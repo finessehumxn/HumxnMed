@@ -31,7 +31,15 @@ these **exact IDs** (or change the IDs in `MC_IAP.PRODUCT` to match yours):
 
 (Put the subs in subscription groups; fill in the review screenshot + description.)
 
-> **OPEN DECISION — consumer Pro pricing.** The code reserves product IDs `mc_pro_monthly` / `mc_pro_yearly` / `mc_pro_lifetime` and an entitlement named **`pro`** for the consumer Pro tier (unlimited AI, unlimited profiles, advanced affairs/POA), but **no price is set and no products exist yet**. Decide Pro's price (suggested: between Plus and Clinical, e.g. ~$19.99/mo), then create those products + a `pro` entitlement and add a Pro card to `/founding`. Until then, Pro is defined in code but not sellable.
+**Consumer Pro tier (price set 2026-07-26: $24.99 / $149.99 / $299.99):** unlimited AI, unlimited profiles, advanced affairs/POA. Card is live on `/founding`; create these products + a `pro` entitlement to make it purchasable.
+
+| Product | Type | ID | Price |
+|---|---|---|---|
+| Pro Monthly | Auto-renewable sub | `mc_pro_monthly` | $24.99/mo |
+| Pro Yearly | Auto-renewable sub | `mc_pro_yearly` | $149.99/yr |
+| Pro Lifetime | Non-consumable | `mc_pro_lifetime` | $299.99 |
+
+Also create web **Stripe** payment links for these three and paste them into `founding.html` `STRIPE` as `proMonthly` / `proYearly` / `proLifetime` (until then the Pro buttons show a friendly "checkout opens once sign-ups go live" message — nothing breaks).
 
 ## Step 2 — RevenueCat
 1. Create a RevenueCat project → add your app (bundle `com.medcompanionai.app`).

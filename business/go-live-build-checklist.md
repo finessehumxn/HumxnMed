@@ -52,7 +52,7 @@ Full detail in `ios-iap-setup.md`. Summary:
 
 - [ ] Products created with those IDs (or change `MC_IAP.PRODUCT` in `frontend/founding.html` to match).
 - [ ] Fill each product's review screenshot + description (ASC won't approve blank ones).
-- [ ] **Consumer Pro is an OPEN DECISION** — code reserves `mc_pro_*` + a `pro` entitlement (unlimited AI, unlimited profiles, advanced affairs/POA) but has no price yet. Set a price (suggest ~$19.99/mo, between Plus and Clinical), create the products + `pro` entitlement, and add a Pro card to `/founding` when ready. Not required for launch — Plus + Clinical are sellable now.
+- [ ] **Consumer Pro** (price set: **$24.99/mo · $149.99/yr · $299.99 lifetime**) — card is live on `/founding`; create `mc_pro_monthly` / `mc_pro_yearly` / `mc_pro_lifetime` + a `pro` entitlement, and paste Stripe links into `founding.html` `STRIPE` (`proMonthly`/`proYearly`/`proLifetime`). Until then the Pro buttons show a friendly "sign-ups go live" message. Not required for initial launch — Plus + Clinical are sellable first.
 
 **2b. RevenueCat**
 - [ ] New RevenueCat project → add app, bundle `com.medcompanionai.app`.
