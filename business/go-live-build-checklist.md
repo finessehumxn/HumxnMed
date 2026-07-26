@@ -39,28 +39,32 @@ Full detail in `ios-iap-setup.md`. Summary:
 **2a. App Store Connect → In-App Purchases / Subscriptions** — create these EXACT IDs
 (put the two subs of each tier in one subscription group):
 
+**Four tiers, one app:** Free → **Plus** (family) → **Pro** (consumer power) → **Clinical** (professional). Pro ≠ Clinical. The $39/$349/$799 offering is **Clinical**.
+
 | Product | Type | ID | Price |
 |---|---|---|---|
 | Plus Monthly | Auto-renewable sub | `mc_plus_monthly` | $9.99/mo |
 | Plus Yearly | Auto-renewable sub | `mc_plus_yearly` | $59.99/yr |
 | Plus Lifetime | Non-consumable | `mc_plus_lifetime` | $129.99 |
-| Pro Monthly | Auto-renewable sub | `mc_pro_monthly` | $39/mo |
-| Pro Yearly | Auto-renewable sub | `mc_pro_yearly` | $349/yr |
-| Pro Lifetime | Non-consumable | `mc_pro_lifetime` | $799 |
+| Clinical Monthly | Auto-renewable sub | `mc_clinical_monthly` | $39/mo |
+| Clinical Yearly | Auto-renewable sub | `mc_clinical_yearly` | $349/yr |
+| Clinical Lifetime | Non-consumable | `mc_clinical_lifetime` | $799 |
 
 - [ ] Products created with those IDs (or change `MC_IAP.PRODUCT` in `frontend/founding.html` to match).
 - [ ] Fill each product's review screenshot + description (ASC won't approve blank ones).
+- [ ] **Consumer Pro is an OPEN DECISION** — code reserves `mc_pro_*` + a `pro` entitlement (unlimited AI, unlimited profiles, advanced affairs/POA) but has no price yet. Set a price (suggest ~$19.99/mo, between Plus and Clinical), create the products + `pro` entitlement, and add a Pro card to `/founding` when ready. Not required for launch — Plus + Clinical are sellable now.
 
 **2b. RevenueCat**
 - [ ] New RevenueCat project → add app, bundle `com.medcompanionai.app`.
 - [ ] Paste the **ASC shared secret** + an **App Store API key** (so RevenueCat validates receipts).
-- [ ] Add the 6 products above.
-- [ ] **Create two entitlements** and attach products:
+- [ ] Add the products above.
+- [ ] **Create entitlements** and attach products:
       - `plus` ← the three `mc_plus_*` products
-      - `pro`  ← the three `mc_pro_*` products
-      *(`mcTier()` is now tolerant — it unlocks if the entitlement id contains "pro"/"plus" **or** the
-      active product id is `mc_pro_*`/`mc_plus_*`. Naming them `plus`/`pro` is cleanest, but a mismatch
-      no longer silently fails as long as the `mc_` product IDs from Section 2a are used.)*
+      - `clinical` ← the three `mc_clinical_*` products
+      - *(later, when priced)* `pro` ← the three `mc_pro_*` products
+      *(`mcTier()` is tolerant — it unlocks if the entitlement id contains "plus"/"pro"/"clinical" **or**
+      the active product id is `mc_plus_*`/`mc_pro_*`/`mc_clinical_*`, with clinical > pro > plus precedence.
+      A naming mismatch won't silently fail as long as the `mc_` product IDs are used.)*
 - [ ] Copy the **Apple public SDK key** (`appl_…`).
 
 **2c. Railway env**

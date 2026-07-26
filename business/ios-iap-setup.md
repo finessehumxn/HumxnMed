@@ -18,16 +18,20 @@ is unaffected by any of this.
 In App Store Connect → your app → **In-App Purchases / Subscriptions**, create products with
 these **exact IDs** (or change the IDs in `MC_IAP.PRODUCT` to match yours):
 
+**Tiers (one app, four ascending levels):** Free → **Plus** (family) → **Pro** (consumer power) → **Clinical** (professional). Pro and Clinical are **different**. The $39/$349/$799 offering is **Clinical**, not consumer Pro.
+
 | Product | Type | ID | Price |
 |---|---|---|---|
 | Plus Monthly | Auto-renewable sub | `mc_plus_monthly` | $9.99/mo |
 | Plus Yearly | Auto-renewable sub | `mc_plus_yearly` | $59.99/yr |
 | Plus Lifetime | Non-consumable | `mc_plus_lifetime` | $129.99 |
-| Pro Monthly | Auto-renewable sub | `mc_pro_monthly` | $39/mo |
-| Pro Yearly | Auto-renewable sub | `mc_pro_yearly` | $349/yr |
-| Pro Lifetime | Non-consumable | `mc_pro_lifetime` | $799 |
+| Clinical Monthly | Auto-renewable sub | `mc_clinical_monthly` | $39/mo |
+| Clinical Yearly | Auto-renewable sub | `mc_clinical_yearly` | $349/yr |
+| Clinical Lifetime | Non-consumable | `mc_clinical_lifetime` | $799 |
 
-(Put the two subs in a subscription group; fill in the review screenshot + description.)
+(Put the subs in subscription groups; fill in the review screenshot + description.)
+
+> **OPEN DECISION — consumer Pro pricing.** The code reserves product IDs `mc_pro_monthly` / `mc_pro_yearly` / `mc_pro_lifetime` and an entitlement named **`pro`** for the consumer Pro tier (unlimited AI, unlimited profiles, advanced affairs/POA), but **no price is set and no products exist yet**. Decide Pro's price (suggested: between Plus and Clinical, e.g. ~$19.99/mo), then create those products + a `pro` entitlement and add a Pro card to `/founding`. Until then, Pro is defined in code but not sellable.
 
 ## Step 2 — RevenueCat
 1. Create a RevenueCat project → add your app (bundle `com.medcompanionai.app`).
