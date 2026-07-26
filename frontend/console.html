@@ -39,6 +39,13 @@
   .disc{ font-size:11.5px; color:var(--sub); line-height:1.5; margin-top:18px; border-top:1px solid var(--line); padding-top:12px; }
   .busy{ color:var(--sub); font-size:14px; padding:8px 2px; }
   .home{ color:var(--accent); text-decoration:none; font-size:12.5px; font-weight:700; }
+  .vbar{ display:flex; gap:8px; align-items:center; margin-top:9px; flex-wrap:wrap; }
+  .vbtn{ background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:999px; padding:8px 14px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .vbtn.rec{ background:var(--danger); border-color:var(--danger); color:#fff; animation:vpulse 1.1s ease-in-out infinite; }
+  .vbtn.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .vhint{ color:var(--sub); font-size:11.5px; }
+  @keyframes vpulse{ 0%,100%{ opacity:1; } 50%{ opacity:.62; } }
+  @media (prefers-reduced-motion: reduce){ .vbtn.rec{ animation:none; } }
 </style>
 <script src="/pro-gate.js"></script>
 <div class="wrap">
@@ -50,6 +57,11 @@
       <button data-m="document">📝 Document</button>
       <button data-m="explain">💬 Explain</button>
       <button data-m="weigh">⚖️ Weigh</button>
+    </div>
+    <div class="vbar">
+      <button id="micBtn" class="vbtn" onclick="mcV.dictate()">🎤 Dictate</button>
+      <button id="raBtn" class="vbtn" onclick="mcV.toggleRA()">🔊 Read aloud: off</button>
+      <span class="vhint">Hands-free — speak your query, it runs; the answer reads back.</span>
     </div>
   </header>
   <main>
@@ -83,12 +95,54 @@
       +'<div class="row"><button class="go" onclick="runWeigh()">See considerations</button></div>'
   };
   function segK(){ document.getElementById('kC').className=refKind==='condition'?'on':''; document.getElementById('kM').className=refKind==='medication'?'on':''; }
+  var curMode='lookup';
   function setMode(m){
+    curMode=m;
     Array.prototype.forEach.call(document.querySelectorAll('#modes button'),function(b){ b.className=b.getAttribute('data-m')===m?'on':''; });
     document.getElementById('pane').innerHTML=PANES[m]; out().innerHTML='';
   }
   Array.prototype.forEach.call(document.querySelectorAll('#modes button'),function(b){ b.onclick=function(){ setMode(b.getAttribute('data-m')); }; });
   setMode('lookup');
+
+  // ── Hands-free voice: dictate into the active mode → auto-run → read the answer back ──
+  function activeInputId(){ return {lookup:'q',document:'n',explain:'e',weigh:'p'}[curMode]||'q'; }
+  function runCurrent(){ ({lookup:runLookup,document:runDocument,explain:runExplain,weigh:runWeigh}[curMode]||function(){})(); }
+  function cleanCmd(t){ return String(t||'').replace(/\s*(go|run|search|okay|ok|period|please|now|thanks?)\.?\s*$/i,'').trim(); }
+  var mcV = {
+    active:false, readAloud:false, rec:null,
+    toggleRA:function(){ this.readAloud=!this.readAloud; var b=document.getElementById('raBtn'); if(b){ b.textContent='🔊 Read aloud: '+(this.readAloud?'on':'off'); b.className='vbtn'+(this.readAloud?' on':''); } if(!this.readAloud){ try{ speechSynthesis.cancel(); }catch(e){} } },
+    speak:function(t){ if(!this.readAloud||!('speechSynthesis' in window)||!t) return; try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(String(t).replace(/\s+/g,' ').slice(0,700)); u.rate=1.03; speechSynthesis.speak(u); }catch(e){} },
+    srNative:function(){ try{ return (window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.SpeechRecognition) || (window.Capacitor&&typeof Capacitor.registerPlugin==='function'&&Capacitor.registerPlugin('SpeechRecognition')) || null; }catch(e){ return null; } },
+    setBtn:function(on){ var b=document.getElementById('micBtn'); if(b){ b.textContent=on?'🔴 Listening…':'🎤 Dictate'; b.className='vbtn'+(on?' rec':''); } },
+    dictate:function(){
+      var input=document.getElementById(activeInputId()); if(!input) return;
+      try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+      var SRnat=this.srNative(); if(SRnat){ this.native(input, SRnat); return; }
+      var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!SR){ input.focus(); var h=document.querySelector('.vhint'); if(h) h.textContent='Tap the mic on your keyboard and speak.'; return; }
+      if(this.active){ try{ this.rec.stop(); }catch(e){} return; }
+      var self=this, r=new SR(), got=''; r.lang=navigator.language||'en-US'; r.interimResults=true; r.continuous=false;
+      r.onresult=function(e){ var t=''; for(var i=0;i<e.results.length;i++){ t+=e.results[i][0].transcript; } got=t; input.value=t; };
+      r.onerror=function(){ self.active=false; self.setBtn(false); };
+      r.onend=function(){ self.active=false; self.setBtn(false); var q=cleanCmd(got); if(q){ input.value=q; runCurrent(); } };
+      this.rec=r; this.active=true; this.setBtn(true); try{ r.start(); }catch(e){ this.active=false; this.setBtn(false); }
+    },
+    native:function(input, SR){
+      var self=this;
+      if(this.active){ try{ SR.stop(); }catch(e){} return; }
+      Promise.resolve().then(function(){ return SR.checkPermissions?SR.checkPermissions():{speechRecognition:'granted'}; })
+        .then(function(p){ return (!p||p.speechRecognition!=='granted')&&SR.requestPermissions?SR.requestPermissions():p; })
+        .then(function(p){
+          if(!p||p.speechRecognition!=='granted'){ input.focus(); return; }
+          self.active=true; self.setBtn(true);
+          try{ SR.removeAllListeners&&SR.removeAllListeners(); }catch(e){}
+          SR.addListener('partialResults', function(d){ var m=(d&&d.matches&&d.matches.length)?d.matches[0]:''; if(m) input.value=m; });
+          SR.addListener('listeningState', function(d){ if(d&&d.status==='stopped'){ self.active=false; self.setBtn(false); var q=cleanCmd(input.value); if(q){ input.value=q; runCurrent(); } } });
+          SR.start({ language:navigator.language||'en-US', maxResults:1, partialResults:true, popup:false });
+        }).catch(function(){ self.active=false; self.setBtn(false); input.focus(); });
+    }
+  };
+  window.mcV=mcV;
 
   function busy(msg){ out().innerHTML='<div class="busy">'+esc(msg||'Working…')+'</div>'; }
   function fail(){ out().innerHTML='<div class="card">Couldn\'t complete that just now — try again.</div>'; }
@@ -105,6 +159,7 @@
       if(d.cautions&&d.cautions.length) h+='<div class="card"><h3>Cautions</h3>'+list(d.cautions)+'</div>';
       h+=sourcesHtml(d.sources)+guardHtml(d.guardrail);
       out().innerHTML=h||'<div class="card">No result.</div>';
+      mcV.speak((d.answer||'')+'. '+((d.key_points||[])[0]||'')+'. '+(d.guardrail||''));
     }).catch(fail);
   };
   window.runDocument=function(){
@@ -118,6 +173,7 @@
       h+=guardHtml(d.guardrail);
       h+='<div class="row"><button class="ghost" onclick="copyOut()">Copy draft</button></div>';
       out().innerHTML=h;
+      mcV.speak('Draft note ready for your review.'+((d.to_confirm&&d.to_confirm.length)?(' '+d.to_confirm.length+' items to confirm.'):''));
     }).catch(fail);
   };
   window.runExplain=function(){
@@ -133,6 +189,7 @@
       if(d.questions&&d.questions.length) h+='<div class="card"><h3>Questions they may have</h3>'+list(d.questions)+'</div>';
       h+='<div class="row"><button class="ghost" onclick="copyOut()">Copy</button></div>';
       out().innerHTML=h||'<div class="card">No result.</div>';
+      mcV.speak(d.headline||'');
     }).catch(fail);
   };
   window.runWeigh=function(){
@@ -149,6 +206,8 @@
       if(d.caveats&&d.caveats.length) h+='<div class="card"><h3>What could change the picture</h3>'+list(d.caveats)+'</div>';
       h+=sourcesHtml(d.sources)+guardHtml(d.guardrail);
       out().innerHTML=h;
+      var cm=(d.cant_miss||[]).slice(0,2).join('; '), cons=(d.consider||[]).slice(0,3).map(function(x){return x.item;}).filter(Boolean).join(', ');
+      mcV.speak('Considerations to weigh. '+(cm?('Can\'t miss: '+cm+'. '):'')+(cons?('Consider: '+cons+'. '):'')+(d.guardrail||''));
     }).catch(fail);
   };
   window.copyOut=function(){ var t=out().innerText||''; if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ var b=event&&event.target; if(b){ var o=b.textContent; b.textContent='Copied ✓'; setTimeout(function(){ b.textContent=o; },1200); } }); } };
