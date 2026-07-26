@@ -61,10 +61,11 @@
     <div class="vbar">
       <button id="micBtn" class="vbtn" onclick="mcV.dictate()">🎤 Dictate</button>
       <button id="raBtn" class="vbtn" onclick="mcV.toggleRA()">🔊 Read aloud: off</button>
-      <span class="vhint">Hands-free — speak your query, it runs; the answer reads back.</span>
+      <button id="recentBtn" class="vbtn" onclick="renderRecent()">🕘 Recent</button>
     </div>
   </header>
   <main>
+    <div id="offbar" style="display:none;background:var(--warn-bg);border:1px solid rgba(224,180,106,.4);color:var(--warn);border-radius:12px;padding:10px 14px;font-size:12.5px;line-height:1.5;margin-bottom:12px">📶 <b>Offline</b> — live look-ups need a connection. Your results from this session are still under <b>🕘 Recent</b>.</div>
     <div id="pane"></div>
     <div id="out" class="out"></div>
     <div class="disc">MedCompanion Clinical supports a licensed clinician and is <b>not a medical device, not a diagnosis, and not a substitute for clinical judgment</b>. Decision support presents considerations you independently review against your own sources — it is not for autonomous or time-critical decisions. Nothing entered here is stored on our servers. © Millennials Creatives LLC.</div>
@@ -144,8 +145,27 @@
   };
   window.mcV=mcV;
 
+  // ── Session history (in memory only — nothing persisted, so no patient content sits at rest) ──
+  var histArr=[];
+  function saveHist(label){ try{ histArr.unshift({mode:curMode, label:(label||'(result)').slice(0,60), html:out().innerHTML}); if(histArr.length>25) histArr.length=25; var b=document.getElementById('recentBtn'); if(b) b.textContent='🕘 Recent'+(histArr.length?(' ('+histArr.length+')'):''); }catch(e){} }
+  var MICON={lookup:'🔎',document:'📝',explain:'💬',weigh:'⚖️'};
+  window.renderRecent=function(){
+    if(!histArr.length){ out().innerHTML='<div class="card">No results yet this session. What you look up stays available here even if signal drops.</div>'; return; }
+    out().innerHTML='<div class="card"><h3>Recent · this session</h3>'+histArr.map(function(it,i){ return '<button class="ghost" style="display:block;width:100%;text-align:left;margin-bottom:6px" onclick="mcShowHist('+i+')">'+(MICON[it.mode]||'')+' '+esc(it.label)+'</button>'; }).join('')+'<div style="font-size:11.5px;color:var(--sub);margin-top:6px">Kept in memory for this session only — never stored.</div></div>';
+  };
+  window.mcShowHist=function(i){ if(histArr[i]) out().innerHTML=histArr[i].html; };
+
+  // ── Offline awareness ──
+  function setOffline(off){ var b=document.getElementById('offbar'); if(b) b.style.display=off?'block':'none'; }
+  window.addEventListener('online', function(){ setOffline(false); });
+  window.addEventListener('offline', function(){ setOffline(true); });
+  setOffline(!navigator.onLine);
+
+  // ── Register the offline shell cache so the console opens when signal drops ──
+  if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('/console-sw.js').catch(function(){}); }catch(e){} }
+
   function busy(msg){ out().innerHTML='<div class="busy">'+esc(msg||'Working…')+'</div>'; }
-  function fail(){ out().innerHTML='<div class="card">Couldn\'t complete that just now — try again.</div>'; }
+  function fail(){ if(!navigator.onLine){ out().innerHTML='<div class="card">📶 You\'re offline — live look-ups need a connection. Your results from this session are still under 🕘 Recent.</div>'; return; } out().innerHTML='<div class="card">Couldn\'t complete that just now — try again.</div>'; }
   function post(path,body){ return fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}); }
 
   window.runLookup=function(){
@@ -159,7 +179,7 @@
       if(d.cautions&&d.cautions.length) h+='<div class="card"><h3>Cautions</h3>'+list(d.cautions)+'</div>';
       h+=sourcesHtml(d.sources)+guardHtml(d.guardrail);
       out().innerHTML=h||'<div class="card">No result.</div>';
-      mcV.speak((d.answer||'')+'. '+((d.key_points||[])[0]||'')+'. '+(d.guardrail||''));
+      mcV.speak((d.answer||'')+'. '+((d.key_points||[])[0]||'')+'. '+(d.guardrail||'')); saveHist(q);
     }).catch(fail);
   };
   window.runDocument=function(){
@@ -173,7 +193,7 @@
       h+=guardHtml(d.guardrail);
       h+='<div class="row"><button class="ghost" onclick="copyOut()">Copy draft</button></div>';
       out().innerHTML=h;
-      mcV.speak('Draft note ready for your review.'+((d.to_confirm&&d.to_confirm.length)?(' '+d.to_confirm.length+' items to confirm.'):''));
+      mcV.speak('Draft note ready for your review.'+((d.to_confirm&&d.to_confirm.length)?(' '+d.to_confirm.length+' items to confirm.'):'')); saveHist(n);
     }).catch(fail);
   };
   window.runExplain=function(){
@@ -189,7 +209,7 @@
       if(d.questions&&d.questions.length) h+='<div class="card"><h3>Questions they may have</h3>'+list(d.questions)+'</div>';
       h+='<div class="row"><button class="ghost" onclick="copyOut()">Copy</button></div>';
       out().innerHTML=h||'<div class="card">No result.</div>';
-      mcV.speak(d.headline||'');
+      mcV.speak(d.headline||''); saveHist(e);
     }).catch(fail);
   };
   window.runWeigh=function(){
@@ -207,7 +227,7 @@
       h+=sourcesHtml(d.sources)+guardHtml(d.guardrail);
       out().innerHTML=h;
       var cm=(d.cant_miss||[]).slice(0,2).join('; '), cons=(d.consider||[]).slice(0,3).map(function(x){return x.item;}).filter(Boolean).join(', ');
-      mcV.speak('Considerations to weigh. '+(cm?('Can\'t miss: '+cm+'. '):'')+(cons?('Consider: '+cons+'. '):'')+(d.guardrail||''));
+      mcV.speak('Considerations to weigh. '+(cm?('Can\'t miss: '+cm+'. '):'')+(cons?('Consider: '+cons+'. '):'')+(d.guardrail||'')); saveHist(p);
     }).catch(fail);
   };
   window.copyOut=function(){ var t=out().innerText||''; if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ var b=event&&event.target; if(b){ var o=b.textContent; b.textContent='Copied ✓'; setTimeout(function(){ b.textContent=o; },1200); } }); } };

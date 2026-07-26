@@ -119,6 +119,14 @@ async def serve_workspace():
 async def serve_console():
     return FileResponse(os.path.join(frontend_dir, "console.html"))
 
+@app.get("/console-sw.js")
+async def serve_console_sw():
+    return FileResponse(
+        os.path.join(frontend_dir, "console-sw.js"),
+        media_type="application/javascript",
+        headers={"Service-Worker-Allowed": "/", "Cache-Control": "no-cache"},
+    )
+
 @app.get("/founding")
 async def serve_founding():
     return FileResponse(os.path.join(frontend_dir, "founding.html"))
