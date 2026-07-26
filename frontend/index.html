@@ -6760,11 +6760,12 @@ document.addEventListener('DOMContentLoaded', function() {
       localStorage.setItem('mc_ai_consent','1');
       localStorage.setItem('mc_ai_enabled','1');
     }
-    // Free-tier daily quota (only enforced when gating is ON and the user is free).
-    if(window._mcGating && (window._mcTier||'free')==='free'){
+    // Daily AI quota (only when gating is ON). Free = few/day, Plus = more/day, Pro & Clinical = unlimited.
+    var _t=(window._mcTier||'free');
+    if(window._mcGating && _t!=='pro' && _t!=='clinical'){
       var k='mc_ai_used_'+(new Date().toISOString().slice(0,10));
-      var used=parseInt(localStorage.getItem(k)||'0',10), lim=window._mcFreeAI||5;
-      if(used>=lim){ if(window.mcShowQuotaPaywall) window.mcShowQuotaPaywall(lim); return false; }
+      var used=parseInt(localStorage.getItem(k)||'0',10), lim=(_t==='plus')?(window._mcPlusAI||25):(window._mcFreeAI||5);
+      if(used>=lim){ if(window.mcShowQuotaPaywall) window.mcShowQuotaPaywall(lim, _t); return false; }
       try{ localStorage.setItem(k, used+1); }catch(e){}
     }
     return true;
@@ -7850,42 +7851,51 @@ document.addEventListener('DOMContentLoaded', function() {
 (function(){
   var cfg={gating:false, plus:['family','vault','legacy'], pro:['clinical','handout','chronology','previsit']};
   function base(){ return (typeof API!=='undefined')?API:''; }
-  function publish(){ window._mcGating=!!cfg.gating; window._mcFreeAI=cfg.free_ai_daily||5; }
+  function publish(){ window._mcGating=!!cfg.gating; window._mcFreeAI=cfg.free_ai_daily||5; window._mcPlusAI=cfg.plus_ai_daily||25; }
   function applyTestFlag(){ try{ if(localStorage.getItem('mc_gating_test')==='1') cfg.gating=true; }catch(e){} }
   applyTestFlag(); publish();
   try{ fetch(base()+'/billing-config').then(function(r){return r.json();}).then(function(c){ if(c) cfg=c; applyTestFlag(); publish();
     window.mcTier().then(function(t){ window._mcTier=t; }); }).catch(function(){}); }catch(e){}
   window._mcTier=window._mcTier||'free';
-  window.mcShowQuotaPaywall=function(limit){
+  // Called when the daily AI cap is hit. tier = the user's CURRENT tier (free or plus); the next tier up is the upsell.
+  window.mcShowQuotaPaywall=function(limit, tier){
     var el=document.getElementById('mcPay'), card=document.getElementById('mcPayCard'); if(!el) return;
-    card.innerHTML='<span class="mcpay-badge">MedCompanion Plus</span>'
-      +'<div class="mcpay-t">You\'ve used your '+(limit||5)+' free explanations today</div>'
-      +'<div class="mcpay-m">Upgrade to Plus for <b>unlimited</b> plain-language explanations — for you and everyone you care for.</div>'
-      +'<ul class="mcpay-ul"><li>Unlimited AI explanations &amp; guides</li><li>Family profiles &amp; passports</li><li>The encrypted vault &amp; &ldquo;For My Family&rdquo;</li></ul>'
+    var toPlus = (tier!=='plus'); // free -> upsell Plus; plus -> upsell Pro
+    var badge = toPlus ? 'MedCompanion Plus' : 'MedCompanion Pro';
+    var msg = toPlus
+      ? 'Upgrade to <b>Plus</b> for more explanations plus family profiles &amp; the vault — or <b>Pro</b> for unlimited.'
+      : 'Upgrade to <b>Pro</b> for <b>unlimited</b> plain-language explanations — for you and everyone you care for.';
+    var feats = toPlus
+      ? ['More AI explanations every day','Family profiles &amp; passports','The encrypted vault &amp; &ldquo;For My Family&rdquo;']
+      : ['Unlimited AI explanations &amp; guides','Unlimited family &amp; Care Circle profiles','Advanced affairs, POA &amp; legal organizing'];
+    card.innerHTML='<span class="mcpay-badge">'+badge+'</span>'
+      +'<div class="mcpay-t">You\'ve used your '+(limit||5)+' explanations today</div>'
+      +'<div class="mcpay-m">'+msg+'</div>'
+      +'<ul class="mcpay-ul">'+feats.map(function(f){return '<li>'+f+'</li>';}).join('')+'</ul>'
       +'<button class="mcpay-go" onclick="mcPayGo()">See plans →</button>'
       +'<div><button class="mcpay-later" onclick="mcPayClose()">Maybe tomorrow</button></div>';
     el.classList.add('show');
   };
-  var RANK={free:0,plus:1,pro:2};
+  // Four ascending tiers of one app. Clinical (provider) is the top tier — NOT the same as Pro.
+  var RANK={free:0,plus:1,pro:2,clinical:3};
 
   function localTier(){ try{ return localStorage.getItem('mc_tier')||'free'; }catch(e){ return 'free'; } }
   // Resolve the paid tier from RevenueCat customer info — tolerant of entitlement NAMING.
-  // Matches by (1) entitlement id containing pro/plus, (2) the active product id (mc_pro_*/mc_plus_*),
-  // (3) active-subscription / purchased product ids. So a purchase can't silently fail to unlock
-  // just because the entitlement was named "premium" or "medcompanion_pro" instead of "pro"/"plus".
+  // Matches by entitlement id and/or the active product id (mc_clinical_*/mc_pro_*/mc_plus_*),
+  // plus active-subscription / purchased product ids. clinical > pro > plus precedence, so a
+  // purchase can't silently fail to unlock over an entitlement-naming quirk.
   function tierFromInfo(info){
     try{
       var ci=(info&&(info.customerInfo||info))||{};
       var act=(ci.entitlements&&ci.entitlements.active)||{};
-      var hasPro=false, hasPlus=false;
+      var hasClinical=false, hasPro=false, hasPlus=false;
+      function scan(pid){ pid=String(pid); if(/mc_clinical_/i.test(pid)) hasClinical=true; else if(/mc_pro_/i.test(pid)) hasPro=true; if(/mc_plus_/i.test(pid)) hasPlus=true; }
       Object.keys(act).forEach(function(k){
-        if(/pro/i.test(k)) hasPro=true; if(/plus/i.test(k)) hasPlus=true;
-        var e=act[k]||{}, pid=String(e.productIdentifier||e.productId||e.product_identifier||'');
-        if(/mc_pro_/i.test(pid)) hasPro=true; if(/mc_plus_/i.test(pid)) hasPlus=true;
+        if(/clinical/i.test(k)) hasClinical=true; else if(/pro/i.test(k)) hasPro=true; if(/plus/i.test(k)) hasPlus=true;
+        var e=act[k]||{}; scan(e.productIdentifier||e.productId||e.product_identifier||'');
       });
-      [].concat(ci.activeSubscriptions||[], ci.allPurchasedProductIdentifiers||ci.allPurchasedProductIds||[])
-        .forEach(function(pid){ pid=String(pid); if(/mc_pro_/i.test(pid)) hasPro=true; if(/mc_plus_/i.test(pid)) hasPlus=true; });
-      if(hasPro) return 'pro'; if(hasPlus) return 'plus';
+      [].concat(ci.activeSubscriptions||[], ci.allPurchasedProductIdentifiers||ci.allPurchasedProductIds||[]).forEach(scan);
+      if(hasClinical) return 'clinical'; if(hasPro) return 'pro'; if(hasPlus) return 'plus';
     }catch(e){}
     return null;
   }
@@ -7908,10 +7918,12 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   function showPaywall(need, feature){
     var el=document.getElementById('mcPay'), card=document.getElementById('mcPayCard');
-    var plan = need==='pro' ? 'Pro' : 'Plus';
-    var feats = need==='pro'
-      ? ['Generate patient handouts &amp; draft notes','Medical chronologies','Clinical tools for your practice']
-      : ['Everyone you care for — family profiles &amp; passports','The encrypted medical accounts vault','&ldquo;For My Family&rdquo; — insurance, will &amp; wishes','Unlimited plain-language explanations'];
+    var plan = need==='clinical' ? 'Clinical' : (need==='pro' ? 'Pro' : 'Plus');
+    var feats = need==='clinical'
+      ? ['Provider workspace &amp; plain-language visit summaries','Patient education handouts','Medical chronologies for your practice']
+      : need==='pro'
+      ? ['Everything in Plus','Unlimited plain-language explanations','Unlimited family &amp; Care Circle profiles','Advanced &ldquo;For My Family&rdquo; — affairs, POA &amp; legal organizing']
+      : ['Everyone you care for — family profiles &amp; passports','The encrypted medical accounts vault','&ldquo;For My Family&rdquo; — insurance, will &amp; wishes'];
     card.innerHTML='<span class="mcpay-badge">MedCompanion '+plan+'</span>'
       +'<div class="mcpay-t">'+(feature?esc(feature):'This')+' is part of '+plan+'</div>'
       +'<div class="mcpay-m">Unlock it and everything below — private, on your device, never sold.</div>'

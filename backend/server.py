@@ -126,9 +126,15 @@ async def billing_config():
     until MC_GATING=1 is set (do that only once in-app purchases are live)."""
     return {
         "gating": MC_GATING,
+        # Four ascending tiers of ONE app: free -> plus -> pro -> clinical.
+        # Plus = family safety-net (individuals & families). Pro = consumer POWER tier
+        # (everything in Plus, but unlimited + advanced affairs/POA). Clinical = the
+        # separate professional tier for clinicians/practices (NOT the same as Pro).
         "plus": ["family", "vault", "legacy"],
-        "pro": ["clinical", "handout", "chronology", "previsit"],
+        "pro": ["unlimited_ai", "unlimited_profiles", "affairs_pro"],
+        "clinical": ["clinical", "handout", "chronology", "previsit"],
         "free_ai_daily": int(os.getenv("MC_FREE_AI_DAILY", "5")),
+        "plus_ai_daily": int(os.getenv("MC_PLUS_AI_DAILY", "25")),
     }
 
 @app.get("/rc-config")

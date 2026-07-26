@@ -82,11 +82,11 @@
       </div>
     </div>
 
-    <!-- PRO -->
+    <!-- CLINICAL (the professional tier — a separate product from consumer Pro) -->
     <div class="card pro">
-      <div class="tier">MedCompanion <em>Pro</em></div>
-<div style="font-size:12px;color:var(--muted,#8fbfa8);margin:-4px 0 8px">the Pro plan of MedCompanion Clinical</div>
-      <div class="tagline">For clinicians — your evidence tool finds the answer. Pro helps you <strong style="color:var(--cream)">deliver it</strong> to your patient.</div>
+      <div class="tier">MedCompanion <em>Clinical</em></div>
+<div style="font-size:12px;color:var(--muted,#8fbfa8);margin:-4px 0 8px">for clinicians &amp; practices — not the same as consumer Pro</div>
+      <div class="tagline">For clinicians — your evidence tool finds the answer. Clinical helps you <strong style="color:var(--cream)">deliver it</strong> to your patient.</div>
       <ul class="feats">
         <li>Plain-language translation of any clinical finding</li>
         <li>Patient handouts — co-branded with your practice</li>
@@ -96,11 +96,11 @@
         <li>Drug-interaction &amp; dosing references · priority responses</li>
       </ul>
       <div class="plans">
-        <button class="plan" onclick="go('proMonthly')"><span><span class="pl-l">Monthly</span></span><span class="pl-price">$39/mo</span></button>
-        <button class="plan best" onclick="go('proYearly')"><span><span class="pl-l">Yearly <span class="tag">Best value</span></span><span class="pl-sub">~$29/mo, below UpToDate</span></span><span class="pl-price">$349/yr</span></button>
-        <button class="plan life" onclick="go('proLifetime')"><span><span class="pl-l">Founding Lifetime <span class="tag">🔒 locked</span></span><span class="pl-sub">pay once, yours forever</span></span><span class="pl-price">$799</span></button>
+        <button class="plan" onclick="go('clinicalMonthly')"><span><span class="pl-l">Monthly</span></span><span class="pl-price">$39/mo</span></button>
+        <button class="plan best" onclick="go('clinicalYearly')"><span><span class="pl-l">Yearly <span class="tag">Best value</span></span><span class="pl-sub">~$29/mo, below UpToDate</span></span><span class="pl-price">$349/yr</span></button>
+        <button class="plan life" onclick="go('clinicalLifetime')"><span><span class="pl-l">Founding Lifetime <span class="tag">🔒 locked</span></span><span class="pl-sub">pay once, yours forever</span></span><span class="pl-price">$799</span></button>
       </div>
-      <div class="miniclin"><strong>Free for verified clinicians:</strong> 5 plain-language translations/month + basic handouts + a clinical-mode preview. Upgrade to Pro any time.</div>
+      <div class="miniclin"><strong>Free for verified clinicians:</strong> 5 plain-language translations/month + basic handouts + a clinical-mode preview. Upgrade to Clinical any time.</div>
     </div>
 
   </div>
@@ -108,7 +108,7 @@
 
 <section style="border-top:1px solid rgba(255,255,255,.06)"><div class="wrap">
   <div class="why">
-    <div class="q">"OpenEvidence helps you find the evidence. MedCompanion Pro helps your patient understand it."</div>
+    <div class="q">"OpenEvidence helps you find the evidence. MedCompanion Clinical helps your patient understand it."</div>
     <p>Use them together — look it up, then explain it in seconds, in your patient's language, with a handout they take home. No other tool owns the patient-communication side.</p>
   </div>
 </div></section>
@@ -128,9 +128,9 @@
     plusMonthly:  'https://buy.stripe.com/4gM7sM7XUb4Z8Q69a9cwg06',
     plusYearly:   'https://buy.stripe.com/5kQ14oa625KFc2iaedcwg05',
     plusLifetime: 'https://buy.stripe.com/6oUdRa6TQ4GB3vM4TTcwg04',
-    proMonthly:   'https://buy.stripe.com/aFadRaba6a0V6HY721cwg02',
-    proYearly:    'https://buy.stripe.com/6oU4gAa623Cx6HYcmlcwg01',
-    proLifetime:  'https://buy.stripe.com/cNieVefqm8WRaYedqpcwg00'
+    clinicalMonthly:   'https://buy.stripe.com/aFadRaba6a0V6HY721cwg02',
+    clinicalYearly:    'https://buy.stripe.com/6oU4gAa623Cx6HYcmlcwg01',
+    clinicalLifetime:  'https://buy.stripe.com/cNieVefqm8WRaYedqpcwg00'
   };
   // ── Apple In-App Purchase (RevenueCat), used INSIDE the iOS app only ──
   // Web uses Stripe (below). Apple 3.1.1 requires StoreKit for in-app digital goods.
@@ -138,7 +138,7 @@
     ready:false,
     // App Store Connect product IDs — create these to match, then RevenueCat maps them.
     PRODUCT:{ plusMonthly:'mc_plus_monthly', plusYearly:'mc_plus_yearly', plusLifetime:'mc_plus_lifetime',
-              proMonthly:'mc_pro_monthly',  proYearly:'mc_pro_yearly',  proLifetime:'mc_pro_lifetime' },
+              clinicalMonthly:'mc_clinical_monthly', clinicalYearly:'mc_clinical_yearly', clinicalLifetime:'mc_clinical_lifetime' },
     rc:function(){ return (window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.Purchases) ? Capacitor.Plugins.Purchases : null; },
     configure:function(){
       var P=this.rc(); if(!P) return Promise.resolve(false); if(this.ready) return Promise.resolve(true);
