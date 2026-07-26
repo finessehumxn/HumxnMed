@@ -1,0 +1,155 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Point of Care · MedCompanion Clinical</title>
+<meta name="description" content="A point-of-care companion for clinicians — rapid reference, documentation, patient communication, and evidence-forward decision support you independently review.">
+<style>
+  :root{ --bg:#0b1512; --panel:#12211c; --panel2:#16271f; --ink:#eaf3ee; --sub:#9db8ac; --line:rgba(255,255,255,.10); --accent:#34c78c; --accent-ink:#062418; --warn:#e0b46a; --warn-bg:rgba(224,180,106,.12); --danger:#ff6b5e; --danger-bg:rgba(224,89,78,.14); }
+  *{ box-sizing:border-box; } html,body{ margin:0; }
+  body{ background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; padding-bottom:40px; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 16px calc(30px + env(safe-area-inset-bottom)); }
+  header.top{ position:sticky; top:0; z-index:5; background:linear-gradient(180deg,var(--bg) 78%,rgba(11,21,18,0)); padding:16px 16px 10px; }
+  .brand{ font-weight:800; letter-spacing:-.01em; font-size:15px; }
+  .brand .tag{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.09em; color:var(--accent); background:rgba(52,199,140,.14); padding:3px 8px; border-radius:6px; margin-left:8px; vertical-align:middle; }
+  .sub{ color:var(--sub); font-size:12.5px; margin-top:3px; }
+  .modes{ display:flex; gap:6px; margin-top:12px; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:2px; }
+  .modes button{ flex:0 0 auto; background:var(--panel); border:1px solid var(--line); color:var(--sub); border-radius:999px; padding:9px 15px; font-size:13.5px; font-weight:700; cursor:pointer; white-space:nowrap; font-family:inherit; }
+  .modes button.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  main{ padding:0 16px; }
+  .lede{ color:var(--sub); font-size:13.5px; margin:6px 0 12px; }
+  label{ display:block; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--sub); margin:0 0 7px; }
+  textarea,input[type=text]{ width:100%; background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:12px; padding:12px 14px; font-size:15px; font-family:inherit; }
+  textarea{ min-height:120px; resize:vertical; line-height:1.5; }
+  .row{ display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap; }
+  button.go{ background:var(--accent); color:var(--accent-ink); border:none; font-weight:800; font-size:15px; padding:13px 20px; border-radius:12px; cursor:pointer; font-family:inherit; }
+  button.ghost{ background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:12px 16px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .seg{ display:inline-flex; background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .seg button{ background:none; border:none; color:var(--sub); padding:9px 13px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .seg button.on{ background:var(--accent); color:var(--accent-ink); }
+  .out{ margin-top:16px; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px 18px; margin-bottom:12px; }
+  .card h3{ margin:0 0 8px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); }
+  .card p{ margin:0 0 6px; line-height:1.6; }
+  ul.clean{ margin:0; padding-left:20px; } ul.clean li{ margin-bottom:7px; line-height:1.5; }
+  .kv{ font-weight:700; } .kv .why{ font-weight:400; color:var(--sub); }
+  .basis{ font-size:12.5px; color:var(--sub); margin-top:2px; }
+  .cantmiss{ background:var(--danger-bg); border-color:rgba(255,107,94,.4); }
+  .cantmiss h3{ color:var(--danger); }
+  .guard{ background:var(--warn-bg); border:1px solid rgba(224,180,106,.4); border-radius:12px; padding:11px 14px; font-size:12.5px; color:var(--warn); line-height:1.5; margin-bottom:12px; }
+  .sources a{ color:var(--accent); text-decoration:none; font-size:13px; display:inline-block; margin-right:14px; }
+  .disc{ font-size:11.5px; color:var(--sub); line-height:1.5; margin-top:18px; border-top:1px solid var(--line); padding-top:12px; }
+  .busy{ color:var(--sub); font-size:14px; padding:8px 2px; }
+  .home{ color:var(--accent); text-decoration:none; font-size:12.5px; font-weight:700; }
+</style>
+<script src="/pro-gate.js"></script>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">MedCompanion<span class="tag">Clinical · Point of Care</span></div>
+    <div class="sub">For a licensed clinician — you are the decision-maker. Reference, documentation &amp; evidence you independently review. <a class="home" href="/app">Patient app →</a></div>
+    <div class="modes" id="modes">
+      <button data-m="lookup" class="on">🔎 Look up</button>
+      <button data-m="document">📝 Document</button>
+      <button data-m="explain">💬 Explain</button>
+      <button data-m="weigh">⚖️ Weigh</button>
+    </div>
+  </header>
+  <main>
+    <div id="pane"></div>
+    <div id="out" class="out"></div>
+    <div class="disc">MedCompanion Clinical supports a licensed clinician and is <b>not a medical device, not a diagnosis, and not a substitute for clinical judgment</b>. Decision support presents considerations you independently review against your own sources — it is not for autonomous or time-critical decisions. Nothing entered here is stored on our servers. © Millennials Creatives LLC.</div>
+  </main>
+</div>
+<script>
+  var API=location.origin;
+  function esc(x){ return String(x==null?'':x).replace(/[&<]/g,function(c){return c==='&'?'&amp;':'&lt;';}); }
+  function list(a){ return '<ul class="clean">'+(a||[]).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'; }
+  function sourcesHtml(s){ if(!s||!s.length) return ''; return '<div class="card"><h3>Verify against source</h3><div class="sources">'+s.map(function(x){return '<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.label)+' ↗</a>';}).join('')+'</div></div>'; }
+  function guardHtml(g){ return g?('<div class="guard">⚖️ '+esc(g)+'</div>'):''; }
+  var out=function(){ return document.getElementById('out'); };
+  var refKind='condition';
+
+  var PANES={
+    lookup:'<div class="lede">Rapid reference at the bedside — drug info, protocols, workup, guidelines. Evidence-forward, with sources to verify.</div>'
+      +'<label>Clinical question</label><input type="text" id="q" placeholder="e.g. empiric abx for community-acquired pneumonia; reversal for warfarin; workup for new AKI">'
+      +'<div class="row"><div class="seg"><button id="kC" class="on" onclick="refKind=\'condition\';segK()">Condition</button><button id="kM" onclick="refKind=\'medication\';segK()">Medication</button></div><button class="go" onclick="runLookup()">Look up</button></div>',
+    document:'<div class="lede">Turn rough or dictated notes into a clean, structured draft you review and sign. It organizes what you said — it won\'t invent findings.</div>'
+      +'<label>Rough / dictated encounter notes</label><textarea id="n" placeholder="55M CP x2h, exertional, HTN DM smoker, VS stable, EKG NSR no ST changes, trop pending, ASA given, plan obs + serial trop…"></textarea>'
+      +'<div class="row"><button class="go" onclick="runDocument()">Draft note</button></div>',
+    explain:'<div class="lede">Explain a diagnosis, note, or plan to the patient/family in the moment — plain language, any language.</div>'
+      +'<label>Note / plan to translate for the patient</label><textarea id="e" placeholder="Paste the assessment &amp; plan, or dictate what you want the patient to understand…"></textarea>'
+      +'<div class="row"><input type="text" id="lang" placeholder="Language (optional, e.g. Spanish)" style="flex:1;min-width:140px"><button class="go" onclick="runExplain()">Explain</button></div>',
+    weigh:'<div class="guard">⚖️ Decision <b>support</b>, not direction. This presents considerations for <b>your independent review</b> against your own guidelines. It is <b>not a diagnosis</b> and <b>not for autonomous or time-critical decisions</b> — you are the decision-maker.</div>'
+      +'<div class="lede">Describe the presentation to see a differential to consider, workup options, and management considerations — each with its basis to verify.</div>'
+      +'<label>Presentation</label><textarea id="p" placeholder="e.g. 68F, sudden dyspnea + pleuritic chest pain, tachycardic, recent long flight, unilateral leg swelling…"></textarea>'
+      +'<div class="row"><button class="go" onclick="runWeigh()">See considerations</button></div>'
+  };
+  function segK(){ document.getElementById('kC').className=refKind==='condition'?'on':''; document.getElementById('kM').className=refKind==='medication'?'on':''; }
+  function setMode(m){
+    Array.prototype.forEach.call(document.querySelectorAll('#modes button'),function(b){ b.className=b.getAttribute('data-m')===m?'on':''; });
+    document.getElementById('pane').innerHTML=PANES[m]; out().innerHTML='';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#modes button'),function(b){ b.onclick=function(){ setMode(b.getAttribute('data-m')); }; });
+  setMode('lookup');
+
+  function busy(msg){ out().innerHTML='<div class="busy">'+esc(msg||'Working…')+'</div>'; }
+  function fail(){ out().innerHTML='<div class="card">Couldn\'t complete that just now — try again.</div>'; }
+  function post(path,body){ return fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json();}); }
+
+  window.runLookup=function(){
+    if(window.mcProGate && !window.mcProGate('reference')) return;
+    var q=(document.getElementById('q').value||'').trim(); if(!q){ out().innerHTML='<div class="card">Enter a question.</div>'; return; }
+    busy('Pulling reference…');
+    post('/clinical-reference',{query:q, kind:refKind}).then(function(d){
+      var h='';
+      if(d.answer) h+='<div class="card"><h3>Answer</h3><p>'+esc(d.answer)+'</p></div>';
+      if(d.key_points&&d.key_points.length) h+='<div class="card"><h3>Key points</h3>'+list(d.key_points)+'</div>';
+      if(d.cautions&&d.cautions.length) h+='<div class="card"><h3>Cautions</h3>'+list(d.cautions)+'</div>';
+      h+=sourcesHtml(d.sources)+guardHtml(d.guardrail);
+      out().innerHTML=h||'<div class="card">No result.</div>';
+    }).catch(fail);
+  };
+  window.runDocument=function(){
+    if(window.mcProGate && !window.mcProGate('scribe')) return;
+    var n=(document.getElementById('n').value||'').trim(); if(!n){ out().innerHTML='<div class="card">Paste your notes.</div>'; return; }
+    busy('Drafting note…');
+    post('/clinical-scribe',{notes:n}).then(function(d){
+      function sec(t,v){ return v?('<div class="card"><h3>'+t+'</h3><p>'+esc(v).replace(/\n/g,'<br>')+'</p></div>'):''; }
+      var h=sec('Subjective',d.subjective)+sec('Objective',d.objective)+sec('Assessment',d.assessment)+sec('Plan',d.plan);
+      if(d.to_confirm&&d.to_confirm.length) h+='<div class="card"><h3>To confirm / document</h3>'+list(d.to_confirm)+'</div>';
+      h+=guardHtml(d.guardrail);
+      h+='<div class="row"><button class="ghost" onclick="copyOut()">Copy draft</button></div>';
+      out().innerHTML=h;
+    }).catch(fail);
+  };
+  window.runExplain=function(){
+    if(window.mcProGate && !window.mcProGate('explain')) return;
+    var e=(document.getElementById('e').value||'').trim(); if(!e){ out().innerHTML='<div class="card">Paste the note/plan.</div>'; return; }
+    var lang=(document.getElementById('lang').value||'').trim();
+    busy('Writing a patient-friendly version…');
+    post('/explain-note',{note:e, lang:lang}).then(function(d){
+      var h='';
+      if(d.headline) h+='<div class="card"><h3>For your patient</h3><p><b>'+esc(d.headline)+'</b></p>'+(d.what_happened?'<p>'+esc(d.what_happened)+'</p>':'')+'</div>';
+      if(d.your_plan&&d.your_plan.length) h+='<div class="card"><h3>The plan</h3>'+list(d.your_plan)+'</div>';
+      if(d.watch_for&&d.watch_for.length) h+='<div class="card cantmiss"><h3>When to seek help</h3>'+list(d.watch_for)+'</div>';
+      if(d.questions&&d.questions.length) h+='<div class="card"><h3>Questions they may have</h3>'+list(d.questions)+'</div>';
+      h+='<div class="row"><button class="ghost" onclick="copyOut()">Copy</button></div>';
+      out().innerHTML=h||'<div class="card">No result.</div>';
+    }).catch(fail);
+  };
+  window.runWeigh=function(){
+    if(window.mcProGate && !window.mcProGate('weigh')) return;
+    var p=(document.getElementById('p').value||'').trim(); if(!p){ out().innerHTML='<div class="card">Describe the presentation.</div>'; return; }
+    busy('Gathering considerations…');
+    post('/clinical-weigh',{presentation:p}).then(function(d){
+      var h=guardHtml(d.guardrail);
+      if(d.summary) h+='<div class="card"><h3>Presentation</h3><p>'+esc(d.summary)+'</p></div>';
+      if(d.cant_miss&&d.cant_miss.length) h+='<div class="card cantmiss"><h3>Can\'t-miss — rule out</h3>'+list(d.cant_miss)+'</div>';
+      if(d.consider&&d.consider.length){ h+='<div class="card"><h3>Differential to consider</h3><ul class="clean">'+d.consider.map(function(x){ return '<li><span class="kv">'+esc(x.item||'')+'</span>'+(x.why?' <span class="why">— '+esc(x.why)+'</span>':'')+'</li>'; }).join('')+'</ul></div>'; }
+      if(d.workup&&d.workup.length) h+='<div class="card"><h3>Workup options to consider</h3>'+list(d.workup)+'</div>';
+      if(d.management&&d.management.length){ h+='<div class="card"><h3>Management considerations</h3><ul class="clean">'+d.management.map(function(x){ return '<li><span class="kv">'+esc(x.option||'')+'</span>'+(x.basis?'<div class="basis">Basis: '+esc(x.basis)+' — verify</div>':'')+'</li>'; }).join('')+'</ul></div>'; }
+      if(d.caveats&&d.caveats.length) h+='<div class="card"><h3>What could change the picture</h3>'+list(d.caveats)+'</div>';
+      h+=sourcesHtml(d.sources)+guardHtml(d.guardrail);
+      out().innerHTML=h;
+    }).catch(fail);
+  };
+  window.copyOut=function(){ var t=out().innerText||''; if(navigator.clipboard){ navigator.clipboard.writeText(t).then(function(){ var b=event&&event.target; if(b){ var o=b.textContent; b.textContent='Copied ✓'; setTimeout(function(){ b.textContent=o; },1200); } }); } };
+</script>

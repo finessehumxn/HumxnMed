@@ -115,6 +115,10 @@ async def serve_family():
 async def serve_workspace():
     return FileResponse(os.path.join(frontend_dir, "workspace.html"))
 
+@app.get("/console")
+async def serve_console():
+    return FileResponse(os.path.join(frontend_dir, "console.html"))
+
 @app.get("/founding")
 async def serve_founding():
     return FileResponse(os.path.join(frontend_dir, "founding.html"))
@@ -769,6 +773,165 @@ async def explain_note(req: ExplainNoteRequest):
     except Exception as e:
         logger.error(f"explain-note error: {e}")
         empty["headline"] = "Couldn't make sense of that note just now — please try again."
+        return empty
+
+
+class ClinicalRefRequest(BaseModel):
+    query: str
+    kind: Optional[str] = "condition"   # 'condition' | 'medication'
+
+@app.post("/clinical-reference")
+async def clinical_reference(req: ClinicalRefRequest):
+    """POINT-OF-CARE RAPID REFERENCE for a licensed clinician. Evidence-forward,
+    concise, attributed to standard references/guidelines so the clinician can
+    independently verify. NON-DEVICE by design: information the clinician reviews,
+    not a patient-specific directive. Stateless."""
+    import json as _json
+    q = (req.query or "").strip()
+    empty = {"answer": "", "key_points": [], "cautions": [], "sources": [], "guardrail": ""}
+    if not q:
+        empty["answer"] = "Enter a clinical question (drug, protocol, workup, guideline)."
+        return empty
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        resp = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=1600,
+            system=(
+                "You are a rapid point-of-care REFERENCE for a licensed clinician (they are the decision-maker). "
+                "Answer concisely and evidence-forward, attributing to standard references/guidelines where possible so "
+                "the clinician can INDEPENDENTLY VERIFY. HARD RULES: general reference information, NOT a patient-specific "
+                "directive and NOT a diagnosis. Do not tell them what to do for a specific patient. If a dose/threshold is "
+                "commonly cited, present it as 'commonly referenced as… (verify against your formulary/guideline)'. Never "
+                "invent citations or numbers; if unsure, say to consult the primary source. Return ONLY JSON with keys: "
+                "answer (2-5 tight sentences), key_points (array of crisp bullets), cautions (array: important caveats, "
+                "contraindications, or 'verify' notes), guardrail (one sentence: reference only, verify against source, "
+                "clinician's judgment governs). No prose outside JSON."
+            ),
+            messages=[{"role": "user", "content": q[:4000]}],
+        )
+        out = "".join(getattr(b, "text", "") for b in resp.content).strip()
+        if out.startswith("```"):
+            out = out.strip("`");  out = out[4:] if out[:4].lower()=="json" else out;  out = out.strip()
+        data = _json.loads(out)
+        for k, dflt in empty.items():
+            data.setdefault(k, dflt)
+        data["sources"] = _official_sources(q, "medication" if req.kind == "medication" else "condition")
+        if not data.get("guardrail"):
+            data["guardrail"] = "Reference only — verify against your primary source; clinical judgment governs."
+        return data
+    except Exception as e:
+        logger.error(f"clinical-reference error: {e}")
+        empty["answer"] = "Couldn't pull that reference just now — try again."
+        return empty
+
+
+class ClinicalScribeRequest(BaseModel):
+    notes: str                          # rough/dictated encounter notes
+    format: Optional[str] = "soap"      # 'soap' | 'brief'
+
+@app.post("/clinical-scribe")
+async def clinical_scribe(req: ClinicalScribeRequest):
+    """AMBIENT DOCUMENTATION helper: organize a clinician's rough/dictated notes into
+    a clean structured DRAFT the clinician edits and signs. It ORGANIZES what was said —
+    it does NOT add findings, diagnoses, or plan items that weren't stated. Stateless."""
+    import json as _json
+    notes = (req.notes or "").strip()
+    empty = {"subjective": "", "objective": "", "assessment": "", "plan": "", "to_confirm": [], "guardrail": ""}
+    if not notes:
+        empty["subjective"] = "Paste or dictate your rough encounter notes to draft a structured note."
+        return empty
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        resp = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2200,
+            system=(
+                "You are a documentation SCRIBE for a licensed clinician. Turn their rough/dictated notes into a clean, "
+                "structured DRAFT note they will review, edit, and sign. HARD RULES: organize ONLY what the clinician "
+                "stated — do NOT invent findings, vitals, diagnoses, or plan items that were not said. If something "
+                "important seems missing, list it under to_confirm rather than fabricating it. This is an unsigned draft, "
+                "not a medical record until the clinician signs it. Return ONLY JSON with keys: subjective, objective, "
+                "assessment, plan (each a clean string; use the clinician's content), to_confirm (array of items to verify "
+                "or document), guardrail (one sentence: unsigned draft, clinician reviews & signs). No prose outside JSON."
+            ),
+            messages=[{"role": "user", "content": notes[:12000]}],
+        )
+        out = "".join(getattr(b, "text", "") for b in resp.content).strip()
+        if out.startswith("```"):
+            out = out.strip("`");  out = out[4:] if out[:4].lower()=="json" else out;  out = out.strip()
+        data = _json.loads(out)
+        for k, dflt in empty.items():
+            data.setdefault(k, dflt)
+        if not data.get("guardrail"):
+            data["guardrail"] = "Unsigned draft — the clinician reviews, edits, and signs."
+        return data
+    except Exception as e:
+        logger.error(f"clinical-scribe error: {e}")
+        empty["subjective"] = "Couldn't draft that just now — try again."
+        return empty
+
+
+class ClinicalWeighRequest(BaseModel):
+    presentation: str                   # the clinical scenario/presentation
+
+@app.post("/clinical-weigh")
+async def clinical_weigh(req: ClinicalWeighRequest):
+    """DECISION SUPPORT engineered to the FDA NON-DEVICE CDS criteria (Cures Act
+    520(o)(1)(E)): it SUPPORTS a licensed clinician's judgment (does not direct it),
+    presents CONSIDERATIONS attributed to guidelines/evidence so the clinician can
+    INDEPENDENTLY REVIEW the basis, and is explicitly NOT for autonomous or
+    time-critical use. No image/signal analysis. Stateless; nothing stored."""
+    import json as _json
+    p = (req.presentation or "").strip()
+    empty = {"summary": "", "consider": [], "workup": [], "management": [],
+             "cant_miss": [], "caveats": [], "sources": [], "guardrail": ""}
+    if not p:
+        empty["summary"] = "Describe the presentation to see considerations to weigh (you decide)."
+        return empty
+    try:
+        import anthropic
+        client = anthropic.Anthropic()
+        resp = client.messages.create(
+            model="claude-sonnet-4-6",
+            max_tokens=2600,
+            system=(
+                "You provide DECISION SUPPORT to a LICENSED CLINICIAN who is the decision-maker. You SUPPORT their "
+                "judgment — you do NOT direct it, and you are NOT a diagnosis. Design constraints (must hold): "
+                "(1) present CONSIDERATIONS to weigh, never a single definitive 'do this'; "
+                "(2) attribute reasoning to guidelines/evidence/standard practice so the clinician can INDEPENDENTLY REVIEW the basis; "
+                "(3) explicitly NOT for autonomous decisions and NOT for time-critical/emergent situations where the clinician "
+                "cannot review the basis — say so; "
+                "(4) never invent statistics, trials, or guideline names; if unsure, say 'per general practice, verify against your guideline'. "
+                "Frame the differential as items to CONSIDER (not ranked fact), workup as options commonly considered, management as "
+                "options with their basis. Always surface can't-miss/dangerous diagnoses to rule out. Return ONLY JSON with keys: "
+                "summary (1-2 sentences neutrally restating the presentation), "
+                "consider (array of {item, why} — differential considerations), "
+                "workup (array of strings — evaluation options commonly considered), "
+                "management (array of {option, basis} — where basis is the guideline/evidence/rationale to verify), "
+                "cant_miss (array — dangerous things to rule out), "
+                "caveats (array — what could change the picture; what's missing), "
+                "guardrail (one sentence: supports not replaces clinical judgment; review the basis; not for autonomous or time-critical use). "
+                "No prose outside JSON."
+            ),
+            messages=[{"role": "user", "content": f"Presentation (for decision support I will independently review):\n\n{p[:6000]}"}],
+        )
+        out = "".join(getattr(b, "text", "") for b in resp.content).strip()
+        if out.startswith("```"):
+            out = out.strip("`");  out = out[4:] if out[:4].lower()=="json" else out;  out = out.strip()
+        data = _json.loads(out)
+        for k, dflt in empty.items():
+            data.setdefault(k, dflt)
+        data["sources"] = _official_sources(p, "condition")
+        if not data.get("guardrail"):
+            data["guardrail"] = ("Supports, does not replace, your clinical judgment — review the basis and verify against "
+                                 "your guidelines. Not for autonomous or time-critical decisions.")
+        return data
+    except Exception as e:
+        logger.error(f"clinical-weigh error: {e}")
+        empty["summary"] = "Couldn't generate considerations just now — try again."
         return empty
 
 
