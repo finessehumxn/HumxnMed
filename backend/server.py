@@ -119,6 +119,10 @@ async def serve_workspace():
 async def serve_console():
     return FileResponse(os.path.join(frontend_dir, "console.html"))
 
+@app.get("/welcome")
+async def serve_welcome():
+    return FileResponse(os.path.join(frontend_dir, "welcome.html"))
+
 @app.get("/console-sw.js")
 async def serve_console_sw():
     return FileResponse(
