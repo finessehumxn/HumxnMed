@@ -189,13 +189,15 @@ async def verify_purchase(session_id: str = ""):
             prod = price.get("product")
             if isinstance(prod, dict):
                 name = (prod.get("name") or "")
+        import re
         n = name.lower()
         tier = None
-        if "clinical" in n:
+        # Word-boundary match so "Pro" isn't matched inside "product"; clinical > pro > plus.
+        if re.search(r"\bclinical\b", n):
             tier = "clinical"
-        elif "pro" in n:
+        elif re.search(r"\bpro\b", n):
             tier = "pro"
-        elif "plus" in n:
+        elif re.search(r"\bplus\b", n):
             tier = "plus"
         if not tier:  # fallback: map by exact price (cents)
             tier = {999: "plus", 5999: "plus", 12999: "plus",

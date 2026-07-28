@@ -76,13 +76,13 @@ Full detail in `ios-iap-setup.md`. Summary:
 
 ## 3. Verify the entitlement → tier wiring (10 min, on device)
 The freemium gate reads the tier from RevenueCat in-app. Confirm the entitlement names
-match what `mcTier()` expects (`plus` / `pro`). If RevenueCat reports a different customer-info
+match what `mcTier()` expects (`plus` / `pro` / `clinical`). If RevenueCat reports a different customer-info
 key, tell me the exact string and I'll align `mcTier()` — this is the one spot where a name
 mismatch silently leaves a paid user on "free."
 - [ ] Sandbox tester (ASC → Users and Access → Sandbox) installed on the device.
 - [ ] Tap a Plus plan → Apple sheet → buy → confirm a Plus feature unlocks.
 - [ ] Tap **Restore purchases** → entitlement returns.
-- [ ] Buy a Pro plan (or use a second sandbox tester) → confirm Pro tools unlock.
+- [ ] Buy a Clinical plan (or use a second sandbox tester) → confirm the clinician tools unlock.
 
 ---
 
@@ -103,7 +103,7 @@ Until this flag flips, gating is OFF and the app is 100% unlocked (current behav
 - [ ] Railway env: `MC_GATING = 1`  (optionally set `MC_FREE_AI_DAILY`, default 5).
 - [ ] Re-open the app; confirm:
       - Free user: 5 AI explanations/day → quota paywall; Plus/Pro → unlimited.
-      - Clinician tools: 5/month free → Pro paywall.
+      - Clinician tools: 5/month free → Clinical paywall.
 - [ ] If anything reads wrong, set `MC_GATING=0` to instantly revert — no deploy needed.
 
 ---
