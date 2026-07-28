@@ -80,6 +80,15 @@
     <div class="card"><h3>🎨 White-label</h3><p>Deliver the same trusted engine under your own brand and domain. For health systems, insurers &amp; larger organizations &mdash; designed with you.</p></div>
   </div>
   <div class="disc"><strong style="color:var(--cream)">Partnering with integrity.</strong> MedCompanion provides health information, not a diagnosis, and is not a medical device. Every reseller is reviewed, and we don&rsquo;t permit misleading medical claims or promises of outcomes. Revenue share, partner pricing, and licensing terms are tailored to your model and audience &mdash; reach out and we&rsquo;ll set them with you.</div>
+  <div style="margin-top:1.3rem;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:1.3rem">
+    <h3 style="font-family:Fraunces,serif;color:var(--gold2);font-size:18px;margin-bottom:.4rem">Get your referral links</h3>
+    <p class="muted" style="font-size:14px;margin-bottom:.8rem">Approved partners: enter your partner code (or name) to generate shareable links. Anyone who subscribes after clicking is tagged to you in Stripe.</p>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <input id="refCode" placeholder="e.g. rose-care" style="flex:1;min-width:200px;background:rgba(255,255,255,.06);border:1px solid var(--bd);color:var(--tx);border-radius:10px;padding:.75rem .9rem;font-size:15px;font-family:inherit">
+      <button onclick="genLinks()" style="background:var(--gold);color:var(--ink);border:none;border-radius:10px;padding:.75rem 1.4rem;font-weight:800;cursor:pointer;font-family:inherit">Generate</button>
+    </div>
+    <div id="refOut" style="margin-top:1rem"></div>
+  </div>
   <a class="cta" href="mailto:team@medcompanionai.com?subject=MedCompanion%20Reseller%20%2F%20License%20inquiry&body=Name%3A%20%0AOrganization%3A%20%0ATrack%20(refer%2Fresell%2Fwhite-label)%3A%20%0AWho%20you%20serve%20%26%20roughly%20how%20many%3A%20%0ANotes%3A%20">Become a reseller →</a>
 </div></div></section>
 <section><div class="wrap">
@@ -91,5 +100,24 @@
   <div class="mc">Millennials Creatives LLC</div>
   <div>MedCompanion AI is a product of Millennials Creatives LLC.</div>
 </footer>
+<script>
+  window.copyRef=function(u){ try{ navigator.clipboard.writeText(u); }catch(e){} };
+  window.genLinks=function(){
+    var raw=(document.getElementById('refCode').value||'').trim().toLowerCase();
+    var c=raw.replace(/[^a-z0-9\-_]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
+    var out=document.getElementById('refOut');
+    if(!c){ out.innerHTML='<p class="muted" style="font-size:13.5px">Enter a code first (letters, numbers, dashes).</p>'; return; }
+    var base=location.origin;
+    function row(label,url){
+      return '<div style="margin-bottom:.7rem"><div style="font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;font-weight:800;margin-bottom:.25rem">'+label+'</div>'
+        +'<div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap">'
+        +'<code style="flex:1;min-width:200px;background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:8px;padding:.45rem .65rem;font-size:13px;color:var(--gold2);word-break:break-all">'+url+'</code>'
+        +'<button onclick="copyRef(\''+url+'\')" style="background:rgba(201,162,75,.15);border:1px solid rgba(201,162,75,.4);color:var(--gold2);border-radius:8px;padding:.4rem .8rem;font-size:12px;font-weight:800;cursor:pointer">Copy</button></div></div>';
+    }
+    out.innerHTML=row('Share the offer (checkout)', base+'/founding?ref='+c)
+      +row('Share the app (try it free)', base+'/app?ref='+c)
+      +'<p class="muted" style="font-size:12.5px;margin-top:.2rem">Subscriptions from these links are attributed to <b style="color:var(--cream)">'+c+'</b> in your Stripe dashboard (as the payment&rsquo;s client reference).</p>';
+  };
+</script>
 </body>
 </html>

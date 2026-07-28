@@ -141,6 +141,8 @@
 </footer>
 
 <script>
+  // Capture a referring partner code (?ref=CODE) so a later checkout can be attributed to them.
+  try{ var _ref=new URLSearchParams(location.search).get('ref'); if(_ref){ localStorage.setItem('mc_ref', _ref.slice(0,60)); } }catch(e){}
   // ── Founding-offer Stripe Payment Links — paste your 6 URLs here (then it's live) ──
   var STRIPE = {
     plusMonthly:  'https://buy.stripe.com/4gM7sM7XUb4Z8Q69a9cwg06',
@@ -194,9 +196,12 @@
         .catch(function(e){ if(String(e).indexOf('cancel')<0) alert("That purchase didn't complete. Please try again."); });
       return;
     }
-    // Web: Stripe checkout.
+    // Web: Stripe checkout — tag the sale with the referring partner (if any) so it's attributable in Stripe.
     var url = STRIPE[key];
-    if (url) { window.location.href = url; }
+    if (url) {
+      try{ var ref=localStorage.getItem('mc_ref'); if(ref){ url += (url.indexOf('?')<0?'?':'&')+'client_reference_id='+encodeURIComponent(ref); } }catch(e){}
+      window.location.href = url;
+    }
     else { alert("Checkout opens here once founding sign-ups go live — join the list at team@medcompanionai.com to be first."); }
   }
 </script>
