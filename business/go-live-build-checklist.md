@@ -68,6 +68,8 @@ Full detail in `ios-iap-setup.md`. Summary:
 - [ ] Copy the **Apple public SDK key** (`appl_…`).
 
 **2c. Railway env**
+- [ ] (Web auto-unlock, optional) Set `STRIPE_SECRET_KEY` = your `sk_…` and set each Stripe payment link's **after-payment redirect** to `https://medcompanion-ai.up.railway.app/welcome`. Stripe appends `?session_id=…`; `/welcome` verifies it via `/verify-purchase` and unlocks the tier on the buyer's device. No-op until the key is set.
+
 - [ ] Set `RC_PUBLIC_KEY = appl_…`  → `/rc-config` serves it; the app configures RevenueCat on load (in-app only).
 
 ---

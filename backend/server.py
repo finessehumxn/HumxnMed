@@ -48,6 +48,7 @@ STORE_HISTORY = os.getenv("MC_STORE_HISTORY", "0") == "1"
 RC_PUBLIC_KEY = os.getenv("RC_PUBLIC_KEY", "")   # RevenueCat PUBLIC SDK key (safe to expose) — enables in-app IAP
 MC_GATING = os.getenv("MC_GATING", "0") == "1"   # freemium paywall enforcement — OFF by default (live app stays fully open until flipped on)
 UMLS_API_KEY = os.getenv("UMLS_API_KEY", "")   # free NLM key enables SNOMED CT coding
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")   # sk_… enables web-purchase verification -> auto-unlock tier on the buyer's device (optional; no-op if unset)
 
 
 # --- Epic / MyChart SMART-on-FHIR (patient standalone launch) -------------
@@ -156,6 +157,54 @@ async def billing_config():
         "free_ai_daily": int(os.getenv("MC_FREE_AI_DAILY", "5")),
         "plus_ai_daily": int(os.getenv("MC_PLUS_AI_DAILY", "25")),
     }
+
+@app.get("/verify-purchase")
+async def verify_purchase(session_id: str = ""):
+    """After a web (Stripe) purchase, the buyer is redirected to /welcome?session_id=cs_…
+    This verifies that session server-side and returns which tier they bought, so the
+    app can unlock it on THAT device (no accounts needed). Fully graceful: returns
+    {"tier": null} if STRIPE_SECRET_KEY is unset, the id is missing/invalid, or the
+    session isn't paid. Never trusts client-supplied tier."""
+    sid = (session_id or "").strip()
+    if not STRIPE_SECRET_KEY or not sid.startswith("cs_"):
+        return {"tier": None}
+    try:
+        import httpx
+        async with httpx.AsyncClient(timeout=15) as client:
+            r = await client.get(
+                f"https://api.stripe.com/v1/checkout/sessions/{sid}",
+                params=[("expand[]", "line_items.data.price.product")],
+                headers={"Authorization": f"Bearer {STRIPE_SECRET_KEY}"},
+            )
+        if r.status_code != 200:
+            return {"tier": None}
+        data = r.json()
+        if data.get("payment_status") not in ("paid", "no_payment_required"):
+            return {"tier": None}
+        items = (data.get("line_items") or {}).get("data") or []
+        name, amount = "", 0
+        if items:
+            price = items[0].get("price") or {}
+            amount = price.get("unit_amount") or 0
+            prod = price.get("product")
+            if isinstance(prod, dict):
+                name = (prod.get("name") or "")
+        n = name.lower()
+        tier = None
+        if "clinical" in n:
+            tier = "clinical"
+        elif "pro" in n:
+            tier = "pro"
+        elif "plus" in n:
+            tier = "plus"
+        if not tier:  # fallback: map by exact price (cents)
+            tier = {999: "plus", 5999: "plus", 12999: "plus",
+                    2499: "pro", 14999: "pro", 29999: "pro",
+                    3900: "clinical", 34900: "clinical", 79900: "clinical"}.get(amount)
+        return {"tier": tier}
+    except Exception as e:
+        logger.error(f"verify-purchase error: {e}")
+        return {"tier": None}
 
 @app.get("/rc-config")
 async def rc_config():

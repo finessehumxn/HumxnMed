@@ -27,6 +27,14 @@
   <div class="fine">Manage or cancel anytime from your account. Questions? <a href="mailto:hello@medcompanionai.com" style="color:var(--teal)">hello@medcompanionai.com</a>.<br>A product of Millennials Creatives LLC.</div>
 </div>
 <script>
-  // Optional: reflect the plan from a ?plan= param (Stripe can append one), else generic.
-  try{ var p=new URLSearchParams(location.search).get('plan'); if(p){ var m={plus:'MedCompanion Plus',pro:'MedCompanion Pro',clinical:'MedCompanion Clinical'}; document.getElementById('planChip').textContent=(m[p.toLowerCase()]||'Your plan')+' is active'; } }catch(e){}
+  var PLAN_NAMES={plus:'MedCompanion Plus',pro:'MedCompanion Pro',clinical:'MedCompanion Clinical'};
+  function setPlan(t){ if(!t) return; try{ localStorage.setItem('mc_tier', t); }catch(e){} var el=document.getElementById('planChip'); if(el) el.textContent=(PLAN_NAMES[t]||'Your plan')+' is active'; }
+  try{
+    var qs=new URLSearchParams(location.search);
+    // 1) Authoritative: verify the Stripe checkout session server-side and unlock that tier on this device.
+    var sid=qs.get('session_id');
+    if(sid){ fetch('/verify-purchase?session_id='+encodeURIComponent(sid)).then(function(r){return r.json();}).then(function(d){ if(d&&d.tier) setPlan(d.tier); }).catch(function(){}); }
+    // 2) Fallback: a manual ?plan= tag just for the label (does not grant access on its own).
+    var p=qs.get('plan'); if(p && !sid){ var el=document.getElementById('planChip'); if(el) el.textContent=(PLAN_NAMES[p.toLowerCase()]||'Your plan')+' is active'; }
+  }catch(e){}
 </script>
