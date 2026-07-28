@@ -123,6 +123,10 @@ async def serve_console():
 async def serve_welcome():
     return FileResponse(os.path.join(frontend_dir, "welcome.html"))
 
+@app.get("/terms")
+async def serve_terms():
+    return FileResponse(os.path.join(frontend_dir, "terms.html"))
+
 @app.get("/console-sw.js")
 async def serve_console_sw():
     return FileResponse(
