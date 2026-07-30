@@ -1,4 +1,4 @@
-﻿"""server.py â€” MedCompanion AI v2"""
+﻿"""server.py â€” HumxnMed AI v2"""
 import os, logging, uuid, asyncio
 from typing import Optional
 from dotenv import load_dotenv
@@ -38,7 +38,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # --- Data-handling policy (trust-by-default) -----------------------------
-# By DEFAULT MedCompanion stores NO health content on the server: the AI
+# By DEFAULT HumxnMed stores NO health content on the server: the AI
 # endpoints are stateless (answer-and-forget) and nothing a user enters is
 # persisted. Server-side history is strictly opt-in and only turns on when a
 # deployment explicitly sets MC_STORE_HISTORY=1 (e.g. after a signed BAA and a
@@ -63,7 +63,7 @@ EPIC_TOKEN_URL = os.getenv("EPIC_TOKEN_URL", "https://fhir.epic.com/interconnect
 EPIC_REDIRECT_URI = os.getenv("EPIC_REDIRECT_URI", "https://medcompanion-ai.up.railway.app/app")
 EPIC_SCOPES = os.getenv("EPIC_SCOPES", "openid fhirUser patient/Patient.read patient/Observation.read patient/Condition.read patient/MedicationRequest.read patient/AllergyIntolerance.read")
 
-app = FastAPI(title="MedCompanion AI", version="2.0.0")
+app = FastAPI(title="HumxnMed AI", version="2.0.0")
 
 # CORS — required so the bundled mobile app (origin https://localhost / capacitor://localhost)
 # can call this API cross-origin. No cookies are used (user_id is sent in the request body),
@@ -279,7 +279,7 @@ async def health():
 
 @app.get("/data-policy")
 async def data_policy():
-    """Honest, machine-readable statement of how MedCompanion handles data.
+    """Honest, machine-readable statement of how HumxnMed handles data.
     The app renders this on the 'Your data & AI' screen, and anyone (a patient,
     a hospital's compliance team) can curl it to verify the claims independently.
     It reports the LIVE configuration of this running server, not marketing copy."""
@@ -304,7 +304,7 @@ async def data_policy():
             "voice_features": {
                 "vendors": voice_vendors,
                 "features": ["Voice input (speech-to-text)", "Read-aloud (text-to-speech)"],
-                "note": "Audio is transcribed/spoken and not retained by MedCompanion.",
+                "note": "Audio is transcribed/spoken and not retained by HumxnMed.",
             },
         },
         "server_stores_health_content": STORE_HISTORY,   # false by default
@@ -514,7 +514,7 @@ async def insights(req: InsightsRequest):
             model="claude-sonnet-4-6",
             max_tokens=1400,
             system=(
-                "You are MedCompanion's health-pattern analyst. You look at a person's own daily "
+                "You are HumxnMed's health-pattern analyst. You look at a person's own daily "
                 "check-ins and surface honest, useful observations in plain language. HARD RULES: "
                 "you provide information, NEVER a diagnosis or treatment; never alarm; correlation is "
                 "not causation, so hedge ('may line up with', 'worth noticing'); if data is thin, say so. "
@@ -579,7 +579,7 @@ async def explain_records(req: RecordsRequest):
             model="claude-sonnet-4-6",
             max_tokens=2400,
             system=(
-                "You are MedCompanion. A person imported their real medical records (from their hospital's "
+                "You are HumxnMed. A person imported their real medical records (from their hospital's "
                 "MyChart / Epic, via FHIR). Explain them warmly and in plain language so they walk into their "
                 "appointment understanding their own chart. HARD RULES: information, NEVER a diagnosis or a "
                 "treatment change; never alarm; when a value is out of range, say what that generally can indicate "
@@ -1312,7 +1312,7 @@ async def visit_summary(req: VisitSummaryRequest):
             model="claude-sonnet-4-6",
             max_tokens=1600,
             system=(
-                "You are MedCompanion, preparing a concise hand-off a busy clinician can read in about 20 "
+                "You are HumxnMed, preparing a concise hand-off a busy clinician can read in about 20 "
                 "seconds. Everything here is PATIENT-REPORTED — present it as such ('patient reports…'), never "
                 "as your own clinical assessment, diagnosis, or triage. Be tight, factual, and free of alarm. "
                 "Surface only what's decision-relevant: the reason for the visit, patient-tracked patterns "

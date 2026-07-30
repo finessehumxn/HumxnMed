@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>You're all set · MedCompanion</title>
-<meta name="description" content="Thank you — your MedCompanion plan is active. Open the app to get started.">
+<title>You're all set · HumxnMed</title>
+<meta name="description" content="Thank you — your HumxnMed plan is active. Open the app to get started.">
 <style>
   :root{ --bg:#0B3D2E; --bg2:#0A1F1A; --cream:#F5F1E6; --ink:#123227; --teal:#0B6E4F; --accent:#34c78c; --sub:#5b6b78; }
   *{ box-sizing:border-box; } html,body{ margin:0; height:100%; }
@@ -20,14 +20,14 @@
   <div class="check">✓</div>
   <h1>You&rsquo;re all set.</h1>
   <div class="plan" id="planChip">Your plan is active</div>
-  <p>Thank you for joining <span class="brand">MedCompanion</span>. Your membership is active and your receipt is on its way by email.</p>
+  <p>Thank you for joining <span class="brand">HumxnMed</span>. Your membership is active and your receipt is on its way by email.</p>
   <p>Everything stays private, on your device &mdash; ready whenever you or someone you care for needs it.</p>
-  <a class="btn" href="/app">Open MedCompanion &rarr;</a>
+  <a class="btn" href="/app">Open HumxnMed &rarr;</a>
   <a class="btn ghost" href="/app">Not now &mdash; take me to the app</a>
   <div class="fine">Manage or cancel anytime from your account. Questions? <a href="mailto:hello@medcompanionai.com" style="color:var(--teal)">hello@medcompanionai.com</a>.<br>A product of Millennials Creatives LLC.</div>
 </div>
 <script>
-  var PLAN_NAMES={plus:'MedCompanion Plus',pro:'MedCompanion Pro',clinical:'MedCompanion Clinical'};
+  var PLAN_NAMES={plus:'HumxnMed Plus',pro:'HumxnMed Pro',clinical:'HumxnMed Clinical'};
   function setPlan(t){ if(!t) return; try{ localStorage.setItem('mc_tier', t); }catch(e){} var el=document.getElementById('planChip'); if(el) el.textContent=(PLAN_NAMES[t]||'Your plan')+' is active'; }
   try{
     var qs=new URLSearchParams(location.search);

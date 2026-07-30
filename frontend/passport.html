@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Health Passport · MedCompanion</title>
+<title>Health Passport · HumxnMed</title>
 <style>
   :root{ --bg:#eef2f4; --card:#fff; --ink:#14212b; --sub:#5a6c78; --line:#e2e9ee; --accent:#0f7a5a; --accent-soft:#e7f4ee; --alert:#c0392b; --alert-soft:#fbe9e7; --gold:#9a6b12; --gold-soft:#fbf1de; }
   @media (prefers-color-scheme:dark){ :root{ --bg:#0b1520; --card:#12212b; --ink:#e9f0f5; --sub:#93a4b2; --line:rgba(255,255,255,.09); --accent:#34c78c; --accent-soft:rgba(52,199,140,.12); --alert:#ff9c93; --alert-soft:rgba(224,87,77,.14); --gold:#e0b46a; --gold-soft:rgba(224,180,106,.12); } }
@@ -49,7 +49,7 @@
   }
   var d=decode(), el=document.getElementById('sheet');
   if(!d){
-    el.innerHTML='<div class="empty"><h1>No passport to show</h1><p>This link needs a Health Passport shared from the MedCompanion app. Ask the patient to open <b>Health Passport</b> and share the link or QR code.</p></div>';
+    el.innerHTML='<div class="empty"><h1>No passport to show</h1><p>This link needs a Health Passport shared from the HumxnMed app. Ask the patient to open <b>Health Passport</b> and share the link or QR code.</p></div>';
     return;
   }
   var who=[]; if(d.a) who.push(esc(d.a));
@@ -94,7 +94,7 @@
   if(d.q&&d.q.length){ h+='<h2>The patient’s questions</h2><div class="card"><ul>'+d.q.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'; }
 
   h+='<div class="actions"><button class="print" onclick="window.print()">Print / Save PDF</button></div>';
-  h+='<div class="foot">Patient-reported information the patient chose to share to make this visit faster. It is information, not a diagnosis, and does not replace your clinical judgment — verify against the record. Assembled on the patient’s device by MedCompanion; nothing is stored on MedCompanion’s servers.</div>';
+  h+='<div class="foot">Patient-reported information the patient chose to share to make this visit faster. It is information, not a diagnosis, and does not replace your clinical judgment — verify against the record. Assembled on the patient’s device by HumxnMed; nothing is stored on HumxnMed’s servers.</div>';
   el.innerHTML=h;
 })();
 </script>
