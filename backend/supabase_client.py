@@ -1,7 +1,7 @@
 """
 supabase_client.py
 ──────────────────
-Supabase client for MedCompanion AI.
+Supabase client for HumxnMed AI.
 Handles auth, session persistence, health history, and user profiles.
 
 Supabase SQL to run in your project dashboard:

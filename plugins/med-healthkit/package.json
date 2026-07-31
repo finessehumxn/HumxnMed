@@ -1,7 +1,7 @@
 {
   "name": "med-healthkit",
   "version": "1.0.0",
-  "description": "Read Apple Health clinical records (FHIR) into MedCompanion — local-first, no upload.",
+  "description": "Read Apple Health clinical records (FHIR) into HumxnMed — local-first, no upload.",
   "author": "Millennials Creatives LLC",
   "license": "MIT",
   "capacitor": {

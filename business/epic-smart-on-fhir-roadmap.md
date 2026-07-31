@@ -1,9 +1,9 @@
-# MedCompanion AI — Epic SMART on FHIR Integration Roadmap
+# HumxnMed AI — Epic SMART on FHIR Integration Roadmap
 
 **Owner:** Millennials Creatives LLC
-**Product:** MedCompanion AI — plain-language explanations of diagnoses, lab results, and medical bills across 15+ languages, with patient handouts and a clinician "Pro" tier.
+**Product:** HumxnMed AI — plain-language explanations of diagnoses, lab results, and medical bills across 15+ languages, with patient handouts and a clinician "Pro" tier.
 **Current state:** Capacitor mobile app (iOS + Android) + web app (medcompanionai.com) + FastAPI/Python backend calling the Anthropic (Claude) API.
-**Positioning:** *OpenEvidence helps clinicians FIND the evidence; MedCompanion helps them EXPLAIN it to the patient.*
+**Positioning:** *OpenEvidence helps clinicians FIND the evidence; HumxnMed helps them EXPLAIN it to the patient.*
 
 **Status:** Planning document. Last updated 2026-06-29.
 
@@ -44,19 +44,19 @@ The **patient standalone / MyChart** launch (Section 3, the consumer path) is im
 2. Obtain an access token scoped to specific data and a specific patient, and
 3. Read FHIR resources through the EHR's API — without the app vendor ever holding the hospital's database credentials.
 
-Epic implements SMART on FHIR. There are **two embedding surfaces** that matter for MedCompanion:
+Epic implements SMART on FHIR. There are **two embedding surfaces** that matter for HumxnMed:
 
 ### Provider-facing (clinician) launch — Hyperspace / Hyperdrive
 - Epic's clinician desktop is **Hyperspace** (the classic Windows client) and **Hyperdrive** (the newer Chromium-based client that hosts web content natively). Web/SMART apps render inside an embedded browser frame.
-- A clinician working in a patient's chart clicks a button/activity that **EHR-launches** MedCompanion. Epic passes a `launch` token and its FHIR endpoint; MedCompanion completes an OAuth handshake and is handed the **current patient context** automatically — no patient lookup, no manual ID entry.
-- This is the **"Pro" tier home run**: the clinician is already in the chart, MedCompanion pulls the active diagnoses and recent labs, and produces a plain-language handout in the patient's language in seconds.
+- A clinician working in a patient's chart clicks a button/activity that **EHR-launches** HumxnMed. Epic passes a `launch` token and its FHIR endpoint; HumxnMed completes an OAuth handshake and is handed the **current patient context** automatically — no patient lookup, no manual ID entry.
+- This is the **"Pro" tier home run**: the clinician is already in the chart, HumxnMed pulls the active diagnoses and recent labs, and produces a plain-language handout in the patient's language in seconds.
 
 ### Patient-facing launch — MyChart
 - **MyChart** is Epic's patient portal (web + mobile). Patients see their own conditions, results, visit summaries, and bills.
 - A SMART app can be surfaced to patients in two ways:
   - **Embedded/linked from MyChart** ("Connect my account" style), or
-  - **Patient standalone launch** — the patient starts in MedCompanion, is redirected to MyChart to log in and consent, and MedCompanion receives a token scoped to *that patient's own data*.
-- This maps directly to MedCompanion's consumer product: a patient connects their chart and gets every result and diagnosis explained in plain language, in their language.
+  - **Patient standalone launch** — the patient starts in HumxnMed, is redirected to MyChart to log in and consent, and HumxnMed receives a token scoped to *that patient's own data*.
+- This maps directly to HumxnMed's consumer product: a patient connects their chart and gets every result and diagnosis explained in plain language, in their language.
 
 > Both surfaces use the same SMART/OAuth machinery. The difference is **who authenticates** (a clinician vs. the patient) and **whose context** you receive.
 
@@ -91,35 +91,35 @@ Epic's program has been **renamed and reorganized recently**, and the public ter
 ### The customer-sponsorship reality (the single most important point)
 **You cannot unilaterally "turn on" a connection to a hospital's live Epic.** Production access requires a **participating Epic customer (a hospital/health system) to enable and authorize your app against their environment.** Practically:
 
-- A hospital must **decide to use MedCompanion**, then have their Epic team register/enable your client ID for their production environment and grant the FHIR scopes.
+- A hospital must **decide to use HumxnMed**, then have their Epic team register/enable your client ID for their production environment and grant the FHIR scopes.
 - This means **your real go-to-market gate is a hospital champion**, not Epic's portal. The first production site effectively co-pilots the integration with you.
 - Pricing/contracting with the hospital is a separate commercial negotiation from anything you pay Epic.
 
-> **Strategic implication for MedCompanion:** Land a pilot health system *before* (or in parallel with) heavy production-integration spend. The sandbox build is cheap; the production path only unlocks once a customer pulls you in.
+> **Strategic implication for HumxnMed:** Land a pilot health system *before* (or in parallel with) heavy production-integration spend. The sandbox build is cheap; the production path only unlocks once a customer pulls you in.
 
 ---
 
 ## 3. The three SMART launch types — when to use each
 
-| Launch type | Who authenticates | Context you get | MedCompanion use case |
+| Launch type | Who authenticates | Context you get | HumxnMed use case |
 |---|---|---|---|
-| **EHR launch** (provider) | Clinician, via Epic SSO | Current patient (+ encounter) handed to you | **Pro tier inside Hyperspace/Hyperdrive.** Clinician opens MedCompanion in-chart → instant handout. **Highest-value, build first.** |
-| **Standalone / patient launch** (MyChart) | The patient | The patient's own record | **Consumer product.** Patient connects their chart in the MedCompanion app/web → explains their own results/diagnoses/bills. |
+| **EHR launch** (provider) | Clinician, via Epic SSO | Current patient (+ encounter) handed to you | **Pro tier inside Hyperspace/Hyperdrive.** Clinician opens HumxnMed in-chart → instant handout. **Highest-value, build first.** |
+| **Standalone / patient launch** (MyChart) | The patient | The patient's own record | **Consumer product.** Patient connects their chart in the HumxnMed app/web → explains their own results/diagnoses/bills. |
 | **Backend services** (system / client-credentials, SMART Backend Services) | No human; app authenticates with a signed JWT (asymmetric key) | Whatever the org grants at the system level | **Batch / no-user-present** jobs — e.g., pre-generating handouts for a cohort, or server-to-server pipelines. **Not the MVP.** Heavier trust bar; needs org-level authorization. |
 
 **Rule of thumb:**
 - A **human is present and it's their/the patient's chart** → EHR launch (clinician) or standalone (patient).
 - **No human, server-driven, bulk** → backend services.
 
-For MedCompanion, **EHR launch is the MVP**, **standalone/MyChart is the consumer scale-out**, and **backend services is a later optimization** — not a starting point.
+For HumxnMed, **EHR launch is the MVP**, **standalone/MyChart is the consumer scale-out**, and **backend services is a later optimization** — not a starting point.
 
 ---
 
-## 4. FHIR resources MedCompanion consumes (and what each becomes in-product)
+## 4. FHIR resources HumxnMed consumes (and what each becomes in-product)
 
-All are FHIR **R4**. For a given patient you typically `GET` each resource type with `patient={id}` plus filters. MedCompanion is fundamentally a **read-only consumer** — it never writes back to the chart, which dramatically lowers the integration and security bar.
+All are FHIR **R4**. For a given patient you typically `GET` each resource type with `patient={id}` plus filters. HumxnMed is fundamentally a **read-only consumer** — it never writes back to the chart, which dramatically lowers the integration and security bar.
 
-| FHIR resource | What it contains | What MedCompanion does with it |
+| FHIR resource | What it contains | What HumxnMed does with it |
 |---|---|---|
 | **Patient** | Demographics, identifiers, **preferred language**, age | Anchors the context; **drives which of the 15+ languages to render in** (use `communication.language`). |
 | **Condition** | Active/resolved problems & diagnoses (often coded SNOMED/ICD-10) | Core input: turns "Type 2 diabetes mellitus with diabetic neuropathy" into a plain-language explanation of what it is and what it means for the patient. |
@@ -157,7 +157,7 @@ For **patient standalone**, the flow is identical except the **patient** authent
 For **backend services**, there is no browser: you authenticate with a **signed JWT client assertion** (asymmetric key you pre-register) at the token endpoint to get an app-level access token.
 
 ### 5.2 Scopes
-SMART scopes look like `patient/Condition.read`, `patient/Observation.read`, `user/Patient.read`, `launch`, `openid`, `fhirUser`, `offline_access`. For MedCompanion's read-only MVP, request the **minimum**:
+SMART scopes look like `patient/Condition.read`, `patient/Observation.read`, `user/Patient.read`, `launch`, `openid`, `fhirUser`, `offline_access`. For HumxnMed's read-only MVP, request the **minimum**:
 ```
 launch openid fhirUser
 patient/Patient.read
@@ -194,13 +194,13 @@ patient/DocumentReference.read
 
 These tie to the companion HIPAA document; summary of what blocks production:
 
-- **HIPAA.** You will handle **PHI**. You need a **Business Associate Agreement (BAA)** with each customer health system, and — because MedCompanion's backend calls the Anthropic (Claude) API — a **BAA with your AI/infra subprocessors** (Anthropic offers HIPAA-eligible/BAA arrangements; confirm and execute). No PHI should reach any subprocessor without a BAA in place.
+- **HIPAA.** You will handle **PHI**. You need a **Business Associate Agreement (BAA)** with each customer health system, and — because HumxnMed's backend calls the Anthropic (Claude) API — a **BAA with your AI/infra subprocessors** (Anthropic offers HIPAA-eligible/BAA arrangements; confirm and execute). No PHI should reach any subprocessor without a BAA in place.
 - **Data minimization & retention.** Read least-privilege scopes; avoid persisting PHI unless required, and if you do, encrypt at rest, define retention/deletion, and log access.
 - **Encryption in transit.** TLS everywhere; OAuth tokens and FHIR responses never logged in plaintext.
 - **OAuth hygiene.** PKCE, exact redirect-URI matching, short-lived tokens, secure refresh-token storage, key rotation for backend services.
 - **Epic's security review / vendor questionnaire.** Expect a formal questionnaire and possibly a request for security attestations (e.g., SOC 2 / HITRUST). Not having these slows or blocks enterprise customers even if Epic's minimum is met.
 - **Auditability.** Log who/what accessed which patient's data and when.
-- **Clinical-safety / scope-of-use posture.** MedCompanion explicitly does **not** diagnose; its guardrail pipeline (emergency/crisis detection, human-in-the-loop confirmation) is a compliance and trust asset — document it for reviewers and customers.
+- **Clinical-safety / scope-of-use posture.** HumxnMed explicitly does **not** diagnose; its guardrail pipeline (emergency/crisis detection, human-in-the-loop confirmation) is a compliance and trust asset — document it for reviewers and customers.
 
 > ⚠️ Confirm current Anthropic HIPAA/BAA terms and any required configuration before sending **any** PHI to the Claude API. This is a hard gate, not a nice-to-have.
 
@@ -232,7 +232,7 @@ Honest framing: the **sandbox prototype is fast**; **production is slow** becaus
 > **A provider-facing (EHR-launch) SMART app, embedded in Hyperspace/Hyperdrive, that reads the current patient's active `Condition`s and recent `Observation`s (labs) and produces a plain-language, patient-language handout — read-only, no write-back.**
 
 Why this is the right first slice:
-- **Highest value density:** the clinician is already in the chart; context is handed to you; output is immediate. It directly demonstrates the "OpenEvidence finds it, MedCompanion explains it" pitch.
+- **Highest value density:** the clinician is already in the chart; context is handed to you; output is immediate. It directly demonstrates the "OpenEvidence finds it, HumxnMed explains it" pitch.
 - **Lowest risk:** **read-only** (no chart writes), **least-privilege scopes**, no patient-auth UX to build, no billing data.
 - **Demoable in the sandbox** — you can show a sponsoring hospital a working integration **before** asking them to commit, which is exactly the artifact that lands a pilot.
 

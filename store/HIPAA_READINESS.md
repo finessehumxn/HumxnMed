@@ -1,4 +1,4 @@
-# MedCompanion AI — HIPAA readiness (honest status)
+# HumxnMed AI — HIPAA readiness (honest status)
 
 **Read this with your clinical co-founder and a healthcare attorney before claiming "HIPAA compliant."**
 

@@ -3,25 +3,25 @@ const fs = require("fs");
 const about = fs.readFileSync("about.html", "utf8");
 // reuse everything up to and including <body>
 const head = about.slice(0, about.indexOf("<body>") + "<body>".length);
-const footer = `\n<footer>\n  <div class="mc">Millennials Creatives LLC</div>\n  <div>MedCompanion AI is a product of Millennials Creatives LLC.</div>\n</footer>\n</body>\n</html>`;
+const footer = `\n<footer>\n  <div class="mc">Millennials Creatives LLC</div>\n  <div>HumxnMed AI is a product of Millennials Creatives LLC.</div>\n</footer>\n</body>\n</html>`;
 const setTitle = (h, title, desc) => h
   .replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`)
   .replace(/<meta name="description"[^>]*>/, `<meta name="description" content="${desc}" />`);
 
 const pages = {
   "about-us.html": {
-    title: "About Us — MedCompanion AI",
-    desc: "MedCompanion AI helps everyday people understand their health in plain language and prepare to partner with their doctor. A product of Millennials Creatives LLC.",
+    title: "About Us — HumxnMed AI",
+    desc: "HumxnMed AI helps everyday people understand their health in plain language and prepare to partner with their doctor. A product of Millennials Creatives LLC.",
     body: `
 <div class="hero"><div class="wrap">
-  <div class="eyebrow">About MedCompanion AI</div>
+  <div class="eyebrow">About HumxnMed AI</div>
   <h1>Health, finally in <em>your language.</em></h1>
-  <p class="lead">MedCompanion AI helps everyday people understand their health in plain language and walk into every appointment prepared — always working with your doctor, never replacing them.</p>
+  <p class="lead">HumxnMed AI helps everyday people understand their health in plain language and walk into every appointment prepared — always working with your doctor, never replacing them.</p>
   <div class="badges"><span class="badge">✓ Plain-language health</span><span class="badge">✓ 15+ languages</span><span class="badge">✓ Works with your doctor</span><span class="badge">✓ Private by design</span></div>
 </div></div>
 <section><div class="wrap">
   <h2>Why we exist</h2>
-  <p class="muted">You get a diagnosis. The doctor uses a word you've never heard, hands you a printout, and the visit is over in nine minutes — and then you're in the parking lot, Googling, more scared than when you walked in. <strong style="color:var(--cream)">MedCompanion AI was built for that exact moment.</strong> We turn the overwhelming language of healthcare into clear, calm words, and help you walk back in prepared and confident. Understanding your own body shouldn't be a privilege reserved for people who already speak the language of medicine. It's a right — and closing that gap is the entire reason we exist.</p>
+  <p class="muted">You get a diagnosis. The doctor uses a word you've never heard, hands you a printout, and the visit is over in nine minutes — and then you're in the parking lot, Googling, more scared than when you walked in. <strong style="color:var(--cream)">HumxnMed AI was built for that exact moment.</strong> We turn the overwhelming language of healthcare into clear, calm words, and help you walk back in prepared and confident. Understanding your own body shouldn't be a privilege reserved for people who already speak the language of medicine. It's a right — and closing that gap is the entire reason we exist.</p>
 </div></div></section>
 <section><div class="wrap">
   <h2>What we do</h2>
@@ -40,22 +40,22 @@ const pages = {
 </div></div></section>
 <section><div class="wrap">
   <h2>Built by Millennials Creatives</h2>
-  <p class="muted">MedCompanion AI is a product of <strong style="color:var(--cream)">Millennials Creatives LLC</strong> — a woman-owned, minority-founded studio building technology that makes essential services understandable for everyone. Our standards are guided by clinical input and a commitment to safety and privacy. <a href="/about.html">See our medical standards →</a></p>
+  <p class="muted">HumxnMed AI is a product of <strong style="color:var(--cream)">Millennials Creatives LLC</strong> — a woman-owned, minority-founded studio building technology that makes essential services understandable for everyone. Our standards are guided by clinical input and a commitment to safety and privacy. <a href="/about.html">See our medical standards →</a></p>
 </div></div></section>
 <section><div class="wrap">
   <h2>What we are — and what we are not</h2>
-  <div class="disc"><strong>MedCompanion AI provides general health information for educational purposes.</strong> It is <strong>not a medical device, not a diagnosis, and not a substitute for professional medical advice</strong>, and it does not handle emergencies — if you may be experiencing one, call your local emergency number. Your own clinician knows your full history and has the final say.</div>
-  <a class="cta" href="/index.html">← Back to MedCompanion AI</a>
+  <div class="disc"><strong>HumxnMed AI provides general health information for educational purposes.</strong> It is <strong>not a medical device, not a diagnosis, and not a substitute for professional medical advice</strong>, and it does not handle emergencies — if you may be experiencing one, call your local emergency number. Your own clinician knows your full history and has the final say.</div>
+  <a class="cta" href="/index.html">← Back to HumxnMed AI</a>
 </div></div></section>`,
   },
 
   "partners.html": {
-    title: "Partnerships — MedCompanion AI",
-    desc: "Bring MedCompanion AI to your patients, employees, students, or members — health systems, employers, schools, pharmacies, publishers, and nonprofits.",
+    title: "Partnerships — HumxnMed AI",
+    desc: "Bring HumxnMed AI to your patients, employees, students, or members — health systems, employers, schools, pharmacies, publishers, and nonprofits.",
     body: `
 <div class="hero"><div class="wrap">
   <div class="eyebrow">Partnerships</div>
-  <h1>Bring MedCompanion AI to <em>your people.</em></h1>
+  <h1>Bring HumxnMed AI to <em>your people.</em></h1>
   <p class="lead">Health systems, employers, schools, pharmacies, publishers, and nonprofits — partner with us to make health understandable for the people you serve, in 15+ languages.</p>
   <div class="badges"><span class="badge">Health systems</span><span class="badge">Employers &amp; benefits</span><span class="badge">Education</span><span class="badge">Publishers &amp; content</span></div>
 </div></div>
@@ -82,23 +82,23 @@ const pages = {
 <section><div class="wrap">
   <h2>Let's build something together</h2>
   <p class="muted">Pilots, co-branded deployments, content licensing, and multilingual community programs — tell us who you serve and we'll shape the right partnership.</p>
-  <a class="cta" href="mailto:team@medcompanionai.com?subject=MedCompanion%20AI%20Partnership">Start a partnership →</a>
+  <a class="cta" href="mailto:team@medcompanionai.com?subject=HumxnMed%20AI%20Partnership">Start a partnership →</a>
 </div></div></section>`,
   },
 
   "investors.html": {
-    title: "For Investors — MedCompanion AI",
-    desc: "MedCompanion AI: making health understandable at scale. The opportunity, what we've built, and how to reach us. A product of Millennials Creatives LLC.",
+    title: "For Investors — HumxnMed AI",
+    desc: "HumxnMed AI: making health understandable at scale. The opportunity, what we've built, and how to reach us. A product of Millennials Creatives LLC.",
     body: `
 <div class="hero"><div class="wrap">
   <div class="eyebrow">For Investors</div>
   <h1>Make health <em>understandable</em> — at scale.</h1>
-  <p class="lead">A multi-trillion-dollar system speaks a language most people don't. MedCompanion AI is the plain-language layer between patients and their care — live on web and mobile, in 15+ languages.</p>
+  <p class="lead">A multi-trillion-dollar system speaks a language most people don't. HumxnMed AI is the plain-language layer between patients and their care — live on web and mobile, in 15+ languages.</p>
   <div class="badges"><span class="badge">AI · Health</span><span class="badge">Live product</span><span class="badge">Web + Mobile</span><span class="badge">Multilingual</span></div>
 </div></div>
 <section><div class="wrap">
   <h2>The opportunity</h2>
-  <p class="muted">Studies suggest the large majority of U.S. adults struggle to understand basic health information — and that gap drives confusion, missed care, and cost across a multi-trillion-dollar healthcare system. AI can finally close it. MedCompanion AI translates medical information into plain language and prepares people to partner with their own clinicians — a daily-use companion across every diagnosis, medication, bill, and visit.</p>
+  <p class="muted">Studies suggest the large majority of U.S. adults struggle to understand basic health information — and that gap drives confusion, missed care, and cost across a multi-trillion-dollar healthcare system. AI can finally close it. HumxnMed AI translates medical information into plain language and prepares people to partner with their own clinicians — a daily-use companion across every diagnosis, medication, bill, and visit.</p>
 </div></div></section>
 <section><div class="wrap">
   <h2>What we've built</h2>
@@ -121,7 +121,7 @@ const pages = {
 <section><div class="wrap">
   <h2>Let's talk</h2>
   <p class="muted">We welcome conversations with mission-aligned investors. Request our deck and the details on traction, roadmap, and the raise.</p>
-  <a class="cta" href="mailto:team@medcompanionai.com?subject=MedCompanion%20AI%20Investor%20Inquiry">Request the investor deck →</a>
+  <a class="cta" href="mailto:team@medcompanionai.com?subject=HumxnMed%20AI%20Investor%20Inquiry">Request the investor deck →</a>
   <div class="disc" style="margin-top:1.4rem">This page is for informational purposes only and is <strong>not an offer to sell, or the solicitation of an offer to buy, any security.</strong> Any such offer would be made only to qualified investors through definitive offering documents.</div>
 </div></div></section>`,
   },

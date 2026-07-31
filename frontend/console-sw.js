@@ -1,4 +1,4 @@
-/* MedCompanion Clinical console — offline shell cache.
+/* HumxnMed Clinical console — offline shell cache.
    Stale-while-revalidate for the console page + its gate script, so the console
    OPENS even when signal drops (OR / hospital dead zones). Never touches POST
    requests (the AI endpoints) or any other page. */

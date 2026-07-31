@@ -1,9 +1,9 @@
-# MedCompanion AI — HIPAA + BAA Readiness Checklist
+# HumxnMed AI — HIPAA + BAA Readiness Checklist
 
 **Company:** Millennials Creatives LLC
-**Product:** MedCompanion AI — plain-language health-explanation tool (consumer app + clinician "Pro" tier)
+**Product:** HumxnMed AI — plain-language health-explanation tool (consumer app + clinician "Pro" tier)
 **Stack:** Capacitor (iOS + Android) + web app · FastAPI/Python on Railway · Supabase (data + auth) · Stripe (payments) · Anthropic Claude API (AI)
-**Goal of this document:** Get to a *minimum viable* compliance posture so MedCompanion can legally run a pilot with **one clinic or hospital**.
+**Goal of this document:** Get to a *minimum viable* compliance posture so HumxnMed can legally run a pilot with **one clinic or hospital**.
 **Last reviewed:** 2026-06-29
 
 > ⚠️ **This is practical guidance, not legal advice.** HIPAA penalties are real and the rules are nuanced. **Have a healthcare attorney review every BAA before you sign it**, and have them confirm the analysis below maps to your actual data flows. Vendor HIPAA terms also change — re-verify each subprocessor's current offering before relying on it.
@@ -31,7 +31,7 @@ HIPAA does not regulate "health data" in the abstract. It regulates **Protected 
 - **Covered Entity (CE):** a health-care provider, health plan, or clearinghouse (e.g., a clinic or hospital).
 - **Business Associate (BA):** a vendor that creates, receives, maintains, or transmits PHI **on behalf of a Covered Entity**.
 
-This produces a sharp, scope-defining line for MedCompanion:
+This produces a sharp, scope-defining line for HumxnMed:
 
 ### Consumer / direct-to-user product → HIPAA likely does NOT apply
 When an individual signs up themselves and types in their own symptoms or uploads their own labs, **the user is not a Covered Entity**, and you are not acting on behalf of one. That data is sensitive and is "consumer health data," but it is generally **outside HIPAA's scope**.
@@ -43,7 +43,7 @@ When an individual signs up themselves and types in their own symptoms or upload
 > So "HIPAA doesn't apply" ≠ "no privacy obligations." It just means a *different* rulebook.
 
 ### Clinician "Pro" tier / clinic pilot → HIPAA DOES apply, and you become a Business Associate
-The moment a clinic or hospital uses MedCompanion to handle PHI **on behalf of the clinic's patients** — e.g., a clinician pastes in a patient's labs, or patient data flows from the clinic to you — **MedCompanion (Millennials Creatives LLC) becomes a Business Associate of that clinic**, and the full HIPAA Security Rule + Breach Notification Rule + relevant Privacy Rule obligations attach to you.
+The moment a clinic or hospital uses HumxnMed to handle PHI **on behalf of the clinic's patients** — e.g., a clinician pastes in a patient's labs, or patient data flows from the clinic to you — **HumxnMed (Millennials Creatives LLC) becomes a Business Associate of that clinic**, and the full HIPAA Security Rule + Breach Notification Rule + relevant Privacy Rule obligations attach to you.
 
 **Bottom line:** The clinic pilot is what pulls you into HIPAA. Everything below is about being ready for *that*.
 
@@ -60,7 +60,7 @@ A **BAA** is the contract HIPAA *requires* between a Covered Entity and its Busi
 
 ### Your subprocessor chain — BAA status (verify current terms before relying on this)
 
-| Subprocessor | Role | Touches PHI? | Offers a BAA? | Plan / tier required | Action for MedCompanion |
+| Subprocessor | Role | Touches PHI? | Offers a BAA? | Plan / tier required | Action for HumxnMed |
 |---|---|---|---|---|---|
 | **Railway** | Hosting / compute for FastAPI backend | **Yes** — PHI passes through and may transit memory/logs | **Yes**, on the **Enterprise track**, "BAAs available upon request" | Enterprise track; gated behind a **minimum monthly commitment (≈$1,000/mo at last check)**. With a BAA in effect, Railway staff can no longer directly access your running workloads. | Contact `team@railway.com`, sign BAA, confirm encryption-at-rest + access controls in your config. |
 | **Supabase** | Database + Auth (where PHI is stored) | **Yes** — primary PHI datastore | **Yes** | **Team plan or higher**, **plus** the **HIPAA add-on** must be requested/enabled and the BAA signed in-dashboard. Supabase has BAAs with its own vendors (e.g., AWS). | Upgrade to Team, enable HIPAA add-on, sign BAA, and place PHI **only** in HIPAA-enabled projects. Follow Supabase's shared-responsibility model (RLS, access, etc. are *your* job). |
@@ -115,7 +115,7 @@ What's still **yours** to handle:
 
 ## 6. The AI question — can you send PHI to Claude?
 
-**Yes — but only under a covered configuration.** This is one of the most important sections for MedCompanion because every explanation request sends user/patient health context to the model.
+**Yes — but only under a covered configuration.** This is one of the most important sections for HumxnMed because every explanation request sends user/patient health context to the model.
 
 You have two viable paths:
 
@@ -201,7 +201,7 @@ Target: a **minimum viable** compliant posture to run **one clinic pilot** — n
 
 ## Addendum — Coded terminology status (2026-07)
 
-MedCompanion normalizes clinical free-text to standard codes via **NIH/NLM APIs** (codes are never model-generated):
+HumxnMed normalizes clinical free-text to standard codes via **NIH/NLM APIs** (codes are never model-generated):
 
 | Data | Standard | Source | Status |
 |---|---|---|---|

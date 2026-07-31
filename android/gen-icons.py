@@ -1,4 +1,4 @@
-"""Generate Android launcher icons (legacy + round + adaptive foreground) from the MedCompanion icon."""
+"""Generate Android launcher icons (legacy + round + adaptive foreground) from the HumxnMed icon."""
 from PIL import Image, ImageDraw
 import os
 

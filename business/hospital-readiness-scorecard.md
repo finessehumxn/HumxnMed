@@ -1,6 +1,6 @@
-# MedCompanion AI — Hospital-Readiness Scorecard & Phased Plan
+# HumxnMed AI — Hospital-Readiness Scorecard & Phased Plan
 
-**Company:** Millennials Creatives LLC · **Product:** MedCompanion AI
+**Company:** Millennials Creatives LLC · **Product:** HumxnMed AI
 **Last reviewed:** 2026-07-12
 **Purpose:** An honest, no-spin picture of what a hospital requires before it says yes, where we actually stand, and the realistic sequence. Share this with an advisor or a prospective clinical champion — it's designed to be *believed*, not to impress.
 
@@ -10,7 +10,7 @@
 
 ## The one-paragraph truth
 
-MedCompanion is a **good patient product** with a **genuinely strong data-privacy architecture** (local-first, nothing stored by default, independently verifiable at `/data-policy`). That is *one* of the things a hospital cares about — and it's real. But "hospital-ready" is a stack of mostly **non-engineering** gates (SOC 2, signed BAAs, insurance, clinical validation, a sponsoring champion) that take **12–18 months and real money**. **You do not need any of that to launch the consumer product**, where the patient authorizes their own records. So the plan is: **ship consumer now, warm the hospital groundwork in parallel, and let a champion + SOC 2 unlock the hospital track later.**
+HumxnMed is a **good patient product** with a **genuinely strong data-privacy architecture** (local-first, nothing stored by default, independently verifiable at `/data-policy`). That is *one* of the things a hospital cares about — and it's real. But "hospital-ready" is a stack of mostly **non-engineering** gates (SOC 2, signed BAAs, insurance, clinical validation, a sponsoring champion) that take **12–18 months and real money**. **You do not need any of that to launch the consumer product**, where the patient authorizes their own records. So the plan is: **ship consumer now, warm the hospital groundwork in parallel, and let a champion + SOC 2 unlock the hospital track later.**
 
 ---
 

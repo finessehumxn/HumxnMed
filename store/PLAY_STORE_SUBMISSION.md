@@ -1,4 +1,4 @@
-# MedCompanion AI — Google Play Store Submission (copy-paste ready)
+# HumxnMed AI — Google Play Store Submission (copy-paste ready)
 
 Owner: **Millennials Creatives LLC** · Package: `com.medcompanionai.app`
 Use this when filling out the Play Console "Main store listing," "App content," and "Data safety" sections.
@@ -9,7 +9,7 @@ Use this when filling out the Play Console "Main store listing," "App content," 
 
 | Field | Value |
 |---|---|
-| **App name** (30 char max) | `MedCompanion AI` |
+| **App name** (30 char max) | `HumxnMed AI` |
 | **Category** | Medical (alt: Health & Fitness) |
 | **Tags** | Health, Medical info, Symptom, Caregiver |
 | **Email** | contact@millennialscreatives.com |
@@ -32,9 +32,9 @@ Understand your health in plain language and prepare to talk with your doctor.
 ## 3) Full description (4000 characters max)
 
 ```
-MedCompanion AI helps you understand your health in plain language and walk into every appointment prepared — so you can partner with your doctor, not replace them.
+HumxnMed AI helps you understand your health in plain language and walk into every appointment prepared — so you can partner with your doctor, not replace them.
 
-Health information is overwhelming. Lab results, diagnoses, medication labels, and insurance letters are written for clinicians, not for you. MedCompanion AI translates all of it into clear, calm, everyday language and helps you ask better questions — always pointing you back to your own licensed clinician for diagnosis and treatment.
+Health information is overwhelming. Lab results, diagnoses, medication labels, and insurance letters are written for clinicians, not for you. HumxnMed AI translates all of it into clear, calm, everyday language and helps you ask better questions — always pointing you back to your own licensed clinician for diagnosis and treatment.
 
 WHAT YOU CAN DO
 
@@ -47,7 +47,7 @@ WHAT YOU CAN DO
 • 15+ languages — Get information in the language you're most comfortable with.
 
 BUILT TO WORK WITH YOUR DOCTOR
-MedCompanion AI is an information and preparation tool. It does not diagnose, treat, or replace professional medical care. Every answer encourages you to confirm with your own clinician, and built-in safety guardrails route urgent or emergency situations to call 911 or your local emergency number.
+HumxnMed AI is an information and preparation tool. It does not diagnose, treat, or replace professional medical care. Every answer encourages you to confirm with your own clinician, and built-in safety guardrails route urgent or emergency situations to call 911 or your local emergency number.
 
 WHO IT'S FOR
 Everyday people, caregivers, parents, patients managing a new diagnosis, and anyone who wants to feel less alone and more prepared in the healthcare system.
@@ -55,9 +55,9 @@ Everyday people, caregivers, parents, patients managing a new diagnosis, and any
 PRIVACY FIRST
 Your information is yours. We never sell your data. You can export or delete your account information at any time.
 
-MedCompanion AI is a product of Millennials Creatives LLC.
+HumxnMed AI is a product of Millennials Creatives LLC.
 
-IMPORTANT: MedCompanion AI provides general health information for educational purposes and is not a medical device. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have. If you think you may have a medical emergency, call your doctor or 911 immediately.
+IMPORTANT: HumxnMed AI provides general health information for educational purposes and is not a medical device. It is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have. If you think you may have a medical emergency, call your doctor or 911 immediately.
 ```
 
 ---
@@ -111,7 +111,7 @@ Category to select: **Reference, News, or Educational** (or "Utility"). Then ans
 ## 6) "What's new" (release notes, 500 char max)
 
 ```
-Welcome to MedCompanion AI! Understand your health in plain language and prepare to partner with your doctor:
+Welcome to HumxnMed AI! Understand your health in plain language and prepare to partner with your doctor:
 • Plain-language explanations of results, diagnoses & notes
 • Medication, food & supplement interaction checks
 • Visit prep with a question list
@@ -139,7 +139,7 @@ Always works with your clinician — never replaces them.
 ## 8) Pre-launch checklist / known Play review risks
 
 1. **Privacy Policy must load** at the URL above and must cover health data. ✅ before submit.
-2. **Webview/remote-content note:** the app loads the live web app. Google occasionally flags thin "webview wrapper" apps — MedCompanion is a substantive health service, which mitigates this, but be ready to explain it in the review notes if asked.
+2. **Webview/remote-content note:** the app loads the live web app. Google occasionally flags thin "webview wrapper" apps — HumxnMed is a substantive health service, which mitigates this, but be ready to explain it in the review notes if asked.
 3. **Health content policy:** Do not state or imply diagnosis/treatment or "medically approved." The listing above uses "information / educational / works with your doctor" language on purpose.
 4. **Account deletion link:** Play requires an account-deletion path for apps with accounts — we have `/user/delete`. Add the **"Delete account" URL** in the Data safety / App content section.
 5. **Target audience:** select adults / 13+ (not "designed for families/children") to avoid the stricter Families policy, since it's a health-info tool.
@@ -148,7 +148,7 @@ Always works with your clinician — never replaces them.
 ---
 
 ### Submission order in Play Console
-1. Create app → name `MedCompanion AI`, language English (US), App (not Game), Free.
+1. Create app → name `HumxnMed AI`, language English (US), App (not Game), Free.
 2. Fill **Main store listing** (sections 1–3, 7 above).
 3. **App content**: privacy policy, ads, content rating (4), target audience, data safety (5), government/health declarations, account deletion.
 4. **Production → Create release** → upload `app-release.aab` → paste "What's new" (6) → roll out.

@@ -1,8 +1,8 @@
-# med-healthkit — Apple Health clinical records for MedCompanion
+# med-healthkit — Apple Health clinical records for HumxnMed
 
 Reads Apple Health **clinical records** (labs, medications, conditions, allergies,
 immunizations, procedures, vitals) as **FHIR JSON** and hands them to the web layer.
-The frontend maps them into MedCompanion records with `window.fhirToRecords()` — the
+The frontend maps them into HumxnMed records with `window.fhirToRecords()` — the
 same mapper used for file import, already live and tested.
 
 **Local-first:** this plugin returns FHIR JSON to the in-app WebView, which stores it
@@ -51,8 +51,8 @@ Do the one-time portal step FIRST, then the codemagic changes, then test on a de
 **2b.** In the "Inject Info.plist keys" step, add the two Health usage strings:
 
 ```bash
-set_str NSHealthShareUsageDescription "MedCompanion reads your Health Records so it can explain your labs, medications and conditions in plain language. Your records stay on your device."
-set_str NSHealthClinicalHealthRecordsShareUsageDescription "MedCompanion reads the clinical records you've connected in Apple Health so it can explain them in plain language, on your device."
+set_str NSHealthShareUsageDescription "HumxnMed reads your Health Records so it can explain your labs, medications and conditions in plain language. Your records stay on your device."
+set_str NSHealthClinicalHealthRecordsShareUsageDescription "HumxnMed reads the clinical records you've connected in Apple Health so it can explain them in plain language, on your device."
 ```
 
 **2c.** Add a new step (after "Add iOS platform", before "Capacitor sync") to write the

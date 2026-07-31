@@ -1,6 +1,6 @@
 {
   "appId": "com.medcompanionai.app",
-  "appName": "MedCompanion AI",
+  "appName": "HumxnMed AI",
   "webDir": "frontend",
   "server": {
     "url": "https://medcompanion-ai.up.railway.app",

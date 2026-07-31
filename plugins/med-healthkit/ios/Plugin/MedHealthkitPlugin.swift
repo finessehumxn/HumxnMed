@@ -5,7 +5,7 @@ import HealthKit
 /**
  * MedHealthkit — reads Apple Health *clinical records* (labs, medications,
  * conditions, allergies, immunizations, procedures, vitals) as FHIR JSON and
- * hands them to the web layer, which maps them into MedCompanion records.
+ * hands them to the web layer, which maps them into HumxnMed records.
  *
  * Nothing is uploaded here: the FHIR JSON is returned to the in-app WebView,
  * which stores it in on-device localStorage. It only reaches the server if the

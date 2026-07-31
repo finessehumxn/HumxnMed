@@ -1,7 +1,7 @@
-# MedCompanion AI — Data-Flow One-Pager
+# HumxnMed AI — Data-Flow One-Pager
 
 **For:** hospital / clinic privacy & security teams evaluating a pilot
-**Company:** Millennials Creatives LLC · **Product:** MedCompanion AI
+**Company:** Millennials Creatives LLC · **Product:** HumxnMed AI
 **Last reviewed:** 2026-07-12
 **Verify any claim here live:** `curl https://medcompanion-ai.up.railway.app/data-policy` · human version at `/trust`
 
@@ -11,7 +11,7 @@
 
 ## The 60-second summary
 
-MedCompanion is built **local-first, AI-optional, human-in-control**:
+HumxnMed is built **local-first, AI-optional, human-in-control**:
 
 1. **Your patients' data lives on their phone.** Health Journal check-ins and My Records entries are stored only in the device's local storage. Opening the app uploads nothing.
 2. **The AI sees data only when the user taps a feature** — and only the specific text for that one task, to generate the answer.
@@ -35,7 +35,7 @@ MedCompanion is built **local-first, AI-optional, human-in-control**:
                    │  and only the text for that task
                    ▼
    ┌─────────────────────────────┐
-   │  MedCompanion API (Railway) │   ← stateless: processes, returns,
+   │  HumxnMed API (Railway) │   ← stateless: processes, returns,
    │  FastAPI, HTTPS/TLS         │     does NOT write health content to a DB
    └───────┬──────────────┬──────┘
            │ text         │ voice (optional, if used)

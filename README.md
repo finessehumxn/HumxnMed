@@ -1,4 +1,4 @@
-# MedCompanion AI
+# HumxnMed AI
 
 **A safety-first patient health-briefing assistant built on a multi-node LangGraph pipeline.**
 
@@ -10,7 +10,7 @@
 
 ## What it does
 
-MedCompanion AI turns a patient's plain-language description of how they feel ("my blood sugar is high and my feet tingle") into a **warm, sourced, easy-to-understand health briefing** — without ever pretending to be a doctor. Every request flows through an explicit safety pipeline that catches emergencies and crisis signals *before* any briefing is generated, and pauses for the patient to confirm what's being looked up.
+HumxnMed AI turns a patient's plain-language description of how they feel ("my blood sugar is high and my feet tingle") into a **warm, sourced, easy-to-understand health briefing** — without ever pretending to be a doctor. Every request flows through an explicit safety pipeline that catches emergencies and crisis signals *before* any briefing is generated, and pauses for the patient to confirm what's being looked up.
 
 The design priority is not raw capability — it's **what the system does when the input is ambiguous, emotionally loaded, or safety-critical.**
 
@@ -111,4 +111,4 @@ Open **http://localhost:8000/app**
 
 ## ⚠️ Medical disclaimer
 
-MedCompanion AI provides general health information for educational purposes only. It is **not a medical device, not a diagnosis, and not a substitute for professional medical advice.** It does not handle emergencies — if you may be experiencing a medical emergency, call your local emergency number. The crisis/emergency guardrail is a safety layer, not a clinical safeguard.
+HumxnMed AI provides general health information for educational purposes only. It is **not a medical device, not a diagnosis, and not a substitute for professional medical advice.** It does not handle emergencies — if you may be experiencing a medical emergency, call your local emergency number. The crisis/emergency guardrail is a safety layer, not a clinical safeguard.

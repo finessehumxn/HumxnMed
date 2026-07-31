@@ -1,8 +1,8 @@
 # Questions for a Digital-Health Regulatory Attorney
-**Hand this to counsel so the engagement is focused and fast.** Goal: a written opinion covering FDA classification, privacy, and claims for MedCompanion AI (a general health-information app by Millennials Creatives LLC). Live product: https://medcompanion-ai.up.railway.app/app
+**Hand this to counsel so the engagement is focused and fast.** Goal: a written opinion covering FDA classification, privacy, and claims for HumxnMed AI (a general health-information app by Millennials Creatives LLC). Live product: https://medcompanion-ai.up.railway.app/app
 
 ## A. FDA / Software as a Medical Device (SaMD)
-1. Based on the current feature set, is MedCompanion a **medical device** under the FD&C Act, or is it excluded as **general wellness / clinical decision support / information** under the 21st Century Cures Act and FDA's CDS and General Wellness guidance? Please issue a written **SaMD determination**.
+1. Based on the current feature set, is HumxnMed a **medical device** under the FD&C Act, or is it excluded as **general wellness / clinical decision support / information** under the 21st Century Cures Act and FDA's CDS and General Wellness guidance? Please issue a written **SaMD determination**.
 2. Specifically classify these features, which are the closest calls:
    - The **ER-or-not triage** (urgency guidance)
    - **Lab / image reading** (plain-language explanation of an uploaded result)

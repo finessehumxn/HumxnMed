@@ -1,6 +1,6 @@
 {
-  "name": "MedCompanion AI",
-  "short_name": "MedCompanion",
+  "name": "HumxnMed AI",
+  "short_name": "HumxnMed",
   "description": "Understand your health in plain language",
   "start_url": "/app",
   "display": "standalone",

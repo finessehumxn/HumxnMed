@@ -1,14 +1,14 @@
-# Codemagic cloud-Mac build for MedCompanion AI iOS (Capacitor).
+# Codemagic cloud-Mac build for HumxnMed AI iOS (Capacitor).
 # SETUP (one time):
 #   1. Connect this repo at codemagic.io (GitHub App).
-#   2. Add your App Store Connect API key in Codemagic named EXACTLY "MedCompanion ASC Key".
+#   2. Add your App Store Connect API key in Codemagic named EXACTLY "HumxnMed ASC Key".
 #   3. Create the app in App Store Connect (bundle id com.medcompanionai.app).
 #   4. Run the "ios-release" workflow -> uploads to TestFlight.
 # No committed package.json / ios project: this workflow reconstructs Capacitor
 # tooling and generates ios/ fresh on the Mac, then applies signing + build fixes.
 workflows:
   ios-release:
-    name: MedCompanion AI iOS Release
+    name: HumxnMed AI iOS Release
     instance_type: mac_mini_m2
     max_build_duration: 60
     integrations:
@@ -41,14 +41,14 @@ workflows:
         script: |
           PLIST=ios/App/App/Info.plist
           set_str(){ plutil -replace "$1" -string "$2" "$PLIST" 2>/dev/null || plutil -insert "$1" -string "$2" "$PLIST"; }
-          set_str NSCameraUsageDescription "MedCompanion uses your camera so you can photograph a lab result, prescription, or document and understand it in plain language."
-          set_str NSPhotoLibraryUsageDescription "MedCompanion lets you upload a photo of a lab result or document so it can explain it in plain language."
-          set_str NSMicrophoneUsageDescription "MedCompanion can use your microphone for voice input of your symptoms."
-          set_str NSSpeechRecognitionUsageDescription "MedCompanion transcribes your spoken symptoms into text so you can talk instead of type."
+          set_str NSCameraUsageDescription "HumxnMed uses your camera so you can photograph a lab result, prescription, or document and understand it in plain language."
+          set_str NSPhotoLibraryUsageDescription "HumxnMed lets you upload a photo of a lab result or document so it can explain it in plain language."
+          set_str NSMicrophoneUsageDescription "HumxnMed can use your microphone for voice input of your symptoms."
+          set_str NSSpeechRecognitionUsageDescription "HumxnMed transcribes your spoken symptoms into text so you can talk instead of type."
           plutil -replace ITSAppUsesNonExemptEncryption -bool false "$PLIST" 2>/dev/null || plutil -insert ITSAppUsesNonExemptEncryption -bool false "$PLIST"
       - name: Capacitor sync (copies frontend/ into the app)
         script: npx cap sync ios
-      - name: Set the MedCompanion app icon (all sizes, consistent)
+      - name: Set the HumxnMed app icon (all sizes, consistent)
         script: |
           # Real 1024x1024 no-alpha source at assets/icon.png. Generate the FULL iOS icon
           # set from it so every size matches (Apple 2.3.8: icons must be final + consistent).
@@ -127,7 +127,7 @@ workflows:
   #   3. Run "android-release" -> builds a signed .aab and uploads to the internal track.
   # Mirrors the iOS job: reconstructs Capacitor tooling, then builds the committed android/.
   android-release:
-    name: MedCompanion AI Android Release
+    name: HumxnMed AI Android Release
     # Build Android on the Mac instance too — the free plan only includes mac_mini_m2
     # (linux_x2 requires a paid plan). macOS machines have the Android SDK + JDK.
     instance_type: mac_mini_m2
@@ -153,7 +153,7 @@ workflows:
           npm install --no-audit --no-fund
       - name: Capacitor sync (copies frontend/ into the Android app)
         script: npx cap sync android
-      - name: Set the MedCompanion app icon
+      - name: Set the HumxnMed app icon
         script: |
           npx --yes @capacitor/assets generate --android \
             --iconBackgroundColor '#034730' --iconBackgroundColorDark '#034730' || true

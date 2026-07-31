@@ -1,4 +1,4 @@
-# MedCompanion AI — "Reviewed by a Real Doctor" setup
+# HumxnMed AI — "Reviewed by a Real Doctor" setup
 
 This turns on the physician co-sign system: patients tap "Get a real doctor to review this,"
 your medical board reviews it in a private portal, and the patient sees a
@@ -25,7 +25,7 @@ alter table public.physician_reviews enable row level security;
 ```
 
 ## 2. Set two environment variables on Railway
-Railway -> your MedCompanion service -> Variables:
+Railway -> your HumxnMed service -> Variables:
 - `SUPABASE_URL` = your project URL (likely already set)
 - `SUPABASE_SERVICE_KEY` = your Supabase **service role** key (Settings -> API)
 - `DOCTOR_KEY` = a strong passcode you give ONLY to your board doctors (e.g. a long random string)

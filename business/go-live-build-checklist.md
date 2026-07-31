@@ -1,4 +1,4 @@
-# MedCompanion — Go-Live Build Checklist
+# HumxnMed — Go-Live Build Checklist
 
 **Goal:** one Codemagic `ios-release` build activates everything currently staged:
 reminders (meds + appointments) and Apple IAP. Then a single Railway flag turns on
@@ -16,7 +16,7 @@ Order matters. Do the sections top to bottom.
 - [ ] Note the signing facts baked into the yaml: bundle `com.medcompanionai.app`,
       team `357ABX659P`, ASC integration **"BarterThat ASC Key"** (that's just the *name* of the
       Codemagic integration holding the *team* API key — an ASC API key is team-wide, so it
-      uploads MedCompanion fine; no change needed).
+      uploads HumxnMed fine; no change needed).
 
 ---
 

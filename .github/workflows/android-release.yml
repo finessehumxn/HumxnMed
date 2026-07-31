@@ -1,7 +1,7 @@
 name: Android Release (AAB)
 
-# Builds a signed Google Play AAB for MedCompanion AI.
-# MedCompanion's repo is a Python + static-frontend project (deployed on Railway),
+# Builds a signed Google Play AAB for HumxnMed AI.
+# HumxnMed's repo is a Python + static-frontend project (deployed on Railway),
 # so there is no committed package.json — this workflow reconstructs the Capacitor 8
 # tooling at build time, syncs the existing android/ project, and produces a signed bundle.
 #

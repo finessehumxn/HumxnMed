@@ -1,4 +1,4 @@
-# MedCompanion — iOS In-App Purchase (RevenueCat) setup
+# HumxnMed — iOS In-App Purchase (RevenueCat) setup
 
 Hybrid billing: **Stripe on the web** (already live), **Apple IAP inside the iOS app**
 (Apple 3.1.1 requires StoreKit for in-app digital goods). The purchase code is

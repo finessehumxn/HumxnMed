@@ -1,11 +1,11 @@
-# MedCompanion AI — Product Overview
+# HumxnMed AI — Product Overview
 **Prepared for our medical advisory board / clinical co-founder.**
 By Millennials Creatives LLC · Web app live at https://medcompanion-ai.up.railway.app/app
 
 ---
 
 ## What it is (in one line)
-MedCompanion AI is a plain-language health *companion* that helps everyday people understand health information and **prepare to partner with their own doctor** — explicitly designed *not* to diagnose, treat, or replace a clinician.
+HumxnMed AI is a plain-language health *companion* that helps everyday people understand health information and **prepare to partner with their own doctor** — explicitly designed *not* to diagnose, treat, or replace a clinician.
 
 ## Our core principle: work WITH the clinician, never around them
 This is the heart of the product and the answer to the "patients arguing with us like Dr. Google" problem.

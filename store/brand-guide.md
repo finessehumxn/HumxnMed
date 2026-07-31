@@ -1,11 +1,11 @@
-# MedCompanionAI — Brand Guide (Premium Health-Tech / Option 07)
+# HumxnMedAI — Brand Guide (Premium Health-Tech / Option 07)
 
 ## Brand Essence
 **Care that listens.** A premium AI health companion that feels as trustworthy as a private concierge clinic (Forward, Function Health) and as warm as a heart-monitor pulse. Quiet luxury meets clinical confidence.
 
 ## Logo
 - **Mark**: Champagne gold heart + EKG pulse line, set inside an emerald rounded squircle.
-- **Wordmark**: "MedCompanionAI" in humanist serif; "AI" subtly accented in emerald.
+- **Wordmark**: "HumxnMedAI" in humanist serif; "AI" subtly accented in emerald.
 - **Lockups**: horizontal (primary), stacked, icon-only.
 
 ## Color Palette

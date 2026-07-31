@@ -41,9 +41,9 @@ Contact addresses in the app are still `team@` / `hello@medcompanionai.com`. Sin
 HumxnMed under Millennials Creatives, you may want `hello@millennialscreatives.com` (or a humxnmed
 address). Not urgent; the current ones work. Tell me the address and I'll swap it site-wide.
 
-## Still says "MedCompanion" (drafts, not the live app)
+## Still says "HumxnMed" (drafts, not the live app)
 The live app + all web pages are already HumxnMed. These **internal marketing drafts** still say
-MedCompanion and reference the old URL — update them when you refresh those channels (I can sweep
+HumxnMed and reference the old URL — update them when you refresh those channels (I can sweep
 them on request): `store/LINKEDIN_COMPANY_PAGE.md`, `store/STORE_LISTING.md`, `store/OVERVIEW.md`,
 `store/LAUNCH.md`, `store/DOCTOR_PORTAL.md`, `store/COUNSEL_CHECKLIST.md`, `store/portfolio-*.html`,
 and the `business/` one-pagers.

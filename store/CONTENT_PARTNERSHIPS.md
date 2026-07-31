@@ -41,9 +41,9 @@ Each has a **"content licensing," "rights & permissions," or "partnerships"** te
 > "Today we ground answers in authoritative public sources (NIH, FDA, CDC, PubMed) with citations. Premium publisher licensing (Wiley, Cochrane, NCCN, then NEJM/JAMA) is a funded growth lever we pursue post-raise, via warm intros and our medical board — the same path category leaders took once they had scale."
 
 ## Outreach email template (for a publisher's licensing/partnerships team)
-> Subject: Content licensing inquiry — MedCompanion AI (Millennials Creatives LLC)
+> Subject: Content licensing inquiry — HumxnMed AI (Millennials Creatives LLC)
 >
 > Hello [Name],
-> I am the founder of MedCompanion AI, a physician-advised health-information platform that helps patients understand their care in plain language and prepare for their clinicians. We cite sources transparently and are guided by a Medical Advisory Board.
+> I am the founder of HumxnMed AI, a physician-advised health-information platform that helps patients understand their care in plain language and prepare for their clinicians. We cite sources transparently and are guided by a Medical Advisory Board.
 > We are interested in a content-licensing partnership to incorporate [PUBLICATION] with proper attribution and rights. Could you point me to the right person on your licensing/partnerships team? Happy to share our product, traction, and intended use.
 > Thank you, [Name / title / link]

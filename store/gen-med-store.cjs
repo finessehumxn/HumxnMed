@@ -1,4 +1,4 @@
-// Generates Google Play store assets for MedCompanion AI:
+// Generates Google Play store assets for HumxnMed AI:
 //   - play-icon-512.png        (512x512 app icon, from the brand icon)
 //   - feature-graphic-1024x500.png
 //   - screenshot phone images  (1080x1920) reflecting the real app + new features
@@ -42,7 +42,7 @@ function visitSheet(x, w, y, u) {
   const label = (yy, t) => `<text x="${x+5*u}" y="${yy}" font-size="${2.7*u}" fill="${TEAL}" font-weight="800" letter-spacing="0.5" font-family="Arial">${esc(t)}</text>`;
   return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${3*u}" fill="#ffffff"/>`
     + `<text x="${x+5*u}" y="${y+9*u}" font-size="${5.2*u}" fill="${EM}" font-weight="800" font-family="Georgia,serif">📋 Doctor Visit Sheet</text>`
-    + line(y+13.5*u, "Prepared with MedCompanionAI · today", "#7a8c8e", 2.6)
+    + line(y+13.5*u, "Prepared with HumxnMedAI · today", "#7a8c8e", 2.6)
     + `<rect x="${x+5*u}" y="${y+16*u}" width="${w-10*u}" height="${0.3*u}" fill="#e3eceb"/>`
     + label(y+22*u, "WHAT I WANT TO TALK ABOUT")
     + line(y+27*u, "Type 2 diabetes — early signs", EM, 3.7, 700)
@@ -120,7 +120,7 @@ function phoneSvg(W, H, s) {
     <clipPath id="ic"><rect x="${px}" y="${top}" width="${11*u}" height="${11*u}" rx="${2.6*u}"/></clipPath></defs>
     <rect width="${W}" height="${H}" fill="url(#g)"/><rect width="${W}" height="${H}" fill="url(#gl)"/>
     <image href="data:image/png;base64,${ICON_B64}" x="${px}" y="${top}" width="${11*u}" height="${11*u}" clip-path="url(#ic)"/>
-    <text x="${px+13.5*u}" y="${top+7.6*u}" font-size="${4.6*u}" fill="${TX}" font-weight="800" font-family="Georgia,serif">MedCompanion<tspan fill="${GOLD}">AI</tspan></text>
+    <text x="${px+13.5*u}" y="${top+7.6*u}" font-size="${4.6*u}" fill="${TX}" font-weight="800" font-family="Georgia,serif">HumxnMed<tspan fill="${GOLD}">AI</tspan></text>
     <text x="${px}" y="${top+26*u}" font-size="${9.5*u}" fill="${TX}" font-weight="800" font-family="Georgia,serif">${esc(l1)}</text>
     <text x="${px}" y="${top+37*u}" font-size="${9.5*u}" fill="${s.accent}" font-weight="800" font-family="Georgia,serif">${esc(l2)}</text>
     <text x="${px}" y="${top+46*u}" font-size="${3.4*u}" fill="${T2}" font-family="Arial">${esc(s.sub)}</text>
@@ -135,7 +135,7 @@ function featureSvg(W, H) {
     <defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${EM}"/><stop offset="1" stop-color="${INK}"/></linearGradient></defs>
     <rect width="${W}" height="${H}" fill="url(#fg)"/>
     <image href="data:image/png;base64,${ICON_B64}" x="${5*u}" y="${H/2-12*u}" width="${24*u}" height="${24*u}"/>
-    <text x="${33*u}" y="${H*0.40}" font-size="${6.6*u}" fill="${CREAM}" font-weight="800" font-family="Georgia,serif">MedCompanion<tspan fill="${GOLD}">AI</tspan></text>
+    <text x="${33*u}" y="${H*0.40}" font-size="${6.6*u}" fill="${CREAM}" font-weight="800" font-family="Georgia,serif">HumxnMed<tspan fill="${GOLD}">AI</tspan></text>
     <text x="${33*u}" y="${H*0.58}" font-size="${3.7*u}" fill="${GOLD}" font-family="Arial" font-weight="700">Health, finally explained.</text>
     <text x="${33*u}" y="${H*0.72}" font-size="${3.1*u}" fill="${CREAM}" font-family="Arial">Works with your doctor — never instead of them.</text>
   </svg>`;

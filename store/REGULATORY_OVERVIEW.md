@@ -1,13 +1,13 @@
-# MedCompanion AI — Regulatory & Licensing Overview (for investors)
+# HumxnMed AI — Regulatory & Licensing Overview (for investors)
 
 **Not legal advice.** This is a plain-language landscape summary to brief investors. Before launch/scale, obtain a formal written opinion from a **healthcare regulatory attorney** (FDA + digital health). Investors will expect this; it is normal diligence.
 
 ## The headline
-MedCompanion AI is **deliberately designed as a general health-information and education tool — NOT a medical device and NOT the practice of medicine.** Every result is framed as "understand and prepare to talk to your doctor," with disclaimers, a human-in-the-loop step, and no individualized diagnosis or treatment. **That design is the strategy: it keeps the app in the lighter-regulation lane** (no FDA premarket clearance required) rather than the heavy Software-as-a-Medical-Device lane. The product decisions we already made (no diagnosis, defer to the clinician, "not for emergencies") are what preserve that position.
+HumxnMed AI is **deliberately designed as a general health-information and education tool — NOT a medical device and NOT the practice of medicine.** Every result is framed as "understand and prepare to talk to your doctor," with disclaimers, a human-in-the-loop step, and no individualized diagnosis or treatment. **That design is the strategy: it keeps the app in the lighter-regulation lane** (no FDA premarket clearance required) rather than the heavy Software-as-a-Medical-Device lane. The product decisions we already made (no diagnosis, defer to the clinician, "not for emergencies") are what preserve that position.
 
 ## 1. FDA — Software as a Medical Device (SaMD) — the big one
 - US software that **diagnoses, treats, or drives a specific clinical decision** is an FDA-regulated device (may need 510(k)/De Novo clearance).
-- The **21st Century Cures Act** and FDA's Clinical Decision Support / General Wellness guidance generally **exclude** software that provides **general information, education, and references** and lets the user/clinician independently review the basis — which is how MedCompanion is positioned.
+- The **21st Century Cures Act** and FDA's Clinical Decision Support / General Wellness guidance generally **exclude** software that provides **general information, education, and references** and lets the user/clinician independently review the basis — which is how HumxnMed is positioned.
 - **Risk areas to watch (keep informational, not diagnostic):** the ER-or-not triage, lab/image interpretation, and medication-interaction features. As built they say "this is not a diagnosis — when in doubt, seek care," which supports the non-device position. A regulatory attorney should confirm the classification of these specific features.
 - **Likely outcome:** non-device / no FDA clearance **if** positioning and disclaimers are maintained — but this needs a formal SaMD determination.
 

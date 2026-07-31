@@ -1,4 +1,4 @@
-# MedCompanion AI — Google Play Launch Checklist
+# HumxnMed AI — Google Play Launch Checklist
 
 Everything in the app/repo is ready. These are the steps that require YOUR account access.
 
@@ -35,7 +35,7 @@ Inside is **app-release.aab** — that’s what you upload to Google Play.
 
 ## 4. Google Play Console
 play.google.com/console → **Create app** (if not already created):
-- App name: **MedCompanion AI** · Language: English (US) · App (not game) · Free
+- App name: **HumxnMed AI** · Language: English (US) · App (not game) · Free
 - Accept declarations.
 
 Then complete (left menu):

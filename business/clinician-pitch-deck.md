@@ -1,4 +1,4 @@
-# MedCompanion AI — Clinician & Hospital Pitch Deck
+# HumxnMed AI — Clinician & Hospital Pitch Deck
 
 *Prepared by Millennials Creatives LLC*
 *Audience: Medical Directors, Practice Managers, CMIOs, Innovation & Patient-Experience Leaders*
@@ -9,15 +9,15 @@
 
 ## Slide 1 — Title / Positioning
 
-# MedCompanion AI
+# HumxnMed AI
 ### Your patients understood the visit. In their language. Before they left the room.
 
-**The plain-language layer for clinical care.** MedCompanion translates any diagnosis, lab result, or clinical finding into language patients actually understand — in 15+ languages — and prints a take-home handout co-branded with your practice.
+**The plain-language layer for clinical care.** HumxnMed translates any diagnosis, lab result, or clinical finding into language patients actually understand — in 15+ languages — and prints a take-home handout co-branded with your practice.
 
 > One line to remember:
-> **OpenEvidence and UpToDate help the clinician *find* the answer. MedCompanion helps them *explain* it to the patient.**
+> **OpenEvidence and UpToDate help the clinician *find* the answer. HumxnMed helps them *explain* it to the patient.**
 
-*Speaker note:* Open by naming the gap everyone in the room recognizes — clinicians are great at diagnosis, but comprehension dies somewhere between the exam room and the parking lot. Position MedCompanion as the "last mile" of the visit, not another reference tool competing for the clinician's attention.
+*Speaker note:* Open by naming the gap everyone in the room recognizes — clinicians are great at diagnosis, but comprehension dies somewhere between the exam room and the parking lot. Position HumxnMed as the "last mile" of the visit, not another reference tool competing for the clinician's attention.
 
 ---
 
@@ -64,14 +64,14 @@
 
 # One clear picture: comprehension, on demand, in any language
 
-**MedCompanion AI takes what the clinician already knows and makes it land.**
+**HumxnMed AI takes what the clinician already knows and makes it land.**
 
 - **Input:** a diagnosis, a lab result, a clinical finding, or free-text.
 - **Translation (the literal kind *and* the literacy kind):** plain-language explanation at a patient-appropriate reading level — in **15+ languages**.
 - **Output:** a take-home **patient handout, co-branded with your practice/health system**, that the patient can read, keep, and share with family.
 - **Where it runs:** **Capacitor mobile app + web today** — works on a phone, a tablet, or the exam-room computer. No new hardware.
 
-> The clinician stays in charge of the medicine. MedCompanion just makes the explanation clear, consistent, and multilingual.
+> The clinician stays in charge of the medicine. HumxnMed just makes the explanation clear, consistent, and multilingual.
 
 *Speaker note:* The "co-branded handout" is the emotional hook for practice managers — it's a tangible, branded artifact that goes home with every patient and reinforces the practice. Hand a printed sample around the room if you have one.
 
@@ -82,7 +82,7 @@
 # The clinician workflow: three steps, seconds long
 
 1. **Find the answer (as you do today).** Clinician reaches a diagnosis or reviews a result — using their judgment, plus tools like OpenEvidence/UpToDate if they wish.
-2. **Explain it in plain language.** Drop the finding into MedCompanion. Instantly get a clear, jargon-free explanation tuned to patient comprehension — and pick the patient's language.
+2. **Explain it in plain language.** Drop the finding into HumxnMed. Instantly get a clear, jargon-free explanation tuned to patient comprehension — and pick the patient's language.
 3. **Hand it over.** Generate a co-branded handout in the patient's language. Print it, text it, or surface it in the app. The patient leaves with something they understand.
 
 **Designed to fit the visit, not interrupt it:**
@@ -90,7 +90,7 @@
 - Clinician reviews and can edit before anything reaches the patient — the human stays in the loop.
 - Multilingual output means no scrambling for an interpreter just to explain a result.
 
-*Speaker note:* Emphasize "human in the loop." Clinicians and risk officers both need to hear that the doctor reviews/edits output before it's handed to the patient — MedCompanion drafts the explanation; the clinician approves it.
+*Speaker note:* Emphasize "human in the loop." Clinicians and risk officers both need to hear that the doctor reviews/edits output before it's handed to the patient — HumxnMed drafts the explanation; the clinician approves it.
 
 ---
 
@@ -98,16 +98,16 @@
 
 # We own the patient-communication lane — complementary, not competitive
 
-| | **What it's for** | **Who reads the output** | **Relationship to MedCompanion** |
+| | **What it's for** | **Who reads the output** | **Relationship to HumxnMed** |
 |---|---|---|---|
 | **OpenEvidence** | Evidence lookup for the *clinician* | Clinician | Upstream — helps you *find* the answer. We help you *explain* it. |
 | **UpToDate** | Clinical reference for the *clinician* | Clinician | Upstream — same: a *finding* tool, not an *explaining* tool. |
 | **MyChart / patient portal** | Records access, messaging, results release | Patient — but in raw, chart-language form | Adjacent — patients get the data, not the *understanding*. We make portal content comprehensible. |
-| **MedCompanion AI** | **Translating clinical findings into plain language the patient understands, in 15+ languages, as a branded handout** | **Patient (and family)** | **The patient-communication layer the others leave empty** |
+| **HumxnMed AI** | **Translating clinical findings into plain language the patient understands, in 15+ languages, as a branded handout** | **Patient (and family)** | **The patient-communication layer the others leave empty** |
 
 > **The clean wedge:** Reference tools answer the clinician. The portal dumps data on the patient. *Nobody owns the moment of explanation in between.* That's us.
 
-*Speaker note:* If someone says "MyChart already sends an after-visit summary," agree — and point out that the summary is written for the chart, often above a patient's reading level, and rarely in their language. MedCompanion is the comprehension layer *on top of* whatever record system they run. Never position as a portal replacement.
+*Speaker note:* If someone says "MyChart already sends an after-visit summary," agree — and point out that the summary is written for the chart, often above a patient's reading level, and rarely in their language. HumxnMed is the comprehension layer *on top of* whatever record system they run. Never position as a portal replacement.
 
 ---
 
@@ -140,7 +140,7 @@
 
 # Built toward HIPAA-grade handling — honestly stated
 
-- **Direction of travel: HIPAA / BAA-ready.** We are building MedCompanion to support a Business Associate Agreement and HIPAA-aligned handling of PHI for clinical deployments. `[STATUS: confirm current BAA availability and HIPAA compliance attestation before representing externally — do not overclaim]`
+- **Direction of travel: HIPAA / BAA-ready.** We are building HumxnMed to support a Business Associate Agreement and HIPAA-aligned handling of PHI for clinical deployments. `[STATUS: confirm current BAA availability and HIPAA compliance attestation before representing externally — do not overclaim]`
 - **Minimize PHI by design.** The core translation task can often be performed on a clinical finding without transmitting patient identifiers; we work to limit PHI exposure.
 - **Clinician-in-the-loop.** Output is reviewed/editable by the clinician before reaching the patient — reducing the risk of unreviewed automated content.
 - **Encryption & access controls.** `[STATUS: state actual encryption-in-transit / at-rest and access-control posture — verify before presenting]`
@@ -160,7 +160,7 @@
 - **Capacitor mobile app + web.** Works on phones, tablets, and exam-room desktops. Usable day one with zero EHR integration.
 
 **On the roadmap**
-- **Epic SMART on FHIR.** MedCompanion launches *inside the clinician's existing workflow* — open it from the chart, pull the relevant finding, generate the handout, all without leaving Epic. `[STATUS: roadmap item — confirm timeline before committing a date to a customer]`
+- **Epic SMART on FHIR.** HumxnMed launches *inside the clinician's existing workflow* — open it from the chart, pull the relevant finding, generate the handout, all without leaving Epic. `[STATUS: roadmap item — confirm timeline before committing a date to a customer]`
 - **Co-branding & template controls** for health-system handout standards.
 - **Workflow-fit refinements** driven by pilot-site feedback.
 
@@ -218,7 +218,7 @@
 - **Shipping, not just slideware.** A working Capacitor mobile + web product exists today; this isn't vaporware. `[PROOF: link a demo / screenshots / reference site — verify]`
 - **Honest by design.** Every number in this conversation is one we'll source or measure with you — not one we invented.
 
-> **MedCompanion AI** — because the visit isn't finished until the patient actually understands it.
+> **HumxnMed AI** — because the visit isn't finished until the patient actually understands it.
 
 *Speaker note:* Land the close on trust. In a category full of overclaiming health-AI vendors, the differentiator in the room is intellectual honesty plus a narrow, deep focus. Offer a live demo as the immediate next step.
 
