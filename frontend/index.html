@@ -5194,6 +5194,12 @@ document.addEventListener('DOMContentLoaded', function() {
     {a:['codeine','opioid','morphine'], meds:['codeine','hydrocodone','oxycodone','morphine','tramadol','hydromorphone','norco','percocet'], label:'opioid'}
   ];
   window.mcAllergyFlags=function(medArr, allergiesStr){
+    // GATED OFF pending FDA regulatory review. FDA's Jan 2026 CDS guidance: decision support shown
+    // directly to patients/caregivers is generally a device. This patient-facing allergy alert is the
+    // one exposed function — disabled by default until a regulatory determination. The clinician-side
+    // console (server /clinical-weigh, built to the non-device HCP criteria) is separate and unaffected.
+    // To re-enable after a regulatory sign-off: set window.MC_CONSUMER_SAFETY_ALERTS = true.
+    if(!window.MC_CONSUMER_SAFETY_ALERTS) return [];
     var flags=[]; if(!allergiesStr) return flags;
     var allergies=String(allergiesStr).toLowerCase().split(/[,;\/]| and /).map(function(s){return s.trim();}).filter(Boolean);
     (medArr||[]).forEach(function(m){ var name=String((m&&m.name)||m||'').toLowerCase(); if(!name) return;
