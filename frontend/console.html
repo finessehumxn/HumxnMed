@@ -83,17 +83,17 @@
   var PANES={
     lookup:'<div class="lede">Rapid reference at the bedside — drug info, protocols, workup, guidelines. Evidence-forward, with sources to verify.</div>'
       +'<label>Clinical question</label><input type="text" id="q" placeholder="e.g. empiric abx for community-acquired pneumonia; reversal for warfarin; workup for new AKI">'
-      +'<div class="row"><div class="seg"><button id="kC" class="on" onclick="refKind=\'condition\';segK()">Condition</button><button id="kM" onclick="refKind=\'medication\';segK()">Medication</button></div><button class="go" onclick="runLookup()">Look up</button></div>',
+      +'<div class="row"><div class="seg"><button id="kC" class="on" onclick="refKind=\'condition\';segK()">Condition</button><button id="kM" onclick="refKind=\'medication\';segK()">Medication</button></div><button class="go" onclick="runLookup()">Look up</button><button class="ghost" onclick="demoExample()">See an example</button></div>',
     document:'<div class="lede">Turn rough or dictated notes into a clean, structured draft you review and sign. It organizes what you said — it won\'t invent findings.</div>'
       +'<label>Rough / dictated encounter notes</label><textarea id="n" placeholder="55M CP x2h, exertional, HTN DM smoker, VS stable, EKG NSR no ST changes, trop pending, ASA given, plan obs + serial trop…"></textarea>'
-      +'<div class="row"><button class="go" onclick="runDocument()">Draft note</button></div>',
+      +'<div class="row"><button class="go" onclick="runDocument()">Draft note</button><button class="ghost" onclick="demoExample()">See an example</button></div>',
     explain:'<div class="lede">Explain a diagnosis, note, or plan to the patient/family in the moment — plain language, any language.</div>'
       +'<label>Note / plan to translate for the patient</label><textarea id="e" placeholder="Paste the assessment &amp; plan, or dictate what you want the patient to understand…"></textarea>'
-      +'<div class="row"><input type="text" id="lang" placeholder="Language (optional, e.g. Spanish)" style="flex:1;min-width:140px"><button class="go" onclick="runExplain()">Explain</button></div>',
+      +'<div class="row"><input type="text" id="lang" placeholder="Language (optional, e.g. Spanish)" style="flex:1;min-width:140px"><button class="go" onclick="runExplain()">Explain</button><button class="ghost" onclick="demoExample()">See an example</button></div>',
     weigh:'<div class="guard">⚖️ Decision <b>support</b>, not direction. This presents considerations for <b>your independent review</b> against your own guidelines. It is <b>not a diagnosis</b> and <b>not for autonomous or time-critical decisions</b> — you are the decision-maker.</div>'
       +'<div class="lede">Describe the presentation to see a differential to consider, workup options, and management considerations — each with its basis to verify.</div>'
       +'<label>Presentation</label><textarea id="p" placeholder="e.g. 68F, sudden dyspnea + pleuritic chest pain, tachycardic, recent long flight, unilateral leg swelling…"></textarea>'
-      +'<div class="row"><button class="go" onclick="runWeigh()">See considerations</button></div>'
+      +'<div class="row"><button class="go" onclick="runWeigh()">See considerations</button><button class="ghost" onclick="demoExample()">See an example</button></div>'
   };
   function segK(){ document.getElementById('kC').className=refKind==='condition'?'on':''; document.getElementById('kM').className=refKind==='medication'?'on':''; }
   var curMode='lookup';
@@ -108,6 +108,8 @@
   // ── Hands-free voice: dictate into the active mode → auto-run → read the answer back ──
   function activeInputId(){ return {lookup:'q',document:'n',explain:'e',weigh:'p'}[curMode]||'q'; }
   function runCurrent(){ ({lookup:runLookup,document:runDocument,explain:runExplain,weigh:runWeigh}[curMode]||function(){})(); }
+  var DEMOS={ lookup:['q','empiric antibiotics for community-acquired pneumonia'], document:['n','55M CP x2h exertional, HTN DM smoker, VS stable, EKG NSR no ST changes, trop pending, ASA given, plan obs + serial trop'], explain:['e','A: T2DM uncontrolled, A1c 8.4%. P: increase metformin to 1000mg BID, start lisinopril 10mg daily, RTC 3 months, return precautions: chest pain or shortness of breath'], weigh:['p','68F sudden dyspnea and pleuritic chest pain, tachycardic, recent long flight, unilateral leg swelling'] };
+  window.demoExample=function(){ var d=DEMOS[curMode]; if(!d) return; var el=document.getElementById(d[0]); if(el) el.value=d[1]; runCurrent(); };
   function cleanCmd(t){ return String(t||'').replace(/\s*(go|run|search|okay|ok|period|please|now|thanks?)\.?\s*$/i,'').trim(); }
   var mcV = {
     active:false, readAloud:false, rec:null,
