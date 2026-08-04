@@ -1,0 +1,127 @@
+<title>HumxnMed — Your AI health companion, in plain language</title>
+<meta name="description" content="HumxnMed helps you and your family understand your health in plain language — private, on your device, and built for both patients and clinicians. A product of Millennials Creatives LLC.">
+<style>
+  :root{
+    --forest:#0B3D2E; --forest2:#0A241B; --ink:#08231b; --cream:#F5EFE0; --card:#103b3e; --bd:#1f5a5c;
+    --gold:#C9A24B; --gold2:#E7C877; --mint:#34C78C; --tx:#EAF3EE; --t2:#9FBFB4;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--ink); color:var(--tx); font:16px/1.65 Inter,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3{ font-family:Fraunces,Georgia,"Times New Roman",serif; font-weight:600; line-height:1.12; letter-spacing:-.01em; }
+  a{ color:var(--gold2); }
+  .wrap{ max-width:980px; margin:0 auto; padding:0 22px; }
+  /* hero */
+  .hero{ background:radial-gradient(900px 520px at 82% -12%,rgba(201,162,75,.18),transparent 60%),linear-gradient(165deg,var(--forest),var(--forest2) 72%,var(--ink)); border-bottom:1px solid rgba(201,162,75,.2); }
+  .hero .wrap{ padding:56px 22px 52px; text-align:center; }
+  .logo{ display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:22px; }
+  .logo svg{ width:64px; height:64px; display:block; }
+  .logo .wm{ font-family:Fraunces,Georgia,serif; font-weight:700; font-size:30px; }
+  .logo .wm .m{ color:var(--gold2); }
+  .hero h1{ font-size:clamp(2.1rem,5.5vw,3.4rem); color:var(--cream); max-width:16ch; margin:0 auto .5rem; }
+  .hero h1 em{ font-style:italic; color:var(--gold2); }
+  .lede{ font-size:19px; color:var(--t2); max-width:60ch; margin:.6rem auto 1.6rem; }
+  .cta-row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .btn{ display:inline-block; text-decoration:none; font-weight:800; font-size:16px; padding:14px 26px; border-radius:12px; }
+  .btn.primary{ background:var(--gold); color:var(--ink); }
+  .btn.ghost{ background:transparent; color:var(--cream); border:1.5px solid rgba(255,255,255,.28); }
+  .kicker{ text-transform:uppercase; letter-spacing:.2em; font-size:11px; font-weight:700; color:var(--gold); }
+  /* sections */
+  section{ padding:52px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+  section h2{ font-size:28px; color:var(--cream); margin:.4rem 0 .3rem; }
+  .muted{ color:var(--t2); max-width:64ch; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-top:1.5rem; }
+  .c{ background:var(--card); border:1px solid var(--bd); border-radius:16px; padding:20px 22px; }
+  .c .ic{ font-size:24px; }
+  .c h3{ font-size:18px; color:var(--gold2); margin:8px 0 5px; }
+  .c p{ font-size:14.5px; color:var(--t2); }
+  .two{ display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:1.4rem; }
+  @media(max-width:720px){ .two{ grid-template-columns:1fr; } }
+  ul.clean{ margin:.6rem 0 0 1.1rem; } ul.clean li{ margin:.45rem 0; color:var(--t2); font-size:15px; }
+  /* tiers */
+  .tiers{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:1.4rem; }
+  @media(max-width:720px){ .tiers{ grid-template-columns:1fr 1fr; } }
+  .tier{ background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:18px 16px; }
+  .tier .n{ font-family:Fraunces,Georgia,serif; font-weight:600; font-size:19px; color:var(--cream); }
+  .tier .who{ font-size:12.5px; color:var(--t2); margin:3px 0 8px; min-height:34px; }
+  .tier .pr{ font-weight:800; color:var(--gold2); font-size:15px; }
+  .trust{ background:rgba(255,255,255,.04); border:1px solid var(--bd); border-radius:14px; padding:16px 20px; font-size:13.5px; color:var(--t2); line-height:1.6; margin-top:1.4rem; }
+  footer{ padding:34px 0; text-align:center; color:var(--t2); font-size:13px; }
+  footer .mc{ font-family:Fraunces,Georgia,serif; color:var(--cream); font-size:16px; margin-bottom:.3rem; }
+  .defs{ position:absolute; width:0; height:0; }
+</style>
+
+<svg class="defs"><defs><linearGradient id="gld" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E7C877"/><stop offset="1" stop-color="#C9A24B"/></linearGradient></defs></svg>
+
+<div class="hero"><div class="wrap">
+  <div class="logo">
+    <svg viewBox="0 0 120 120" aria-label="HumxnMed logo">
+      <rect width="120" height="120" rx="28" fill="#0B3D2E"/>
+      <path d="M60 50 C 54 40, 34 40, 34 55 C 34 68, 50 78, 60 90 C 70 78, 86 68, 86 55 C 86 40, 66 40, 60 50 Z" fill="none" stroke="url(#gld)" stroke-width="3.4"/>
+      <path d="M33 63 H49 L54 52 L60 76 L65 60 H87" fill="none" stroke="url(#gld)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="60" y="83" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="700" fill="url(#gld)">HM</text>
+    </svg>
+    <span class="wm">Humxn<span class="m">Med</span></span>
+  </div>
+  <h1>Your health, finally <em>explained.</em></h1>
+  <p class="lede">HumxnMed is the AI health companion that helps you and the people you care for understand any diagnosis, result, medication, or bill — in plain language. Private, on your device, and built for both sides of the exam room.</p>
+  <div class="cta-row">
+    <a class="btn primary" href="https://medcompanion-ai.up.railway.app/app">Open the app →</a>
+    <a class="btn ghost" href="https://medcompanion-ai.up.railway.app/clinical">For clinicians</a>
+  </div>
+</div></div>
+
+<section><div class="wrap">
+  <div class="kicker">Why HumxnMed</div>
+  <h2>Everything Big Tech health isn't.</h2>
+  <p class="muted">Amazon and the cloud-first apps turn your health into a transaction and your data into a product. HumxnMed does the opposite.</p>
+  <div class="grid">
+    <div class="c"><div class="ic">🔒</div><h3>Private by design</h3><p>Your records live on your device. <b>Never sold, never used for ads, never tied to a shopping profile.</b> When you use AI, only what you send is processed to answer you — never stored.</p></div>
+    <div class="c"><div class="ic">👨‍👩‍👧</div><h3>Your whole family</h3><p>Not just you — keep every loved one's meds, allergies, and plans in one place, so you're ready when they need you.</p></div>
+    <div class="c"><div class="ic">🩺</div><h3>Both sides of the exam room</h3><p>The same engine that explains your care to <i>you</i> gives clinicians a point-of-care companion — genuinely rare.</p></div>
+    <div class="c"><div class="ic">🏥</div><h3>Works with any doctor</h3><p>No lock-in. HumxnMed helps with the care and pharmacy you <i>already</i> have — it doesn't sell you its own.</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="kicker">What it does</div>
+  <h2>For everyday humans, and for professionals.</h2>
+  <div class="two">
+    <div>
+      <h3 style="color:var(--gold2);font-size:19px;margin-bottom:.3rem">For you &amp; your family</h3>
+      <ul class="clean">
+        <li>Understand any diagnosis, lab, or bill in plain language</li>
+        <li>Track medications &amp; get reminders — with refill alerts</li>
+        <li>Keep a Care Circle for the people you look after</li>
+        <li>A printable visit summary &amp; emergency card</li>
+        <li>&ldquo;For My Family&rdquo; — get affairs in order, encrypted</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:var(--gold2);font-size:19px;margin-bottom:.3rem">For clinicians (Clinical)</h3>
+      <ul class="clean">
+        <li>Point-of-care console — look up, document, explain, weigh</li>
+        <li>Plain-language visit summaries &amp; patient handouts</li>
+        <li>Medical chronologies from records</li>
+        <li>Hands-free voice &amp; works offline in dead zones</li>
+        <li>Built to the clinician-facing (non-device) line</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="kicker">Plans</div>
+  <h2>Free for everyone. Paid when you want more.</h2>
+  <div class="tiers">
+    <div class="tier"><div class="n">Free</div><div class="who">Everyone — the core app</div><div class="pr">$0</div></div>
+    <div class="tier"><div class="n">Plus</div><div class="who">Everyday humans, caregivers &amp; families</div><div class="pr">$9.99/mo</div></div>
+    <div class="tier"><div class="n">Pro</div><div class="who">Power users — everything, unlimited</div><div class="pr">$24.99/mo</div></div>
+    <div class="tier"><div class="n">Clinical</div><div class="who">Clinicians &amp; practices</div><div class="pr">$39/mo</div></div>
+  </div>
+  <div class="trust">HumxnMed gives health <b>information, not a diagnosis</b>. It is not a medical device and does not replace your clinician's judgment. In an emergency, call your local emergency number.</div>
+</div></section>
+
+<footer>
+  <div class="mc">HumxnMed</div>
+  <div>A product of <b>Millennials Creatives LLC</b> · <a href="https://medcompanion-ai.up.railway.app/app">Open the app</a> · <a href="https://medcompanion-ai.up.railway.app/privacy">Privacy</a></div>
+</footer>

@@ -124,6 +124,10 @@ async def serve_console():
 async def serve_welcome():
     return FileResponse(os.path.join(frontend_dir, "welcome.html"))
 
+@app.get("/humxnmed")
+async def serve_humxnmed_page():
+    return FileResponse(os.path.join(frontend_dir, "humxnmed-page.html"))
+
 @app.get("/terms")
 async def serve_terms():
     return FileResponse(os.path.join(frontend_dir, "terms.html"))
