@@ -1917,7 +1917,12 @@ async def signup(req: AuthRequest):
         result = sb.auth.sign_up({"email": req.email, "password": req.password})
         return {"status": "success", "user_id": result.user.id if result.user else None}
     except Exception as e:
-        raise HTTPException(400, str(e))
+        logger.error(f"signup failed: {e}")
+        msg = str(e)
+        # Don't leak infra errors (DNS/connection) to customers — show a clean message.
+        if "Name or service" in msg or "getaddrinfo" in msg or "Connection" in msg or "timed out" in msg.lower():
+            raise HTTPException(503, "Accounts are temporarily unavailable — you don't need one, everything works without it.")
+        raise HTTPException(400, "We couldn't create that account. Please check your email and password and try again.")
 
 @app.post("/auth/login")
 async def login(req: AuthRequest):
