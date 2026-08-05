@@ -1,5 +1,5 @@
 ﻿"""server.py â€” HumxnMed AI v2"""
-import os, logging, uuid, asyncio
+import os, logging, uuid, asyncio, time
 from typing import Optional
 from dotenv import load_dotenv
 load_dotenv()
@@ -1934,8 +1934,27 @@ async def review_sign(review_id: str, req: SignRequest):
 # a purchase follow them across devices. Accounts are OFF until Supabase is configured;
 # every endpoint degrades to a clean 503 so a customer never sees a broken signup.
 
+_acct_probe = {"ok": False, "at": 0.0}
 def _accounts_on() -> bool:
-    return SUPABASE_ENABLED and supabase_configured()
+    """Accounts are ON only when a Supabase project is genuinely reachable AND set up
+    (entitlements table exists, key valid) — not merely when env vars are present. This
+    keeps a broken/dead project from ever showing customers a signup that can't work.
+    Result cached ~2 min so we don't probe Supabase on every request."""
+    if not (SUPABASE_ENABLED and supabase_configured()):
+        return False
+    now = time.monotonic()
+    if now - _acct_probe["at"] < 120:
+        return _acct_probe["ok"]
+    ok = False
+    try:
+        sb = get_supabase()
+        sb.table("entitlements").select("email").limit(1).execute()  # reachable + table + key
+        ok = True
+    except Exception as e:
+        logger.warning(f"accounts probe failed — accounts stay OFF: {e}")
+    _acct_probe["ok"] = ok
+    _acct_probe["at"] = now
+    return ok
 
 ACCOUNTS_OFF_MSG = "Accounts aren't turned on yet — you don't need one, everything works without it."
 
