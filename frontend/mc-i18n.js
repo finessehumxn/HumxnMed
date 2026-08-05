@@ -83,7 +83,6 @@
     return items;
   }
 
-  var inflight = false, queue = [];
   function translateItems(items) {
     if (LANG === 'en' || !items.length) return;
     var need = [], seen = {};
@@ -93,16 +92,23 @@
       else if (!seen[it.text]) { seen[it.text] = 1; need.push(it.text); }
     });
     if (!need.length) return;
-    // Send uncached strings for translation, then apply.
-    fetch('/i18n-batch', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ strings: need, target: LANG }) })
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        var tr = (d && d.translations) || {}, changed = false;
-        for (var k in tr) { if (tr[k] && tr[k] !== k) { CACHE[k] = tr[k]; changed = true; } }
-        if (changed) saveCache();
-        items.forEach(function (it) { var c = CACHE[it.text]; if (c) it.apply(c); });
-      })
-      .catch(function () {});
+    function applyCached() { items.forEach(function (it) { var c = CACHE[it.text]; if (c) it.apply(c); }); }
+    // Chunk the network requests so text appears PROGRESSIVELY (each chunk applies as it
+    // returns) instead of the whole page staying English until one big request finishes.
+    var CH = 40;
+    for (var i = 0; i < need.length; i += CH) {
+      (function (chunk) {
+        fetch('/i18n-batch', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ strings: chunk, target: LANG }) })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            var tr = (d && d.translations) || {}, changed = false;
+            for (var k in tr) { if (tr[k] && tr[k] !== k) { CACHE[k] = tr[k]; changed = true; } }
+            if (changed) saveCache();
+            applyCached();
+          })
+          .catch(function () {});
+      })(need.slice(i, i + CH));
+    }
   }
 
   function run(root) { if (LANG === 'en') return; try { translateItems(collect(root || document.body)); } catch (e) {} }
