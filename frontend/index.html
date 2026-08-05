@@ -9,7 +9,115 @@
 <!-- iOS (App Store): hide paid pricing tiers so the app ships free, avoiding App Store IAP rules. The web app keeps full pricing. -->
 <style>html.cap-app .pricing-section,html.cap-app #pricing,html.cap-app a[href="#pricing"],html.cap-app .nav-link-pricing{display:none !important;}</style>
 <!-- iOS v1 ships the free health companion. Account sync (which the web backend handles) arrives in a later update; neutralize sign-up so it never hits auth, no matter where the button lives. -->
-<script>document.addEventListener('DOMContentLoaded',function(){window.openAuth=function(){try{alert("Everything here is free to use right now — no account needed. Accounts and cross-device sync are coming soon.");}catch(e){}};});</script>
+<script>
+/* HumxnMed accounts — passwordless email magic-code.
+   The customer enters their email, gets a 6-digit code, types it back, and their paid
+   tier (tied to that email at purchase) unlocks on this device. We store ONLY email+tier
+   server-side; health data stays local. Dormant until Supabase is configured server-side:
+   /auth/status returns {accounts:false} and we fall back to a friendly "no account needed"
+   message — a broken signup can never appear. */
+(function(){
+  var RANK={free:0,plus:1,pro:2,clinical:3};
+  function rank(t){return RANK[t]||0;}
+  function applyTier(t){ try{ if(t && rank(t)>rank(localStorage.getItem('mc_tier')||'free')) localStorage.setItem('mc_tier',t); }catch(e){} }
+  function savedUser(){ try{ return JSON.parse(localStorage.getItem('mc_user')||'null'); }catch(e){ return null; } }
+
+  // Resolve once whether accounts are turned on.
+  var statusReady = fetch('/auth/status').then(function(r){return r.json();}).then(function(d){return !!(d&&d.accounts);}).catch(function(){return false;});
+
+  // Best-effort cross-device re-sync: if we have a token, refresh the tier from the server.
+  statusReady.then(function(on){
+    if(!on) return;
+    var u=savedUser();
+    if(u&&u.token){
+      fetch('/me',{headers:{'Authorization':'Bearer '+u.token}}).then(function(r){return r.json();})
+        .then(function(d){ if(d&&d.authenticated){ applyTier(d.tier); } }).catch(function(){});
+    }
+    // Arriving from /welcome?...→/app?login=<email>: auto-open sign-in prefilled so a buyer
+    // secures their purchase on this device with one tap.
+    try{ var lp=new URLSearchParams(location.search).get('login'); if(lp && !(u&&u.token)) emailStep(lp); }catch(e){}
+  });
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function close(){ var m=document.getElementById('mcAcctModal'); if(m) m.remove(); }
+  function shell(inner){
+    close();
+    var d=document.createElement('div'); d.id='mcAcctModal';
+    d.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(8,26,24,.62);display:flex;align-items:center;justify-content:center;padding:20px';
+    d.innerHTML='<div style="background:#fff;border-radius:20px;max-width:400px;width:100%;padding:28px;box-shadow:0 26px 70px rgba(0,0,0,.4);font-family:system-ui,-apple-system,sans-serif;color:#123">'
+      +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0f766e">HumxnMed account</div>'+inner+'</div>';
+    d.addEventListener('click',function(e){ if(e.target===d) close(); });
+    document.body.appendChild(d);
+    return d;
+  }
+  function emailStep(prefill){
+    shell('<div style="font-size:21px;font-weight:800;margin:8px 0 4px">Sign in or create your account</div>'
+      +'<div style="font-size:14px;color:#4b5f5b;line-height:1.5;margin-bottom:16px">Enter your email and we’ll send you a 6-digit code. No password. If you’ve purchased, use the same email so your plan unlocks here.</div>'
+      +'<input id="mcAcctEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" value="'+esc(prefill||'')+'" style="width:100%;box-sizing:border-box;padding:13px;font-size:16px;border:1px solid #cfe0dc;border-radius:12px;margin-bottom:10px">'
+      +'<div id="mcAcctErr" style="display:none;color:#c0392b;font-size:13.5px;margin-bottom:8px"></div>'
+      +'<button id="mcAcctSend" style="width:100%;background:#0f766e;color:#fff;border:none;font-weight:800;font-size:15px;padding:13px;border-radius:12px;cursor:pointer">Email me a code &rarr;</button>'
+      +'<button onclick="document.getElementById(\'mcAcctModal\').remove()" style="width:100%;background:none;border:none;color:#6b7d79;font-size:13.5px;margin-top:10px;cursor:pointer">Not now</button>');
+    var em=document.getElementById('mcAcctEmail'); if(em) em.focus();
+    document.getElementById('mcAcctSend').onclick=sendCode;
+    if(em) em.addEventListener('keydown',function(e){ if(e.key==='Enter') sendCode(); });
+  }
+  function err(msg){ var e=document.getElementById('mcAcctErr'); if(e){ e.textContent=msg; e.style.display='block'; } }
+  function sendCode(){
+    var email=(document.getElementById('mcAcctEmail').value||'').trim();
+    var btn=document.getElementById('mcAcctSend');
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ err('Please enter a valid email address.'); return; }
+    if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
+    fetch('/auth/request-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})})
+      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+      .then(function(res){ if(!res.ok) throw new Error((res.d&&res.d.detail)||'Could not send code'); codeStep(email); })
+      .catch(function(e){ if(btn){ btn.disabled=false; btn.textContent='Email me a code →'; } err(e.message||'Could not send code. Try again.'); });
+  }
+  function codeStep(email){
+    shell('<div style="font-size:21px;font-weight:800;margin:8px 0 4px">Check your email</div>'
+      +'<div style="font-size:14px;color:#4b5f5b;line-height:1.5;margin-bottom:16px">We sent a 6-digit code to <b>'+esc(email)+'</b>. Enter it below.</div>'
+      +'<input id="mcAcctCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="width:100%;box-sizing:border-box;padding:13px;font-size:22px;letter-spacing:.3em;text-align:center;border:1px solid #cfe0dc;border-radius:12px;margin-bottom:10px">'
+      +'<div id="mcAcctErr" style="display:none;color:#c0392b;font-size:13.5px;margin-bottom:8px"></div>'
+      +'<button id="mcAcctVerify" style="width:100%;background:#0f766e;color:#fff;border:none;font-weight:800;font-size:15px;padding:13px;border-radius:12px;cursor:pointer">Verify &amp; sign in</button>'
+      +'<button id="mcAcctBack" style="width:100%;background:none;border:none;color:#6b7d79;font-size:13.5px;margin-top:10px;cursor:pointer">Use a different email</button>');
+    var c=document.getElementById('mcAcctCode'); if(c) c.focus();
+    document.getElementById('mcAcctVerify').onclick=function(){ verifyCode(email); };
+    document.getElementById('mcAcctBack').onclick=function(){ emailStep(email); };
+    if(c) c.addEventListener('keydown',function(e){ if(e.key==='Enter') verifyCode(email); });
+  }
+  function verifyCode(email){
+    var code=(document.getElementById('mcAcctCode').value||'').trim();
+    var btn=document.getElementById('mcAcctVerify');
+    if(code.length<6){ err('Enter the 6-digit code.'); return; }
+    if(btn){ btn.disabled=true; btn.textContent='Verifying…'; }
+    fetch('/auth/verify-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,code:code})})
+      .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+      .then(function(res){
+        if(!res.ok) throw new Error((res.d&&res.d.detail)||'Incorrect code');
+        var d=res.d;
+        try{ localStorage.setItem('mc_user',JSON.stringify({email:d.email,token:d.access_token})); }catch(e){}
+        applyTier(d.tier);
+        close();
+        var paid=d.tier&&d.tier!=='free';
+        alert(paid ? ('✓ Signed in — your HumxnMed '+d.tier.charAt(0).toUpperCase()+d.tier.slice(1)+' plan is now unlocked on this device.')
+                   : '✓ You’re signed in. Your account is ready — any plan you buy will follow you across devices.');
+        location.reload();
+      })
+      .catch(function(e){ if(btn){ btn.disabled=false; btn.textContent='Verify & sign in'; } err(e.message||'That code is incorrect or expired.'); });
+  }
+
+  // Public entry point used by the "Sign in" nav links.
+  function openAccountFlow(mode, prefillEmail){
+    statusReady.then(function(on){
+      if(on){ emailStep(prefillEmail); }
+      else { try{ alert('Everything here is free to use right now — no account needed. Accounts and cross-device sync are coming soon.'); }catch(e){} }
+    });
+  }
+  // A later script declares its own function openAuth() (the old password modal); install
+  // AFTER the DOM parses so ours wins. Guard for the already-loaded case.
+  function install(){ window.openAuth=openAccountFlow; window.mcAccountsOn=function(){ return statusReady; }; window.mcSignOut=function(){ try{ localStorage.removeItem('mc_user'); }catch(e){} }; }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',install); else install();
+})();
+</script>
 <meta name="description" content="HumxnMed AI helps every human understand their health — symptoms, puberty, sexual health, mental health, reproductive questions, and everything too embarrassing to say out loud. Plain language. Free. All languages. All bodies. All beliefs." />
 <meta name="keywords" content="understand symptoms, plain language health, medical companion, better than WebMD, understand doctor, health questions, free health help, all languages, holistic health" />
 <meta name="robots" content="index, follow" />

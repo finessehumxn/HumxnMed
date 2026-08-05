@@ -8,7 +8,7 @@ if os.getenv("LANGCHAIN_API_KEY"):
     os.environ.setdefault("LANGCHAIN_TRACING_V2", "true")
     os.environ.setdefault("LANGCHAIN_PROJECT", "medcompanion-ai")
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -17,12 +17,16 @@ from langgraph.types import Command
 from .graph import build_graph
 
 try:
-    from .supabase_client import (get_supabase, save_session, get_user_history, log_symptom,
+    from .supabase_client import (get_supabase, supabase_configured, get_entitlement, set_entitlement,
+                                  save_session, get_user_history, log_symptom,
                                   get_symptom_history, request_review, get_review,
                                   get_pending_reviews, sign_review, export_user_data, delete_user_data, clear_user_data)
     SUPABASE_ENABLED = True
 except ImportError:
     SUPABASE_ENABLED = False
+    def supabase_configured(): return False
+    async def get_entitlement(*a, **k): return None
+    async def set_entitlement(*a, **k): return False
     async def save_session(*a, **k): return None
     async def get_user_history(u, limit=20): return []
     async def log_symptom(*a, **k): return False
@@ -211,7 +215,16 @@ async def verify_purchase(session_id: str = ""):
             tier = {999: "plus", 5999: "plus", 12999: "plus",
                     2499: "pro", 14999: "pro", 29999: "pro",
                     3900: "clinical", 34900: "clinical", 79900: "clinical"}.get(amount)
-        return {"tier": tier}
+        # Record the tier against the buyer's email so it follows them across devices
+        # once they sign in with that email. Falls back silently if accounts aren't on.
+        buyer_email = ((data.get("customer_details") or {}).get("email")
+                       or data.get("customer_email") or "").strip().lower()
+        if tier and buyer_email:
+            try:
+                await set_entitlement(buyer_email, tier, "stripe")
+            except Exception as ee:
+                logger.error(f"entitlement save error: {ee}")
+        return {"tier": tier, "email": buyer_email or None}
     except Exception as e:
         logger.error(f"verify-purchase error: {e}")
         return {"tier": None}
@@ -458,6 +471,13 @@ class SymptomLogRequest(BaseModel):
 class AuthRequest(BaseModel):
     email: str
     password: str
+
+class EmailRequest(BaseModel):
+    email: str
+
+class VerifyCodeRequest(BaseModel):
+    email: str
+    code: str
 
 class TranslateRequest(BaseModel):
     text: str
@@ -1908,32 +1928,85 @@ async def review_sign(review_id: str, req: SignRequest):
     ok = await sign_review(review_id, req.doctor_name, req.verdict, req.note or "")
     return {"ok": ok}
 
-@app.post("/auth/signup")
-async def signup(req: AuthRequest):
-    if not SUPABASE_ENABLED:
-        raise HTTPException(503, "Auth not configured yet")
-    try:
-        sb = get_supabase()
-        result = sb.auth.sign_up({"email": req.email, "password": req.password})
-        return {"status": "success", "user_id": result.user.id if result.user else None}
-    except Exception as e:
-        logger.error(f"signup failed: {e}")
-        msg = str(e)
-        # Don't leak infra errors (DNS/connection) to customers — show a clean message.
-        if "Name or service" in msg or "getaddrinfo" in msg or "Connection" in msg or "timed out" in msg.lower():
-            raise HTTPException(503, "Accounts are temporarily unavailable — you don't need one, everything works without it.")
-        raise HTTPException(400, "We couldn't create that account. Please check your email and password and try again.")
+# ── ACCOUNTS: passwordless email magic-code ──────────────────────────────────
+# No passwords. The customer enters their email, gets a 6-digit code, types it back,
+# and we return their tier (looked up from the entitlements table). This is what makes
+# a purchase follow them across devices. Accounts are OFF until Supabase is configured;
+# every endpoint degrades to a clean 503 so a customer never sees a broken signup.
 
-@app.post("/auth/login")
-async def login(req: AuthRequest):
-    if not SUPABASE_ENABLED:
-        raise HTTPException(503, "Auth not configured yet")
+def _accounts_on() -> bool:
+    return SUPABASE_ENABLED and supabase_configured()
+
+ACCOUNTS_OFF_MSG = "Accounts aren't turned on yet — you don't need one, everything works without it."
+
+@app.get("/auth/status")
+async def auth_status():
+    """Frontend checks this to decide whether to show the sign-in form or the
+    'no account needed' message. Keeps a broken signup from ever appearing."""
+    return {"accounts": _accounts_on()}
+
+@app.post("/auth/request-code")
+async def auth_request_code(req: EmailRequest):
+    """Email the customer a 6-digit sign-in code (creates the account if new)."""
+    if not _accounts_on():
+        raise HTTPException(503, ACCOUNTS_OFF_MSG)
+    email = (req.email or "").strip().lower()
+    if "@" not in email or "." not in email.split("@")[-1]:
+        raise HTTPException(400, "Please enter a valid email address.")
     try:
         sb = get_supabase()
-        result = sb.auth.sign_in_with_password({"email": req.email, "password": req.password})
-        return {"status": "success", "access_token": result.session.access_token if result.session else None, "user_id": result.user.id if result.user else None}
+        sb.auth.sign_in_with_otp({"email": email, "options": {"should_create_user": True}})
+        # Always the same response whether or not the email already existed (no account enumeration).
+        return {"ok": True}
     except Exception as e:
-        raise HTTPException(401, "Invalid credentials")
+        logger.error(f"request-code failed: {e}")
+        msg = str(e).lower()
+        if "rate" in msg or "too many" in msg or "429" in msg:
+            raise HTTPException(429, "Too many requests — please wait a minute and try again.")
+        raise HTTPException(503, "We couldn't send your code just now. Please try again in a moment.")
+
+@app.post("/auth/verify-code")
+async def auth_verify_code(req: VerifyCodeRequest):
+    """Verify the 6-digit code, then return the tier this email owns (if any)."""
+    if not _accounts_on():
+        raise HTTPException(503, ACCOUNTS_OFF_MSG)
+    email = (req.email or "").strip().lower()
+    code = (req.code or "").strip()
+    if not email or not code:
+        raise HTTPException(400, "Enter the code we emailed you.")
+    try:
+        sb = get_supabase()
+        result = sb.auth.verify_otp({"email": email, "token": code, "type": "email"})
+    except Exception as e:
+        logger.error(f"verify-code failed: {e}")
+        raise HTTPException(401, "That code is incorrect or expired. Request a new one.")
+    token = result.session.access_token if result and result.session else None
+    if not token:
+        raise HTTPException(401, "That code is incorrect or expired. Request a new one.")
+    tier = await get_entitlement(email) or "free"
+    return {"ok": True, "email": email, "access_token": token, "tier": tier}
+
+@app.get("/me")
+async def me(authorization: str = Header(default="")):
+    """Given a valid session token, return the signed-in email + the tier it owns.
+    Used to re-sync a customer's tier on another device. Never 500s the app: an
+    expired/invalid token just returns {authenticated: false} so local state stands."""
+    if not _accounts_on():
+        return {"authenticated": False, "tier": None}
+    token = authorization.replace("Bearer ", "").strip()
+    if not token:
+        return {"authenticated": False, "tier": None}
+    try:
+        sb = get_supabase()
+        u = sb.auth.get_user(token)
+        email = (u.user.email if u and u.user else "") or ""
+    except Exception as e:
+        logger.error(f"/me failed: {e}")
+        return {"authenticated": False, "tier": None}
+    if not email:
+        return {"authenticated": False, "tier": None}
+    tier = await get_entitlement(email) or "free"
+    return {"authenticated": True, "email": email.lower(), "tier": tier}
 
 @app.post("/session/start")
 async def session_start(req: StartRequest):

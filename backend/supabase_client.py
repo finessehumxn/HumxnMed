@@ -94,6 +94,68 @@ def get_supabase() -> Optional[Client]:
         return None
 
 
+def supabase_configured() -> bool:
+    """True only when a real Supabase project is wired up (URL + key set). The `supabase`
+    package being importable is NOT enough — accounts stay OFF until this is True, so the
+    login UI never shows a signup that can't work."""
+    return bool(os.getenv("SUPABASE_URL")) and bool(
+        os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+    )
+
+
+# ── ENTITLEMENTS (which tier an email owns) ──────────────────────────────────
+# The ONLY account data we store server-side: an email and which paid tier it owns.
+# Health data never lives here — it stays on the device. This is what lets a purchase
+# follow the customer across devices: they buy (Stripe records the tier for their email),
+# then sign in with that email on any device and their tier unlocks.
+#
+# Run this SQL in the Supabase project (SQL Editor):
+#   create table if not exists public.entitlements (
+#     email text primary key,
+#     tier text not null,
+#     source text,
+#     updated_at timestamptz default now()
+#   );
+#   alter table public.entitlements enable row level security;
+#   -- The server uses the service key (bypasses RLS); no public policies needed.
+def _norm_email(email: str) -> str:
+    return (email or "").strip().lower()
+
+
+async def get_entitlement(email: str) -> Optional[str]:
+    """Return the tier an email owns (e.g. 'clinical'), or None."""
+    sb = get_supabase()
+    e = _norm_email(email)
+    if not sb or not e:
+        return None
+    try:
+        r = sb.table("entitlements").select("tier").eq("email", e).limit(1).execute()
+        rows = r.data or []
+        return rows[0]["tier"] if rows else None
+    except Exception as ex:
+        logger.error(f"get_entitlement error: {ex}")
+        return None
+
+
+async def set_entitlement(email: str, tier: str, source: str = "") -> bool:
+    """Record that an email owns a tier (upsert). Called after a verified purchase."""
+    sb = get_supabase()
+    e = _norm_email(email)
+    if not sb or not e or not tier:
+        return False
+    try:
+        from datetime import datetime, timezone
+        sb.table("entitlements").upsert(
+            {"email": e, "tier": tier, "source": source,
+             "updated_at": datetime.now(timezone.utc).isoformat()},
+            on_conflict="email",
+        ).execute()
+        return True
+    except Exception as ex:
+        logger.error(f"set_entitlement error: {ex}")
+        return False
+
+
 async def save_session(
     user_id: str,
     raw_input: str,
