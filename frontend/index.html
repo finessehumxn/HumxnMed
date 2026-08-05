@@ -39,24 +39,37 @@
   });
 
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  function close(){ var m=document.getElementById('mcAcctModal'); if(m) m.remove(); }
-  function shell(inner){
+  var _lastFocus=null;
+  function close(){ var m=document.getElementById('mcAcctModal'); if(m) m.remove(); try{ if(_lastFocus&&_lastFocus.focus) _lastFocus.focus(); }catch(e){} }
+  window.mcAcctClose=close;
+  function focusables(d){ return Array.prototype.slice.call(d.querySelectorAll('button,input,a[href],select,textarea,[tabindex]:not([tabindex="-1"])')).filter(function(el){ return !el.disabled && el.offsetParent!==null; }); }
+  function shell(inner, label){
+    _lastFocus=document.activeElement;
     close();
     var d=document.createElement('div'); d.id='mcAcctModal';
+    d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-label', label||'Sign in to HumxnMed');
     d.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(8,26,24,.62);display:flex;align-items:center;justify-content:center;padding:20px';
     d.innerHTML='<div style="background:#fff;border-radius:20px;max-width:400px;width:100%;padding:28px;box-shadow:0 26px 70px rgba(0,0,0,.4);font-family:system-ui,-apple-system,sans-serif;color:#123">'
       +'<div style="font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0f766e">HumxnMed account</div>'+inner+'</div>';
     d.addEventListener('click',function(e){ if(e.target===d) close(); });
+    // Keyboard: Escape closes; Tab is trapped inside the dialog.
+    d.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){ e.preventDefault(); close(); return; }
+      if(e.key==='Tab'){ var f=focusables(d); if(!f.length) return; var first=f[0], last=f[f.length-1];
+        if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+        else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); } }
+    });
     document.body.appendChild(d);
     return d;
   }
   function emailStep(prefill){
-    shell('<div style="font-size:21px;font-weight:800;margin:8px 0 4px">Sign in or create your account</div>'
+    shell('<h2 style="font-size:21px;font-weight:800;margin:8px 0 4px">Sign in or create your account</h2>'
       +'<div style="font-size:14px;color:#4b5f5b;line-height:1.5;margin-bottom:16px">Enter your email and we’ll send you a 6-digit code. No password. If you’ve purchased, use the same email so your plan unlocks here.</div>'
-      +'<input id="mcAcctEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" value="'+esc(prefill||'')+'" style="width:100%;box-sizing:border-box;padding:13px;font-size:16px;border:1px solid #cfe0dc;border-radius:12px;margin-bottom:10px">'
-      +'<div id="mcAcctErr" style="display:none;color:#c0392b;font-size:13.5px;margin-bottom:8px"></div>'
-      +'<button id="mcAcctSend" style="width:100%;background:#0f766e;color:#fff;border:none;font-weight:800;font-size:15px;padding:13px;border-radius:12px;cursor:pointer">Email me a code &rarr;</button>'
-      +'<button onclick="document.getElementById(\'mcAcctModal\').remove()" style="width:100%;background:none;border:none;color:#6b7d79;font-size:13.5px;margin-top:10px;cursor:pointer">Not now</button>');
+      +'<label for="mcAcctEmail" style="display:block;font-size:13px;font-weight:700;color:#123;margin-bottom:6px">Email address</label>'
+      +'<input id="mcAcctEmail" type="email" inputmode="email" autocomplete="email" aria-label="Email address" placeholder="you@email.com" value="'+esc(prefill||'')+'" style="width:100%;box-sizing:border-box;padding:13px;font-size:16px;border:1px solid #cfe0dc;border-radius:12px;margin-bottom:10px">'
+      +'<div id="mcAcctErr" role="alert" aria-live="assertive" style="display:none;color:#b02a1a;font-size:13.5px;margin-bottom:8px"></div>'
+      +'<button id="mcAcctSend" type="button" style="width:100%;min-height:48px;background:#0f766e;color:#fff;border:none;font-weight:800;font-size:15px;padding:13px;border-radius:12px;cursor:pointer">Email me a code &rarr;</button>'
+      +'<button type="button" onclick="window.mcAcctClose()" style="width:100%;min-height:44px;background:none;border:none;color:#4b5f5b;font-size:13.5px;margin-top:10px;cursor:pointer;text-decoration:underline">Not now</button>', 'Sign in or create your account');
     var em=document.getElementById('mcAcctEmail'); if(em) em.focus();
     document.getElementById('mcAcctSend').onclick=sendCode;
     if(em) em.addEventListener('keydown',function(e){ if(e.key==='Enter') sendCode(); });
@@ -73,12 +86,13 @@
       .catch(function(e){ if(btn){ btn.disabled=false; btn.textContent='Email me a code →'; } err(e.message||'Could not send code. Try again.'); });
   }
   function codeStep(email){
-    shell('<div style="font-size:21px;font-weight:800;margin:8px 0 4px">Check your email</div>'
+    shell('<h2 style="font-size:21px;font-weight:800;margin:8px 0 4px">Check your email</h2>'
       +'<div style="font-size:14px;color:#4b5f5b;line-height:1.5;margin-bottom:16px">We sent a 6-digit code to <b>'+esc(email)+'</b>. Enter it below.</div>'
-      +'<input id="mcAcctCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="width:100%;box-sizing:border-box;padding:13px;font-size:22px;letter-spacing:.3em;text-align:center;border:1px solid #cfe0dc;border-radius:12px;margin-bottom:10px">'
-      +'<div id="mcAcctErr" style="display:none;color:#c0392b;font-size:13.5px;margin-bottom:8px"></div>'
-      +'<button id="mcAcctVerify" style="width:100%;background:#0f766e;color:#fff;border:none;font-weight:800;font-size:15px;padding:13px;border-radius:12px;cursor:pointer">Verify &amp; sign in</button>'
-      +'<button id="mcAcctBack" style="width:100%;background:none;border:none;color:#6b7d79;font-size:13.5px;margin-top:10px;cursor:pointer">Use a different email</button>');
+      +'<label for="mcAcctCode" style="display:block;font-size:13px;font-weight:700;color:#123;margin-bottom:6px">6-digit sign-in code</label>'
+      +'<input id="mcAcctCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="6-digit sign-in code" placeholder="123456" style="width:100%;box-sizing:border-box;padding:13px;font-size:22px;letter-spacing:.3em;text-align:center;border:1px solid #cfe0dc;border-radius:12px;margin-bottom:10px">'
+      +'<div id="mcAcctErr" role="alert" aria-live="assertive" style="display:none;color:#b02a1a;font-size:13.5px;margin-bottom:8px"></div>'
+      +'<button id="mcAcctVerify" type="button" style="width:100%;min-height:48px;background:#0f766e;color:#fff;border:none;font-weight:800;font-size:15px;padding:13px;border-radius:12px;cursor:pointer">Verify &amp; sign in</button>'
+      +'<button id="mcAcctBack" type="button" style="width:100%;min-height:44px;background:none;border:none;color:#4b5f5b;font-size:13.5px;margin-top:10px;cursor:pointer;text-decoration:underline">Use a different email</button>', 'Enter your sign-in code');
     var c=document.getElementById('mcAcctCode'); if(c) c.focus();
     document.getElementById('mcAcctVerify').onclick=function(){ verifyCode(email); };
     document.getElementById('mcAcctBack').onclick=function(){ emailStep(email); };
