@@ -49,6 +49,10 @@ RC_PUBLIC_KEY = os.getenv("RC_PUBLIC_KEY", "")   # RevenueCat PUBLIC SDK key (sa
 MC_GATING = os.getenv("MC_GATING", "0") == "1"   # freemium paywall enforcement — OFF by default (live app stays fully open until flipped on)
 UMLS_API_KEY = os.getenv("UMLS_API_KEY", "")   # free NLM key enables SNOMED CT coding
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")   # sk_… enables web-purchase verification -> auto-unlock tier on the buyer's device (optional; no-op if unset)
+# Founding-clinician comp codes: redeeming one grants free Clinical access for MC_FOUNDER_DAYS.
+# Set MC_FOUNDER_CODES to your own comma-separated codes (default has a starter one so it works now).
+MC_FOUNDER_CODES = [c.strip().upper() for c in os.getenv("MC_FOUNDER_CODES", "FOUNDINGRN").split(",") if c.strip()]
+MC_FOUNDER_DAYS = int(os.getenv("MC_FOUNDER_DAYS", "180"))
 
 
 # --- Epic / MyChart SMART-on-FHIR (patient standalone launch) -------------
@@ -211,6 +215,15 @@ async def verify_purchase(session_id: str = ""):
     except Exception as e:
         logger.error(f"verify-purchase error: {e}")
         return {"tier": None}
+
+@app.get("/redeem-code")
+async def redeem_code(code: str = ""):
+    """Redeem a founding-clinician comp code -> free Clinical access for MC_FOUNDER_DAYS.
+    Codes are held server-side (env), not in client JS. Returns {ok, tier, days}."""
+    c = (code or "").strip().upper()
+    if c and c in MC_FOUNDER_CODES:
+        return {"ok": True, "tier": "clinical", "days": MC_FOUNDER_DAYS}
+    return {"ok": False}
 
 @app.get("/rc-config")
 async def rc_config():
