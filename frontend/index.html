@@ -6,6 +6,8 @@
 <title>HumxnMed AI — Understand Your Health in Plain Language</title>
 <script>try{if(window.Capacitor||location.hostname==='localhost'||location.hostname==='127.0.0.1'){document.documentElement.classList.add('cap-app');}}catch(e){}</script>
 <script>try{var _r=new URLSearchParams(location.search).get('ref');if(_r){localStorage.setItem('mc_ref',_r.slice(0,60));}}catch(e){}</script>
+<script src="/static/mc-i18n.js"></script>
+<meta name="google" content="notranslate"><!-- our own switcher handles languages; avoid double-translation by Chrome/Google Translate -->
 <!-- iOS (App Store): hide paid pricing tiers so the app ships free, avoiding App Store IAP rules. The web app keeps full pricing. -->
 <style>html.cap-app .pricing-section,html.cap-app #pricing,html.cap-app a[href="#pricing"],html.cap-app .nav-link-pricing{display:none !important;}</style>
 <!-- iOS v1 ships the free health companion. Account sync (which the web backend handles) arrives in a later update; neutralize sign-up so it never hits auth, no matter where the button lives. -->
@@ -2706,7 +2708,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- ═══ MAIN CONTENT ═══ -->
 <main class="main" role="main" id="main-content">
-  <div id="resultsArea"></div>
+  <div id="resultsArea" data-i18n-keep></div>
   <style>
     #customizingBanner{display:none;margin:0 auto 1.25rem;max-width:680px;background:linear-gradient(135deg,var(--teal,#1f9d96),#15807a);color:#fff;border-radius:16px;padding:1.05rem 1.3rem;box-shadow:0 10px 30px rgba(31,157,150,.28);align-items:center;gap:.95rem}
     #customizingBanner.show{display:flex}
@@ -2746,7 +2748,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 
-  <div id="output" role="region" aria-live="polite" aria-label="Health information results"></div>
+  <div id="output" role="region" aria-live="polite" aria-label="Health information results" data-i18n-keep></div>
 </main>
 <!-- ═══ IMPACT BANNER ═══ -->
 <section class="banner" aria-label="Why this exists">
@@ -4808,7 +4810,7 @@ async function confirmCondition(useAI) {
   var old = document.getElementById('briefingCard');
   if (old) old.remove();
 
-  out('<div class="card" id="briefingCard">' +
+  out('<div class="card" id="briefingCard" data-i18n-keep>' +
     '<div class="card-header"><div class="card-icon ci-warm"><i class="ti ti-book-2"></i></div>' +
     '<div class="card-title">Here\'s what I found out for you</div>' +
     '<div class="card-status running-lbl"><div class="spin"></div> Researching…</div></div>' +
@@ -6018,7 +6020,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <button onclick="window.print()" style="background:#0B6E4F;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:800;font-size:14px;cursor:pointer">🖨 Print / Save PDF</button>
       <button onclick="document.getElementById('mcPacket').style.display='none'" style="background:#fff;border:1px solid #d5dee4;color:#5b6b78;border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer">Close</button>
     </div>
-    <div id="mcpkBody"></div>
+    <div id="mcpkBody" data-i18n-keep></div>
   </div>
 </div>
 <script>
@@ -7494,7 +7496,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="mcj-wrap">
     <div class="mcj-top"><div class="mcj-title">Medical accounts</div><button class="mcj-x" onclick="closeVault()" aria-label="Close">&times;</button></div>
     <p class="mcj-sub">Every portal in one place &mdash; MyChart, insurance, pharmacy, labs, dental. <b>Encrypted on this device with your passphrase.</b> Never uploaded, never sent to the AI, and never included in your Health Passport.</p>
-    <div id="mcvBody"></div>
+    <div id="mcvBody" data-i18n-keep></div>
     <p class="mcj-disc">We can't see or recover your passphrase &mdash; if you forget it, the vault can't be opened. For your most critical logins, a dedicated password manager is still the gold standard; this is for keeping your <i>medical</i> portals straight. <a href="javascript:void(0)" onclick="openTrust()" style="color:#7fe6b4;text-decoration:underline">🔒 How your data is handled</a></p>
   </div>
 </div>
@@ -7765,7 +7767,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="mcj-wrap">
     <div class="mcj-top"><div class="mcj-title">For My Family</div><button class="mcj-x" onclick="closeLegacy()" aria-label="Close">&times;</button></div>
     <p class="mcj-sub">The things your family will need if something happens to you &mdash; life insurance, your will, who's in charge, your wishes. So they're never left scrambling or guessing. <b>Encrypted on this device</b>, never uploaded, never sent to AI.</p>
-    <div id="mclBody"></div>
+    <div id="mclBody" data-i18n-keep></div>
     <p class="mcj-disc">This <b>organizes</b> the information &mdash; it is <b>not a will</b> and does not replace an attorney or a licensed estate plan. For a legally valid will, power of attorney, or beneficiary designation, see a licensed professional. We can't see or recover your passphrase, and we can't release this automatically &mdash; print it for your executor or share your passphrase with someone you trust. <a href="javascript:void(0)" onclick="openTrust()" style="color:#7fe6b4;text-decoration:underline">🔒 How your data is handled</a></p>
   </div>
 </div>

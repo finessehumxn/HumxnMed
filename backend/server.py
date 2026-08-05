@@ -508,6 +508,62 @@ async def translate(req: TranslateRequest):
         logger.error(f"translate error: {e}")
         return {"translated": text}
 
+class I18nRequest(BaseModel):
+    strings: list          # English UI strings to translate
+    target: str            # target language code (es, fr, ar, …)
+
+# Server-side shared cache so the first visitor in a language warms it for everyone
+# (per-process; resets on redeploy — a durable store can back this later).
+_i18n_cache: dict = {}
+# Languages the UI switcher offers (must mirror MED_LANGS in the frontend).
+_I18N_LANGS = {"es","fr","zh","ar","hi","pt","ru","vi","ko","tl","de","ja","fa","so"}
+
+@app.post("/i18n-batch")
+async def i18n_batch(req: I18nRequest):
+    """Translate a batch of UI microcopy into `target`, returning {source: translated}.
+    SAFETY: this is for general interface text only. The frontend never sends
+    safety/legal/medical-disclaimer copy here (those stay authoritative English), and we
+    instruct the model to keep brand names, medical codes (RxNorm/LOINC/ICD/SNOMED),
+    drug names, numbers and placeholders EXACTLY. Always fails soft to English."""
+    target = (req.target or "").strip().lower()
+    strings = [s for s in (req.strings or []) if isinstance(s, str) and s.strip()]
+    if target not in _I18N_LANGS or not strings:
+        return {"translations": {}}
+    cache = _i18n_cache.setdefault(target, {})
+    todo = [s for s in dict.fromkeys(strings) if s not in cache]   # unique, uncached, ordered
+    if todo:
+        try:
+            import anthropic, json as _json
+            client = anthropic.Anthropic()
+            # Cap batch size to keep responses reliable.
+            for i in range(0, len(todo), 40):
+                chunk = todo[i:i+40]
+                numbered = "\n".join(f"{j+1}. {s}" for j, s in enumerate(chunk))
+                resp = client.messages.create(
+                    model="claude-sonnet-4-6",
+                    max_tokens=4000,
+                    system=(
+                        "You translate short UI microcopy for a health app. Translate each numbered "
+                        "item into the target language with natural, concise, plain wording a patient "
+                        "would read. Keep it SHORT (UI labels/buttons). Do NOT translate or alter: brand "
+                        "names (HumxnMed, Millennials Creatives), medical coding systems (RxNorm, LOINC, "
+                        "ICD-10, SNOMED), drug names, numbers, units, emoji, or placeholders in braces/percent. "
+                        "Preserve any leading/trailing punctuation and arrows. Return ONLY a JSON array of "
+                        "strings, same length and order as the input, no keys, no commentary."
+                    ),
+                    messages=[{"role": "user", "content": f"Target language code: {target}\n\nItems:\n{numbered}"}],
+                )
+                raw = "".join(getattr(b, "text", "") for b in resp.content).strip()
+                start, end = raw.find("["), raw.rfind("]")
+                arr = _json.loads(raw[start:end+1]) if start >= 0 and end > start else []
+                for k, s in enumerate(chunk):
+                    t = arr[k] if k < len(arr) and isinstance(arr[k], str) and arr[k].strip() else s
+                    cache[s] = t
+        except Exception as e:
+            logger.error(f"i18n-batch error: {e}")
+            # leave uncached ones untranslated (frontend falls back to English)
+    return {"translations": {s: cache.get(s, s) for s in strings}}
+
 class InsightsRequest(BaseModel):
     entries: list          # on-device check-ins: [{date, symptoms, severity, mood, energy, sleep, notes, meds}]
     lang: Optional[str] = None
