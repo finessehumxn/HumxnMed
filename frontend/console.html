@@ -51,6 +51,20 @@
 <div class="wrap">
   <header class="top">
     <div class="brand">HumxnMed<span class="tag">Clinical · Point of Care</span></div>
+    <div id="founderBadge" style="display:none;margin-top:7px;font-size:12px;font-weight:800;color:#06301f;background:#bff0d8;border-radius:999px;padding:4px 12px;width:fit-content">★ Founding Clinician · active through <span id="founderExp"></span></div>
+    <script>
+      (function(){
+        function show(){
+          var u=0; try{ u=parseInt(localStorage.getItem('mc_founder_until')||'0',10); }catch(e){}
+          var t=''; try{ t=localStorage.getItem('mc_tier')||''; }catch(e){}
+          var b=document.getElementById('founderBadge');
+          if(!b) return;
+          if(u>Date.now()){ var ex=document.getElementById('founderExp'); if(ex) ex.textContent=new Date(u).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); b.style.display='block'; }
+          else if(t==='clinical'){ b.textContent='★ Clinical member'; b.style.display='block'; }
+        }
+        if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',show); else show();
+      })();
+    </script>
     <div class="sub">For a licensed clinician — you are the decision-maker. Reference, documentation &amp; evidence you independently review. <a class="home" href="/app">Patient app →</a> &middot; <a class="home" href="#" onclick="window.mcPromptFounderCode&&window.mcPromptFounderCode();return false;">Founder code</a></div>
     <div class="modes" id="modes">
       <button data-m="lookup" class="on">🔎 Look up</button>

@@ -155,6 +155,12 @@ async def serve_console_sw():
 async def serve_founding():
     return FileResponse(os.path.join(frontend_dir, "founding.html"))
 
+@app.get("/redeem")
+async def serve_redeem():
+    """Founding-clinician code activation — enter a code, unlock Clinical on this device.
+    No account needed; works on any device by re-entering the same code."""
+    return FileResponse(os.path.join(frontend_dir, "redeem.html"))
+
 @app.get("/billing-config")
 async def billing_config():
     """Whether freemium gating is enforced, and which features belong to which tier.

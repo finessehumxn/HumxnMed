@@ -1,0 +1,67 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Activate your Clinical access · HumxnMed</title>
+<meta name="description" content="Founding clinicians: enter your code to activate HumxnMed Clinical on this device.">
+<style>
+  :root{ --bg:#0B3D2E; --bg2:#0A1F1A; --cream:#F5F1E6; --ink:#123227; --teal:#0B6E4F; --accent:#34c78c; --sub:#5b6b78; }
+  *{ box-sizing:border-box; } html,body{ margin:0; height:100%; }
+  body{ background:linear-gradient(165deg,var(--bg),var(--bg2)); color:#eaf3ee; font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; display:flex; align-items:center; justify-content:center; padding:24px; min-height:100vh; }
+  .card{ background:var(--cream); color:var(--ink); border-radius:24px; max-width:460px; width:100%; padding:38px 32px; box-shadow:0 30px 80px rgba(0,0,0,.45); }
+  .eyebrow{ font-size:11px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--teal); text-align:center; }
+  h1{ font-family:Lora,Georgia,"Times New Roman",serif; font-size:26px; font-weight:800; letter-spacing:-.01em; margin:8px 0 6px; text-align:center; text-wrap:balance; }
+  p{ font-size:15px; color:#3a4b42; line-height:1.6; margin:0 0 14px; }
+  label{ display:block; font-size:13px; font-weight:700; color:var(--ink); margin:14px 0 6px; }
+  input{ width:100%; padding:14px; font-size:18px; letter-spacing:.06em; text-align:center; border:1px solid #cdddd6; border-radius:12px; }
+  .btn{ display:block; width:100%; background:var(--teal); color:#fff; border:none; text-decoration:none; text-align:center; font-weight:800; font-size:16px; padding:15px; border-radius:13px; margin-top:14px; cursor:pointer; }
+  .btn.ghost{ background:transparent; color:var(--teal); border:1.5px solid rgba(11,110,79,.3); font-size:14.5px; padding:12px; }
+  .err{ display:none; color:#b02a1a; font-size:13.5px; margin-top:10px; }
+  .fine{ font-size:12.5px; color:var(--sub); margin-top:18px; line-height:1.55; text-align:center; }
+  .check{ width:70px; height:70px; border-radius:50%; background:var(--accent); color:#062418; display:flex; align-items:center; justify-content:center; font-size:38px; font-weight:900; margin:0 auto 18px; box-shadow:0 10px 26px rgba(52,199,140,.4); }
+  .member{ background:#0B3D2E; color:#eafaf1; border-radius:14px; padding:16px; text-align:center; margin:6px 0 8px; }
+  .member .role{ font-weight:800; font-size:17px; letter-spacing:.01em; }
+  .member .exp{ font-size:13px; color:#a9d6c2; margin-top:3px; }
+</style>
+<div class="card" id="card">
+  <div class="eyebrow">HumxnMed Clinical</div>
+  <h1>Activate your founding access</h1>
+  <p>Enter the founder code you were given. It unlocks <b>HumxnMed Clinical</b> on this device — no account needed. You can enter the same code on any device (phone, tablet, the OR workstation) to unlock it there too.</p>
+  <label for="code">Founder code</label>
+  <input id="code" autocapitalize="characters" autocomplete="one-time-code" placeholder="e.g. Founder2026" aria-label="Founder code">
+  <div class="err" id="err" role="alert" aria-live="assertive"></div>
+  <button class="btn" id="go" type="button">Activate Clinical &rarr;</button>
+  <div class="fine">Founding clinicians only. Questions? <a href="mailto:hello@medcompanionai.com" style="color:var(--teal)">hello@medcompanionai.com</a></div>
+</div>
+<script>
+  var PLAN_KEY='mc_tier', UNTIL_KEY='mc_founder_until';
+  function rankUp(t){ try{ var R={free:0,plus:1,pro:2,clinical:3}; if((R[t]||0) > (R[localStorage.getItem(PLAN_KEY)||'free']||0)) localStorage.setItem(PLAN_KEY,t); }catch(e){} }
+  function fmt(ts){ try{ return new Date(ts).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}); }catch(e){ return ''; } }
+  function success(days){
+    var until = Date.now() + (days||180)*86400000;
+    try{ localStorage.setItem(UNTIL_KEY, String(until)); }catch(e){}
+    rankUp('clinical');
+    document.getElementById('card').innerHTML =
+      '<div class="check">✓</div>'
+      + '<div class="eyebrow" style="text-align:center">You’re in</div>'
+      + '<h1>Clinical is activated</h1>'
+      + '<div class="member"><div class="role">★ Founding Clinician</div><div class="exp">HumxnMed Clinical · active through ' + fmt(until) + '</div></div>'
+      + '<p style="text-align:center">Full access to the point-of-care console — rapid reference, documentation, patient handouts, and decision support.</p>'
+      + '<a class="btn" href="/console">Open the Clinical console &rarr;</a>'
+      + '<a class="btn ghost" href="/app">Go to the app</a>'
+      + '<div class="fine">Using another device? Come back to this page and enter the same code to unlock it there too.</div>';
+  }
+  function fail(msg){ var e=document.getElementById('err'); if(e){ e.textContent=msg||'That code isn’t valid. Double-check it, or reach out to us.'; e.style.display='block'; } }
+  function redeem(){
+    var code=(document.getElementById('code').value||'').trim();
+    var btn=document.getElementById('go');
+    if(!code){ fail('Enter your founder code.'); return; }
+    if(btn){ btn.disabled=true; btn.textContent='Activating…'; }
+    fetch('/redeem-code?code='+encodeURIComponent(code))
+      .then(function(r){return r.json();})
+      .then(function(d){ if(d&&d.ok){ success(d.days); } else { if(btn){ btn.disabled=false; btn.textContent='Activate Clinical →'; } fail(); } })
+      .catch(function(){ if(btn){ btn.disabled=false; btn.textContent='Activate Clinical →'; } fail('Something went wrong. Please try again.'); });
+  }
+  document.getElementById('go').onclick=redeem;
+  document.getElementById('code').addEventListener('keydown',function(e){ if(e.key==='Enter') redeem(); });
+  // Support a prefilled link: /redeem?code=Founder2026
+  try{ var pc=new URLSearchParams(location.search).get('code'); if(pc){ document.getElementById('code').value=pc; } }catch(e){}
+</script>

@@ -31,7 +31,7 @@
   window.mcRedeemFounderCode=function(code){
     return fetch('/redeem-code?code='+encodeURIComponent((code||'').trim()))
       .then(function(r){return r.json();})
-      .then(function(d){ if(d&&d.ok){ try{ localStorage.setItem('mc_founder_until', String(Date.now()+(d.days||180)*86400000)); }catch(e){} } return d; })
+      .then(function(d){ if(d&&d.ok){ try{ localStorage.setItem('mc_founder_until', String(Date.now()+(d.days||180)*86400000)); var R={free:0,plus:1,pro:2,clinical:3}; if(R.clinical > (R[localStorage.getItem('mc_tier')||'free']||0)) localStorage.setItem('mc_tier','clinical'); }catch(e){} } return d; })
       .catch(function(){ return {ok:false}; });
   };
   window.mcPromptFounderCode=function(){
