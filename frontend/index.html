@@ -125,7 +125,7 @@
   function openAccountFlow(mode, prefillEmail){
     statusReady.then(function(on){
       if(on){ emailStep(prefillEmail); }
-      else { try{ alert('Everything here is free to use right now — no account needed. Accounts and cross-device sync are coming soon.'); }catch(e){} }
+      else { try{ if(confirm('You don’t need an account — everything here is ready to use right now.\n\nClinical? Activate your access with your founder code. Open the activation page now?')) location.href='/redeem'; }catch(e){} }
     });
   }
   // A later script declares its own function openAuth() (the old password modal); install
