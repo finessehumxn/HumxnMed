@@ -2039,7 +2039,17 @@ def _accounts_on() -> bool:
         sb.table("entitlements").select("email").limit(1).execute()  # reachable + table + key
         ok = True
     except Exception as e:
-        logger.warning(f"accounts probe failed — accounts stay OFF: {e}")
+        # Distinguish "project reachable + key valid, table just not created yet" (accounts CAN
+        # work — auth needs no table) from a real misconfig (bad key / unreachable). Sign-up works
+        # without the entitlements table; it only limits tier grants until the table is created.
+        msg = str(e).lower()
+        table_missing = ("does not exist" in msg or "not find the table" in msg
+                         or "pgrst205" in msg or "42p01" in msg or "schema cache" in msg)
+        if table_missing:
+            ok = True
+            logger.warning("accounts ON but entitlements table is missing — run the setup SQL to enable tier grants.")
+        else:
+            logger.warning(f"accounts probe failed (bad key/unreachable) — accounts stay OFF: {e}")
     _acct_probe["ok"] = ok
     _acct_probe["at"] = now
     return ok
