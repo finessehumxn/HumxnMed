@@ -53,9 +53,12 @@ RC_PUBLIC_KEY = os.getenv("RC_PUBLIC_KEY", "")   # RevenueCat PUBLIC SDK key (sa
 MC_GATING = os.getenv("MC_GATING", "0") == "1"   # freemium paywall enforcement — OFF by default (live app stays fully open until flipped on)
 UMLS_API_KEY = os.getenv("UMLS_API_KEY", "")   # free NLM key enables SNOMED CT coding
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")   # sk_… enables web-purchase verification -> auto-unlock tier on the buyer's device (optional; no-op if unset)
-# Founding-clinician comp codes: redeeming one grants free Clinical access for MC_FOUNDER_DAYS.
-# Set MC_FOUNDER_CODES to your own comma-separated codes (default has a starter one so it works now).
-MC_FOUNDER_CODES = [c.strip().upper() for c in os.getenv("MC_FOUNDER_CODES", "FOUNDINGRN").split(",") if c.strip()]
+# Founding-clinician comp codes: redeeming one IN THE APP grants free Clinical access for
+# MC_FOUNDER_DAYS. NOTE: a Stripe *coupon* (e.g. "Founder2026") only makes web checkout free —
+# it does NOT unlock the app by itself. To let a founder unlock in-app, the code they type here
+# must be in this list. Defaults include the founder codes already handed out; override/extend
+# with the MC_FOUNDER_CODES env (comma-separated). Matching is case-insensitive.
+MC_FOUNDER_CODES = [c.strip().upper() for c in os.getenv("MC_FOUNDER_CODES", "FOUNDINGRN,FOUNDER2026").split(",") if c.strip()]
 MC_FOUNDER_DAYS = int(os.getenv("MC_FOUNDER_DAYS", "180"))
 
 
