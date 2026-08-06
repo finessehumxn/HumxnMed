@@ -59,6 +59,9 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")   # sk_… enables web-pu
 # must be in this list. Defaults include the founder codes already handed out; override/extend
 # with the MC_FOUNDER_CODES env (comma-separated). Matching is case-insensitive.
 MC_FOUNDER_CODES = [c.strip().upper() for c in os.getenv("MC_FOUNDER_CODES", "FOUNDINGRN,FOUNDER2026").split(",") if c.strip()]
+# Owner-only secret to grant a tier to an email (comp a founding clinician's ACCOUNT so it
+# follows them across devices once accounts are on). Set MC_ADMIN_SECRET in Railway; unset = off.
+MC_ADMIN_SECRET = os.getenv("MC_ADMIN_SECRET", "").strip()
 MC_FOUNDER_DAYS = int(os.getenv("MC_FOUNDER_DAYS", "180"))
 
 
@@ -246,6 +249,26 @@ async def redeem_code(code: str = ""):
     if c and c in MC_FOUNDER_CODES:
         return {"ok": True, "tier": "clinical", "days": MC_FOUNDER_DAYS}
     return {"ok": False}
+
+class GrantRequest(BaseModel):
+    email: str
+    tier: str
+    secret: str = ""
+
+@app.post("/admin/grant")
+async def admin_grant(req: GrantRequest):
+    """Owner-only: grant a tier to an email so it's tied to their ACCOUNT (follows them across
+    devices once they sign in). Use to comp a founding clinician: grant their email 'clinical'.
+    Requires MC_ADMIN_SECRET and that accounts (Supabase) are live."""
+    if not MC_ADMIN_SECRET or req.secret != MC_ADMIN_SECRET:
+        raise HTTPException(403, "Not authorized")
+    if not _accounts_on():
+        raise HTTPException(503, "Accounts aren't on yet — connect Supabase first.")
+    tier = (req.tier or "").strip().lower()
+    if tier not in ("free", "plus", "pro", "clinical"):
+        raise HTTPException(400, "tier must be one of free/plus/pro/clinical")
+    ok = await set_entitlement(req.email, tier, "admin-grant")
+    return {"ok": ok, "email": (req.email or "").strip().lower(), "tier": tier}
 
 @app.get("/rc-config")
 async def rc_config():
