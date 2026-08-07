@@ -118,6 +118,24 @@ def invalid_handler(state: PatientState) -> dict:
     }
 
 
+def unavailable_handler(state: PatientState) -> dict:
+    """The safety classifier could not produce a status we recognise. We do NOT know
+    this input is safe to answer, so the graph terminates here instead of continuing
+    to extraction. Carries emergency and crisis routing, because the one thing we
+    can't do is stay silent about them while the classifier is down."""
+    logger.error("Guardrail unavailable — failing closed to unavailable_handler")
+    return {
+        "current_node":      "unavailable_handler",
+        "guardrail_message": state.get("guardrail_message") or (
+            "I can't safely review this right now — something went wrong on my end. "
+            "Please try again in a moment.\n\n"
+            "If this is a medical emergency, call 911 or go to your nearest emergency room. "
+            "If you're in emotional distress or thinking about harming yourself, "
+            "call or text 988 to reach the Suicide and Crisis Lifeline, any time of day or night."
+        ),
+    }
+
+
 def error_handler(state: PatientState) -> dict:
     """Catches errors from any pipeline node. Ensures clean termination."""
     logger.error(f"Pipeline error caught by error_handler: {state.get('error')}")
@@ -132,17 +150,25 @@ def error_handler(state: PatientState) -> dict:
 # â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 
 def route_after_guardrail(state: PatientState) -> str:
-    """Fan-out from guardrail to appropriate handler or extraction."""
-    status = state.get("guardrail_status", "pass")
+    """Fan-out from guardrail to appropriate handler or extraction.
+
+    FAILS CLOSED: an absent or unrecognised status routes to unavailable_handler,
+    never to extraction. Defaulting to 'pass' here would send a crisis message into
+    the briefing pipeline whenever the classifier hiccuped."""
+    status = state.get("guardrail_status")
     route_map = {
-        "pass":      "extraction",
-        "emergency": "emergency_handler",
-        "crisis":    "crisis_handler",
-        "off_topic": "off_topic_handler",
-        "invalid":   "invalid_handler",
+        "pass":        "extraction",
+        "emergency":   "emergency_handler",
+        "crisis":      "crisis_handler",
+        "off_topic":   "off_topic_handler",
+        "invalid":     "invalid_handler",
+        "unavailable": "unavailable_handler",
     }
-    destination = route_map.get(status, "extraction")
-    logger.info(f"Guardrail routing: status='{status}' â†’ '{destination}'")
+    destination = route_map.get(status)
+    if destination is None:
+        logger.error(f"Guardrail returned unroutable status {status!r} — failing closed")
+        destination = "unavailable_handler"
+    logger.info(f"Guardrail routing: status='{status}' -> '{destination}'")
     return destination
 
 
@@ -209,6 +235,7 @@ def build_graph():
     builder.add_node("crisis_handler",    crisis_handler)
     builder.add_node("off_topic_handler", off_topic_handler)
     builder.add_node("invalid_handler",   invalid_handler)
+    builder.add_node("unavailable_handler", unavailable_handler)
     builder.add_node("error_handler",     error_handler)
 
     # â”€â”€ Entry point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -224,6 +251,7 @@ def build_graph():
             "crisis_handler":    "crisis_handler",
             "off_topic_handler": "off_topic_handler",
             "invalid_handler":   "invalid_handler",
+            "unavailable_handler": "unavailable_handler",
         }
     )
 
@@ -250,6 +278,7 @@ def build_graph():
     builder.add_edge("crisis_handler",    END)
     builder.add_edge("off_topic_handler", END)
     builder.add_edge("invalid_handler",   END)
+    builder.add_edge("unavailable_handler", END)
     builder.add_edge("error_handler",     END)
 
     # â”€â”€ Compile with MemorySaver for interrupt/resume support â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

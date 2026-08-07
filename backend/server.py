@@ -13,7 +13,7 @@ if os.getenv("LANGCHAIN_API_KEY") and os.getenv("MC_ENABLE_TRACING", "").strip()
 else:
     os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
-from fastapi import FastAPI, HTTPException, Header
+from fastapi import FastAPI, HTTPException, Header, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -65,7 +65,9 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")   # sk_… enables web-pu
 # it does NOT unlock the app by itself. To let a founder unlock in-app, the code they type here
 # must be in this list. Defaults include the founder codes already handed out; override/extend
 # with the MC_FOUNDER_CODES env (comma-separated). Matching is case-insensitive.
-MC_FOUNDER_CODES = [c.strip().upper() for c in os.getenv("MC_FOUNDER_CODES", "FOUNDINGRN,FOUNDER2026").split(",") if c.strip()]
+# No default. Shipping guessable literals ("FOUNDER2026") as the fallback meant
+# anyone could redeem a Clinical comp on an unconfigured deploy. Unset = feature off.
+MC_FOUNDER_CODES = [c.strip().upper() for c in os.getenv("MC_FOUNDER_CODES", "").split(",") if c.strip()]
 # Owner-only secret to grant a tier to an email (comp a founding clinician's ACCOUNT so it
 # follows them across devices once accounts are on). Set MC_ADMIN_SECRET in Railway; unset = off.
 MC_ADMIN_SECRET = os.getenv("MC_ADMIN_SECRET", "").strip()
@@ -348,13 +350,37 @@ async def verify_purchase(session_id: str = ""):
         logger.error(f"verify-purchase error: {e}")
         return {"tier": None}
 
+# Simple in-process attempt limiter. Single uvicorn worker -> shared, same as
+# _briefing_jobs. Guards guessable-secret endpoints from unbounded brute force.
+_attempts: dict = {}
+
+def _rate_limited(bucket: str, key: str, limit: int, window_s: int) -> bool:
+    now = time.time()
+    hits = [t for t in _attempts.get((bucket, key), []) if now - t < window_s]
+    if len(hits) >= limit:
+        _attempts[(bucket, key)] = hits
+        return True
+    hits.append(now)
+    _attempts[(bucket, key)] = hits
+    if len(_attempts) > 10000:      # crude bound; never let this map grow forever
+        for k in [k for k, v in _attempts.items() if not any(now - t < window_s for t in v)]:
+            _attempts.pop(k, None)
+    return False
+
 @app.get("/redeem-code")
-async def redeem_code(code: str = ""):
+async def redeem_code(request: Request, code: str = ""):
     """Redeem a founding-clinician comp code -> free Clinical access for MC_FOUNDER_DAYS.
-    Codes are held server-side (env), not in client JS. Returns {ok, tier, days}."""
+    Codes are held server-side (env), not in client JS. Returns {ok, tier, days}.
+
+    Rate limited and compared in constant time: a valid code grants a $799-tier
+    entitlement, so an unmetered endpoint here is a free-Clinical vending machine."""
+    ip = (request.client.host if request.client else "unknown")
+    if _rate_limited("redeem", ip, limit=5, window_s=300):
+        raise HTTPException(429, "Too many attempts — please wait a few minutes and try again.")
     c = (code or "").strip().upper()
-    if c and c in MC_FOUNDER_CODES:
+    if c and any(hmac.compare_digest(c, valid) for valid in MC_FOUNDER_CODES):
         return {"ok": True, "tier": "clinical", "days": MC_FOUNDER_DAYS}
+    logger.warning(f"redeem-code: failed attempt from {ip}")
     return {"ok": False}
 
 class GrantRequest(BaseModel):
@@ -2263,8 +2289,13 @@ async def session_start(req: StartRequest):
     try:
         # blocking LangGraph run — keep it off the event loop so one request can't freeze others
         result = await asyncio.to_thread(graph.invoke, initial_state, config, interrupt_before=["confirmation"])
-        guardrail = result.get("guardrail_status", "pass")
-        if guardrail in ("emergency", "crisis", "off_topic", "invalid"):
+        # Fail closed: only an explicit "pass" continues to the briefing flow. An
+        # absent or unrecognised status is a classifier failure, not permission.
+        guardrail = result.get("guardrail_status")
+        if guardrail != "pass":
+            if guardrail not in ("emergency", "crisis", "off_topic", "invalid", "unavailable"):
+                logger.error(f"session_start: unroutable guardrail status {guardrail!r} — failing closed")
+                guardrail = "unavailable"
             return {"status": guardrail, "guardrail_message": result.get("guardrail_message", "")}
         if result.get("error"):
             return {"status": "error", "error": result["error"]}
@@ -2443,8 +2474,48 @@ async def user_data_clear(req: DeleteRequest, authorization: str = Header(defaul
     ok = await clear_user_data(req.user_id)
     return {"status": "ok" if ok else "error"}
 
+@app.post("/account/delete")
+async def account_delete(authorization: str = Header(default="")):
+    """Delete the SIGNED-IN user's own account — the magic-code way (token identifies them; no user_id
+    needed). Removes their Supabase auth user + entitlement. Health data is on-device, wiped client-side.
+    Fails soft so the client-side local wipe always proceeds."""
+    if not _accounts_on():
+        return {"ok": True}
+    token = (authorization or "").replace("Bearer ", "").strip()
+    if not token:
+        raise HTTPException(401, "Not signed in")
+    try:
+        sb = get_supabase()
+        u = sb.auth.get_user(token)
+        user = u.user if u else None
+        if not user:
+            raise HTTPException(401, "Not signed in")
+        email = (getattr(user, "email", "") or "").lower()
+        try:
+            if email:
+                sb.table("entitlements").delete().eq("email", email).execute()
+        except Exception as e:
+            logger.error(f"account delete entitlement: {e}")
+        try:
+            sb.auth.admin.delete_user(user.id)
+        except Exception as e:
+            logger.error(f"account delete auth user: {e}")
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"account delete: {e}")
+        return {"ok": True}
+
 @app.get("/session/{thread_id}/state")
-async def session_state(thread_id: str):
+async def session_state(thread_id: str, secret: str = ""):
+    """Debug only. Returns raw PatientState — the patient's own words, symptoms, and
+    identified condition. That is PHI, so this is owner-gated behind MC_ADMIN_SECRET
+    and returns 404 when the secret is unset (i.e. off in production by default).
+    An unguessable thread_id is not access control: UUIDs leak via logs, Referer
+    headers, and shared URLs."""
+    if not MC_ADMIN_SECRET or not hmac.compare_digest(secret or "", MC_ADMIN_SECRET):
+        raise HTTPException(404)
     config = {"configurable": {"thread_id": thread_id}}
     try:
         state = graph.get_state(config)

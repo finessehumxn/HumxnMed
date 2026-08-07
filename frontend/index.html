@@ -3356,17 +3356,8 @@ function signOut() {
 }
 
 async function loadHistory() {
-  if (!currentUser || !currentUser.user_id) { openAuth('login'); return; }
-  var res = await fetch(API + '/user/' + currentUser.user_id + '/history');
-  var data = await res.json();
-  if (!data.history || !data.history.length) {
-    alert('No history yet — complete a health briefing to save it here.');
-    return;
-  }
-  var list = data.history.map(function(h) {
-    return new Date(h.created_at).toLocaleDateString() + ': ' + (h.condition_identified || 'Health question');
-  }).join('\n');
-  alert('Your saved health history:\n\n' + list);
+  // Local-first: your Health Journal & records are saved on THIS device (private) — not on a server.
+  alert('Your Health Journal and saved records live privately on this device. Open “My Health” from the menu to view and manage them.');
 }
 
 /* ── Restore auth on load ── */
@@ -4393,35 +4384,22 @@ function renderVisitPrep(d) {
     + '<button class="vc-save" onclick="shareVisitPrep()" style="border-color:#1f9d96;color:#7fe3d8"><i class="ti ti-share"></i> Share / Save this prep</button>';
 }
 async function exportMyData() {
-  if (!(currentUser && currentUser.user_id)) return;
-  try {
-    var res = await fetch(API + '/user/' + currentUser.user_id + '/export');
-    var data = await res.json();
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a'); a.href = url; a.download = 'my-medcompanion-data.json';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-  } catch(e) { alert('Could not export right now — please try again.'); }
+  // Local-first: export the real on-device data (mcBackup is self-contained; optional password).
+  if (window.mcBackup) { window.mcBackup(); }
+  else { alert('Export isn’t available right now — please try again.'); }
 }
 async function clearMyHealthData() {
-  if (!(currentUser && currentUser.user_id)) return;
-  if (!(await window.mcConfirm({title:'Clear your saved health data?',message:'Your account stays active. This cannot be undone.',ok:'Clear data',danger:true}))) return;
-  try {
-    var res = await fetch(API + '/user/data/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: currentUser.user_id }) });
-    var d = await res.json();
-    if (d.status === 'ok') { window.mcToast('Your health data has been cleared'); openHealthHub(); }
-    else alert('Could not clear your data right now — please try again.');
-  } catch(e) { alert('Could not clear your data right now — please try again.'); }
+  // Local-first: clear the on-device health data (mctWipe self-confirms and removes local mc_* data).
+  if (window.mctWipe) { window.mctWipe(); }
 }
 async function deleteMyAccount() {
-  if (!(currentUser && currentUser.user_id)) return;
-  if (!(await window.mcConfirm({title:'Delete your account?',message:'Your account and all saved health data will be deleted. This cannot be undone.',ok:'Delete account',danger:true}))) return;
-  try {
-    await fetch(API + '/user/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: currentUser.user_id }) });
-  } catch(e) {}
-  try { localStorage.removeItem('mc_user'); localStorage.removeItem('mc_history'); } catch(e) {}
-  signOut(); closeHealthHub();
-  window.mcToast('Your account and data have been deleted');
+  if (!(await window.mcConfirm({title:'Delete your account?',message:'This deletes your account and wipes your data from this device. This cannot be undone.',ok:'Delete account',danger:true}))) return;
+  // Delete the server account — the token identifies you (magic-code accounts have no user_id). Best-effort.
+  try { var u = JSON.parse(localStorage.getItem('mc_user') || 'null'); if (u && u.token) { await fetch(API + '/account/delete', { method: 'POST', headers: { 'Authorization': 'Bearer ' + u.token } }); } } catch(e) {}
+  // Wipe on-device data (the real data is local-first).
+  try { var ks = []; for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && (k.indexOf('mc_') === 0 || k.indexOf('mc.') === 0)) ks.push(k); } ks.forEach(function(k){ localStorage.removeItem(k); }); } catch(e) {}
+  try { if (window.signOut) signOut(); if (window.closeHealthHub) closeHealthHub(); } catch(e) {}
+  if (window.mcToast) window.mcToast('Your account and data have been deleted');
 }
 function shareVisitPrep() {
   var d = window._vpData; if (!d) return;
