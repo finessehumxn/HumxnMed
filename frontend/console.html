@@ -126,35 +126,69 @@
   window.demoExample=function(){ var d=DEMOS[curMode]; if(!d) return; var el=document.getElementById(d[0]); if(el) el.value=d[1]; runCurrent(); };
   function cleanCmd(t){ return String(t||'').replace(/\s*(go|run|search|okay|ok|period|please|now|thanks?)\.?\s*$/i,'').trim(); }
   var mcV = {
-    active:false, readAloud:false, rec:null,
+    active:false, readAloud:false, rec:null, manualStop:false, natSR:null,
     toggleRA:function(){ this.readAloud=!this.readAloud; var b=document.getElementById('raBtn'); if(b){ b.textContent='🔊 Read aloud: '+(this.readAloud?'on':'off'); b.className='vbtn'+(this.readAloud?' on':''); } if(!this.readAloud){ try{ speechSynthesis.cancel(); }catch(e){} } },
     speak:function(t){ if(!this.readAloud||!('speechSynthesis' in window)||!t) return; try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(String(t).replace(/\s+/g,' ').slice(0,700)); u.rate=1.03; speechSynthesis.speak(u); }catch(e){} },
     srNative:function(){ try{ return (window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.SpeechRecognition) || (window.Capacitor&&typeof Capacitor.registerPlugin==='function'&&Capacitor.registerPlugin('SpeechRecognition')) || null; }catch(e){ return null; } },
-    setBtn:function(on){ var b=document.getElementById('micBtn'); if(b){ b.textContent=on?'🔴 Listening…':'🎤 Dictate'; b.className='vbtn'+(on?' rec':''); } },
+    setBtn:function(on){ var b=document.getElementById('micBtn'); if(b){ b.textContent=on?'🔴 Listening — tap to stop':'🎤 Dictate'; b.className='vbtn'+(on?' rec':''); } var h=document.querySelector('.vhint'); if(h) h.textContent=on?'Listening — take your time, pauses are fine. Tap to stop when you’re done, then review and run.':''; },
+    // Manual stop only: the recognizer keeps listening through thinking pauses; it ends
+    // ONLY when the clinician taps the button. Dictation fills the box — it never auto-runs,
+    // so no one is rushed. Works on web (Web Speech, continuous + auto-resume) and native.
+    stopDictation:function(){
+      this.manualStop=true; this.active=false; this.setBtn(false);
+      try{ this.rec&&this.rec.stop(); }catch(e){}
+      try{ if(this.natSR){ this.natSR.removeAllListeners&&this.natSR.removeAllListeners(); this.natSR.stop&&this.natSR.stop(); } }catch(e){}
+    },
     dictate:function(){
       var input=document.getElementById(activeInputId()); if(!input) return;
       try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
+      if(this.active){ this.stopDictation(); return; }              // tap again = stop
       var SRnat=this.srNative(); if(SRnat){ this.native(input, SRnat); return; }
       var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
       if(!SR){ input.focus(); var h=document.querySelector('.vhint'); if(h) h.textContent='Tap the mic on your keyboard and speak.'; return; }
-      if(this.active){ try{ this.rec.stop(); }catch(e){} return; }
-      var self=this, r=new SR(), got=''; r.lang=navigator.language||'en-US'; r.interimResults=true; r.continuous=false;
-      r.onresult=function(e){ var t=''; for(var i=0;i<e.results.length;i++){ t+=e.results[i][0].transcript; } got=t; input.value=t; };
-      r.onerror=function(){ self.active=false; self.setBtn(false); };
-      r.onend=function(){ self.active=false; self.setBtn(false); var q=cleanCmd(got); if(q){ input.value=q; runCurrent(); } };
-      this.rec=r; this.active=true; this.setBtn(true); try{ r.start(); }catch(e){ this.active=false; this.setBtn(false); }
+      var self=this;
+      var base=(input.value||'').replace(/\s+$/,''); if(base) base+=' ';   // keep & append to existing text
+      var finalTxt='';
+      var r=new SR(); r.lang=navigator.language||'en-US'; r.interimResults=true; r.continuous=true;
+      r.onresult=function(e){
+        var interim='';
+        for(var i=e.resultIndex;i<e.results.length;i++){
+          if(e.results[i].isFinal){ finalTxt+=e.results[i][0].transcript+' '; }
+          else { interim+=e.results[i][0].transcript; }
+        }
+        input.value=(base+finalTxt+interim).replace(/\s{2,}/g,' ');
+        try{ input.scrollTop=input.scrollHeight; }catch(_){}
+      };
+      r.onerror=function(ev){
+        if(ev&&(ev.error==='not-allowed'||ev.error==='service-not-allowed')){ self.manualStop=true; self.active=false; self.setBtn(false); }
+        // 'no-speech'/'aborted' during a pause: let onend auto-resume.
+      };
+      r.onend=function(){
+        if(self.manualStop){ self.active=false; self.setBtn(false); return; }
+        // Browser auto-stops on silence/timeout — resume so thinking pauses never cut them off.
+        base=(base+finalTxt).replace(/\s{2,}/g,' '); if(base&&!/\s$/.test(base)) base+=' '; finalTxt='';
+        try{ r.start(); }catch(e){ setTimeout(function(){ try{ if(!self.manualStop) r.start(); }catch(_){} }, 300); }
+      };
+      this.rec=r; this.active=true; this.manualStop=false; this.setBtn(true);
+      try{ r.start(); }catch(e){ this.active=false; this.setBtn(false); }
     },
     native:function(input, SR){
       var self=this;
-      if(this.active){ try{ SR.stop(); }catch(e){} return; }
       Promise.resolve().then(function(){ return SR.checkPermissions?SR.checkPermissions():{speechRecognition:'granted'}; })
         .then(function(p){ return (!p||p.speechRecognition!=='granted')&&SR.requestPermissions?SR.requestPermissions():p; })
         .then(function(p){
           if(!p||p.speechRecognition!=='granted'){ input.focus(); return; }
-          self.active=true; self.setBtn(true);
+          self.active=true; self.manualStop=false; self.natSR=SR; self.setBtn(true);
+          var base=(input.value||'').replace(/\s+$/,''); if(base) base+=' ';
           try{ SR.removeAllListeners&&SR.removeAllListeners(); }catch(e){}
-          SR.addListener('partialResults', function(d){ var m=(d&&d.matches&&d.matches.length)?d.matches[0]:''; if(m) input.value=m; });
-          SR.addListener('listeningState', function(d){ if(d&&d.status==='stopped'){ self.active=false; self.setBtn(false); var q=cleanCmd(input.value); if(q){ input.value=q; runCurrent(); } } });
+          SR.addListener('partialResults', function(d){ var m=(d&&d.matches&&d.matches.length)?d.matches[0]:''; if(m) input.value=(base+m).replace(/\s{2,}/g,' '); });
+          SR.addListener('listeningState', function(d){
+            if(d&&d.status==='stopped'){
+              var cur=(input.value||'').replace(/\s+$/,''); if(cur){ base=cur+' '; }   // fold what we have into base
+              if(self.manualStop){ self.active=false; self.setBtn(false); return; }
+              try{ SR.start({ language:navigator.language||'en-US', partialResults:true, popup:false }); }catch(e){}   // resume through pauses
+            }
+          });
           SR.start({ language:navigator.language||'en-US', maxResults:1, partialResults:true, popup:false });
         }).catch(function(){ self.active=false; self.setBtn(false); input.focus(); });
     }
