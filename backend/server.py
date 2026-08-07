@@ -67,6 +67,9 @@ MC_FOUNDER_CODES = [c.strip().upper() for c in os.getenv("MC_FOUNDER_CODES", "FO
 # Owner-only secret to grant a tier to an email (comp a founding clinician's ACCOUNT so it
 # follows them across devices once accounts are on). Set MC_ADMIN_SECRET in Railway; unset = off.
 MC_ADMIN_SECRET = os.getenv("MC_ADMIN_SECRET", "").strip()
+# HIPAA posture: when "1", route patient data ONLY through vendors you can put under a BAA
+# (OpenAI), dropping Groq/ElevenLabs. Flip on once BAAs are signed. Default off (all vendors).
+MC_BAA_ONLY = os.getenv("MC_BAA_ONLY", "").strip() in ("1", "true", "True")
 MC_FOUNDER_DAYS = int(os.getenv("MC_FOUNDER_DAYS", "180"))
 
 
@@ -1560,6 +1563,8 @@ async def speak(req: SpeakRequest):
     el_key = os.getenv("ELEVENLABS_API_KEY")
     el_voice = os.getenv("ELEVENLABS_VOICE_ID")
     openai_key = os.getenv("OPENAI_API_KEY")
+    if MC_BAA_ONLY:
+        el_key = None  # HIPAA posture: read-aloud only via a BAA-capable vendor (OpenAI)
     if not (el_key and el_voice) and not openai_key:
         raise HTTPException(503, "Voice not configured — add OPENAI_API_KEY or ELEVENLABS_API_KEY")
 
@@ -1631,6 +1636,10 @@ async def transcribe(req: TranscribeRequest):
     groq = os.getenv("GROQ_API_KEY")
     openai_key = os.getenv("OPENAI_API_KEY")
     eleven = os.getenv("ELEVENLABS_API_KEY")
+    if MC_BAA_ONLY:
+        # HIPAA posture: only route audio through vendors we can put under a BAA (OpenAI).
+        groq = None
+        eleven = None
     if not (groq or openai_key or eleven):
         raise HTTPException(503, "Transcription not configured")
 
