@@ -1,12 +1,17 @@
 ﻿"""server.py â€” HumxnMed AI v2"""
-import os, logging, uuid, asyncio, time
+import os, logging, uuid, asyncio, time, hmac
 from typing import Optional
 from dotenv import load_dotenv
 load_dotenv()
 
-if os.getenv("LANGCHAIN_API_KEY"):
+# LangSmith tracing sends the FULL pipeline (incl. raw health input) to LangChain's cloud.
+# That is PHI leaving to an undisclosed third party — so it is OFF unless EXPLICITLY opted in
+# via MC_ENABLE_TRACING=1 (not merely because an API key happens to be present).
+if os.getenv("LANGCHAIN_API_KEY") and os.getenv("MC_ENABLE_TRACING", "").strip() in ("1", "true", "True"):
     os.environ.setdefault("LANGCHAIN_TRACING_V2", "true")
-    os.environ.setdefault("LANGCHAIN_PROJECT", "medcompanion-ai")
+    os.environ.setdefault("LANGCHAIN_PROJECT", "humxnmed")
+else:
+    os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.staticfiles import StaticFiles
@@ -79,17 +84,59 @@ EPIC_SCOPES = os.getenv("EPIC_SCOPES", "openid fhirUser patient/Patient.read pat
 
 app = FastAPI(title="HumxnMed AI", version="2.0.0")
 
-# CORS — required so the bundled mobile app (origin https://localhost / capacitor://localhost)
-# can call this API cross-origin. No cookies are used (user_id is sent in the request body),
-# so credentials are disabled and wildcard origins are safe.
+# CORS — restricted to the known web + native origins (was wildcard). Same-origin app
+# requests are unaffected (CORS only governs cross-origin). No cookies are used.
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from collections import defaultdict
+_EXTRA_ORIGINS = [o.strip() for o in os.getenv("MC_ALLOWED_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://humxnmed.millennialscreatives.com",
+        "https://millennialscreatives.com",
+        "https://www.millennialscreatives.com",
+        "https://medcompanion-ai.up.railway.app",
+        "https://web-production-82e2d.up.railway.app",
+        "https://medcompanionai.com",
+        "capacitor://localhost", "ionic://localhost", "https://localhost", "http://localhost",
+    ] + _EXTRA_ORIGINS,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Simple per-IP rate limit on the expensive/unauthenticated AI + voice endpoints (was none —
+# an open door to run up the AI bill). In-memory sliding window; fine for single-process.
+_rl_hits = defaultdict(list)
+_RL_PREFIXES = ("/transcribe", "/i18n-batch", "/speak", "/translate", "/session/start",
+                "/companion", "/advocate", "/billhelp", "/insights", "/explain-records",
+                "/explain-note", "/med-guide", "/handout", "/analyze", "/chronology",
+                "/pre-visit", "/visit-", "/normalize-med", "/code-term", "/triage", "/clinical-")
+_RL_MAX_PER_MIN = int(os.getenv("MC_RL_PER_MIN", "40"))
+
+@app.middleware("http")
+async def _rate_limit_and_security_headers(request, call_next):
+    path = request.url.path
+    if request.method == "POST" and any(path.startswith(p) for p in _RL_PREFIXES):
+        ip = (request.headers.get("x-forwarded-for", "").split(",")[0].strip()
+              or (request.client.host if request.client else "?"))
+        now = time.monotonic()
+        hits = _rl_hits[ip]
+        while hits and now - hits[0] > 60:
+            hits.pop(0)
+        if len(hits) >= _RL_MAX_PER_MIN:
+            return JSONResponse({"detail": "Too many requests — please slow down and try again in a minute."}, status_code=429)
+        hits.append(now)
+        if len(_rl_hits) > 5000:  # cheap unbounded-growth guard
+            for k in [k for k, v in list(_rl_hits.items()) if not v or now - v[-1] > 120][:2000]:
+                _rl_hits.pop(k, None)
+    resp = await call_next(request)
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    resp.headers["X-Frame-Options"] = "SAMEORIGIN"
+    resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    resp.headers.setdefault("Content-Security-Policy", "frame-ancestors 'self'")
+    return resp
 
 memory = MemorySaver()
 graph = build_graph()
@@ -269,7 +316,7 @@ async def admin_grant(req: GrantRequest):
     """Owner-only: grant a tier to an email so it's tied to their ACCOUNT (follows them across
     devices once they sign in). Use to comp a founding clinician: grant their email 'clinical'.
     Requires MC_ADMIN_SECRET and that accounts (Supabase) are live."""
-    if not MC_ADMIN_SECRET or req.secret != MC_ADMIN_SECRET:
+    if not MC_ADMIN_SECRET or not hmac.compare_digest(req.secret or "", MC_ADMIN_SECRET):
         raise HTTPException(403, "Not authorized")
     if not _accounts_on():
         raise HTTPException(503, "Accounts aren't on yet — connect Supabase first.")
@@ -567,7 +614,8 @@ async def i18n_batch(req: I18nRequest):
     instruct the model to keep brand names, medical codes (RxNorm/LOINC/ICD/SNOMED),
     drug names, numbers and placeholders EXACTLY. Always fails soft to English."""
     target = (req.target or "").strip().lower()
-    strings = [s for s in (req.strings or []) if isinstance(s, str) and s.strip()]
+    # Cap input to prevent cost-abuse: at most 200 strings, each <= 2000 chars.
+    strings = [s[:2000] for s in (req.strings or []) if isinstance(s, str) and s.strip()][:200]
     if target not in _I18N_LANGS or not strings:
         return {"translations": {}}
     cache = _i18n_cache.setdefault(target, {})
@@ -1545,6 +1593,8 @@ async def transcribe(req: TranscribeRequest):
     This works on the LIVE build over the network — no native plugin needed."""
     import base64, httpx
     b64 = req.audio or ""
+    if len(b64) > 34_000_000:  # ~25 MB decoded cap (Whisper limit); reject oversized uploads
+        raise HTTPException(413, "Audio too large — keep recordings under a few minutes.")
     if "," in b64[:64]:
         b64 = b64.split(",", 1)[1]
     try:
@@ -1993,7 +2043,7 @@ class SignRequest(BaseModel):
 
 def _doctor_key_ok(key: str) -> bool:
     want = os.getenv("DOCTOR_KEY")
-    return bool(want) and key == want
+    return bool(want) and hmac.compare_digest(key or "", want)
 
 @app.post("/review/request")
 async def review_request(req: ReviewRequest):
@@ -2216,7 +2266,7 @@ async def session_confirm(thread_id: str, req: ConfirmRequest):
             norm = state_snapshot.values.get("normalization", {})
             final_condition = norm.get("primary_condition", "") or norm.get("plain_condition_name", "")
 
-        logger.info(f"confirm: final_condition='{final_condition}' (async)")
+        logger.info("confirm: briefing generated (async)")  # do NOT log the condition (PHI)
         graph.update_state(config, {"final_condition": final_condition}, as_node="confirmation")
 
         raw_input = state_snapshot.values.get("raw_input", "")
@@ -2258,22 +2308,53 @@ async def analyze_image(req: StartRequest):
     except Exception as e:
         raise HTTPException(500, str(e))
 
+# ── Ownership guard for stored-PHI endpoints ─────────────────────────────────
+# SECURITY: these previously had NO auth — anyone could export or delete ANY user's
+# records by supplying their id (IDOR). Now they require a valid Supabase session token
+# whose user matches the target id.
+async def _authed_user_id(authorization: str) -> Optional[str]:
+    if not _accounts_on():
+        return None
+    token = (authorization or "").replace("Bearer ", "").strip()
+    if not token:
+        return None
+    try:
+        sb = get_supabase()
+        u = sb.auth.get_user(token)
+        return (u.user.id if u and u.user else None)
+    except Exception as e:
+        logger.error(f"auth check failed: {e}")
+        return None
+
+async def _require_owner(user_id: str, authorization: str) -> str:
+    uid = await _authed_user_id(authorization)
+    if not uid or uid != user_id:
+        raise HTTPException(403, "Not authorized")
+    return uid
+
 @app.get("/user/{user_id}/history")
-async def user_history(user_id: str):
+async def user_history(user_id: str, authorization: str = Header(default="")):
+    await _require_owner(user_id, authorization)
     return {"status": "ok", "history": await get_user_history(user_id)}
 
 @app.get("/user/{user_id}/symptoms")
-async def user_symptoms(user_id: str):
+async def user_symptoms(user_id: str, authorization: str = Header(default="")):
+    await _require_owner(user_id, authorization)
     return {"status": "ok", "symptoms": await get_symptom_history(user_id)}
 
 @app.post("/user/symptoms/log")
-async def log_symptom_entry(req: SymptomLogRequest):
+async def log_symptom_entry(req: SymptomLogRequest, authorization: str = Header(default="")):
+    await _require_owner(req.user_id, authorization)
+    if not STORE_HISTORY:
+        # Honor the "store nothing by default" promise: do not persist PHI unless enabled.
+        return {"status": "ok", "stored": False}
     success = await log_symptom(req.user_id, req.symptom, req.severity, req.notes or "")
-    return {"status": "ok" if success else "error"}
+    return {"status": "ok" if success else "error", "stored": bool(success)}
 
 @app.get("/user/{user_id}/export")
-async def user_export(user_id: str):
+async def user_export(user_id: str, authorization: str = Header(default="")):
     """HIPAA patient right: download everything we store about you."""
+    await _require_owner(user_id, authorization)
     data = await export_user_data(user_id)
     return {"status": "ok", "exported_at": __import__("datetime").datetime.utcnow().isoformat() + "Z", "data": data}
 
@@ -2281,14 +2362,16 @@ class DeleteRequest(BaseModel):
     user_id: str
 
 @app.post("/user/delete")
-async def user_delete(req: DeleteRequest):
+async def user_delete(req: DeleteRequest, authorization: str = Header(default="")):
     """HIPAA patient right: delete your account and all your data."""
+    await _require_owner(req.user_id, authorization)
     ok = await delete_user_data(req.user_id)
     return {"status": "ok" if ok else "error"}
 
 @app.post("/user/data/clear")
-async def user_data_clear(req: DeleteRequest):
+async def user_data_clear(req: DeleteRequest, authorization: str = Header(default="")):
     """Patient right: delete all health data (logs, history) WITHOUT deleting the account."""
+    await _require_owner(req.user_id, authorization)
     ok = await clear_user_data(req.user_id)
     return {"status": "ok" if ok else "error"}
 

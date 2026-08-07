@@ -43,8 +43,17 @@
       <li>To respond to questions you send us.</li>
     </ul>
 
-    <h2>3. AI processing</h2>
-    <p>To produce your briefing, the text you submit is processed by trusted AI and search providers (including Anthropic's Claude API) and may be checked against reputable public medical sources (such as NIH, Mayo Clinic, and FDA). We send only what is needed to answer your question.</p>
+    <h2>3. AI processing &mdash; what leaves your device, and to whom</h2>
+    <p>HumxnMed is local-first: your saved records live on your device. But the AI features are cloud-based, so <strong>when you use them, the specific content you submit is sent to third-party providers to generate a response</strong>. Being direct about exactly what goes where:</p>
+    <ul>
+      <li><strong>Text you submit</strong> (symptoms, questions, notes, records you ask about) &rarr; <strong>Anthropic (Claude)</strong> to generate the answer.</li>
+      <li><strong>Photos you upload</strong> (e.g. a document or lab image) &rarr; Anthropic's vision model to read them.</li>
+      <li><strong>Voice recordings</strong>, if you use the microphone &rarr; a speech-to-text provider (<strong>Groq, OpenAI, or ElevenLabs</strong>) to transcribe; read-aloud uses a text-to-speech provider.</li>
+      <li><strong>Connected records</strong>, if you link a patient portal (Epic / MyChart via SMART-on-FHIR) &rarr; imported and parsed to answer your questions.</li>
+      <li><strong>Account &amp; plan</strong> (email + which tier you own), if you create an account &rarr; <strong>Supabase</strong>. Payments, if you buy a plan &rarr; <strong>Stripe</strong>. We store <em>email and tier only</em> &mdash; never your health records.</li>
+      <li><strong>Optional "reviewed by a clinician"</strong>: if <em>you</em> request a human review, the relevant content is stored so a reviewer can see it. That is the one path where you actively choose to have content saved.</li>
+    </ul>
+    <p>We send only what is needed to answer each request, and we do not write your health content to our own database by default. These AI providers process data under their own terms; formal healthcare assurances (signed BAAs, a HIPAA program, SOC 2) are <strong>in progress</strong> &mdash; until they are complete, do not enter information you are not comfortable processing under standard commercial cloud terms, and clinicians should not enter identifiable patient information.</p>
 
     <h2>4. What we do not do</h2>
     <ul>

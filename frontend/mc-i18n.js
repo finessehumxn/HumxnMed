@@ -38,6 +38,11 @@
   function saveCache() { try { localStorage.setItem('mc_i18n_' + LANG, JSON.stringify(CACHE)); } catch (e) {} }
   var CACHE = LANG === 'en' ? {} : loadCache(LANG);
 
+  // SAFETY: never machine-translate safety-critical copy. A mistranslated crisis line, emergency
+  // instruction, or medical disclaimer can cause harm, so these stay authoritative English until a
+  // human-reviewed translation exists. (Better English-and-clear than translated-and-wrong.)
+  var SAFETY_RE = /988|911|suicide|crisis lifeline|not a (diagnosis|doctor|medical device|substitute|replacement)|not an emergency|call your local emergency|seek emergency|emergency room|go to the er|get help right away|call emergency/i;
+
   function translatable(str) {
     if (!str) return false;
     var s = str.trim();
@@ -45,6 +50,7 @@
     if (!/[A-Za-zÀ-ɏ]/.test(s)) return false;      // must contain letters (skip numbers/codes/emoji)
     if (/^[\d\s.,:%\/\-+°x×()]+$/.test(s)) return false;     // pure numeric / units
     if (/^https?:\/\//i.test(s) || /^\S+@\S+\.\S+$/.test(s)) return false; // url / email
+    if (SAFETY_RE.test(s)) return false;            // keep safety-critical copy in authoritative English
     return true;
   }
   function skip(node) {

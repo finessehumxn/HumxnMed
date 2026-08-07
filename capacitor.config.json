@@ -3,10 +3,10 @@
   "appName": "HumxnMed AI",
   "webDir": "frontend",
   "server": {
-    "url": "https://medcompanion-ai.up.railway.app",
-    "cleartext": true
+    "url": "https://humxnmed.millennialscreatives.com",
+    "androidScheme": "https"
   },
   "android": {
-    "allowMixedContent": true
+    "allowMixedContent": false
   }
 }
