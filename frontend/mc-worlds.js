@@ -40,6 +40,8 @@
 
   // Re-open the door (used by a "Switch experience" control anywhere in the app).
   window.mcSwitchWorld = function () { try { localStorage.removeItem(KEY); } catch (e) {} door(); };
+  // Cross into the clinician world (from the patient app's "Are you a clinician?" control).
+  window.mcGoClinician = function () { set('clinician'); location.href = '/console'; };
 
   function returningClinicianBanner() {
     if (document.getElementById('mcWorldBanner')) return;

@@ -2583,14 +2583,13 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function(e){ var m=document.getElementById('navDD'); if(m && m.classList.contains('show') && !e.target.closest('.nav-dd')) closeNavDD(); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeNavDD(); });
 </script>
-<!-- ── User Type Selector ── -->
-<div class="user-type-bar" id="userTypeBar" role="toolbar" aria-label="Select your background">
-  <span class="user-type-label">I am viewing this as:</span>
-  <button class="user-type-btn active" id="btnEveryday" onclick="setUserType('everyday')">
-    🙋 An everyday person
-  </button>
-  <button class="user-type-btn" id="btnPro" onclick="setUserType('professional')">
-    🏥 A medical professional
+<!-- ── Two worlds: the patient app stays purely for patients. Clinicians cross to their own
+     world (the point-of-care console) instead of morphing this screen. ── -->
+<div class="user-type-bar" id="userTypeBar" role="navigation" aria-label="For clinicians">
+  <span class="user-type-label">Are you a clinician?</span>
+  <button class="user-type-btn active" id="btnEveryday" style="display:none" onclick="setUserType('everyday')" aria-hidden="true">🙋 An everyday person</button>
+  <button class="user-type-btn" id="btnPro" type="button" onclick="window.mcGoClinician&&window.mcGoClinician()">
+    🩺 Open the clinician console →
   </button>
 </div>
 
@@ -3117,6 +3116,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     </div>
     <div class="footer-links">
+      <a href="javascript:void(0)" class="footer-link" role="button" onclick="window.mcSwitchWorld&&window.mcSwitchWorld()"><i class="ti ti-arrows-left-right" aria-hidden="true"></i> Switch experience</a>
       <a href="/about-us.html" class="footer-link"><i class="ti ti-info-circle" aria-hidden="true"></i> About us</a>
       <a href="/about.html" class="footer-link"><i class="ti ti-rosette-discount-check" aria-hidden="true"></i> Our medical standards</a>
       <a href="/partners.html" class="footer-link"><i class="ti ti-heart-handshake" aria-hidden="true"></i> Partnerships</a>
