@@ -321,9 +321,19 @@ async def verify_purchase(session_id: str = ""):
         elif re.search(r"\bplus\b", n):
             tier = "plus"
         if not tier:  # fallback: map by exact price (cents)
+            # Pro lifetime is listed as "$299" on /founding but was specced at $299.99, so both
+            # are accepted — a cent-level mismatch must never silently drop a paid buyer to free.
             tier = {999: "plus", 5999: "plus", 12999: "plus",
-                    2499: "pro", 14999: "pro", 29999: "pro",
+                    2499: "pro", 14999: "pro", 29900: "pro", 29999: "pro",
                     3900: "clinical", 34900: "clinical", 79900: "clinical"}.get(amount)
+        if not tier:
+            # Paid, but matched neither name nor price — almost always a renamed/repriced Stripe
+            # product. Log loudly with the details needed to fix the mapping; the buyer still gets
+            # a null tier (never a wrong one), but the sale is no longer invisible.
+            logger.error(
+                f"verify-purchase: PAID but UNMAPPED — product={name!r} amount={amount} "
+                f"session={sid} — add this price/name to the tier map"
+            )
         # Record the tier against the buyer's email so it follows them across devices
         # once they sign in with that email. Falls back silently if accounts aren't on.
         buyer_email = ((data.get("customer_details") or {}).get("email")
