@@ -61,6 +61,14 @@ workflows:
         script: |
           perl -0777 -i -pe 's/(\n(\t+)buildSettings = \{)/$1\n$2\tDEVELOPMENT_TEAM = $ENV{DEV_TEAM};/g' ios/App/App.xcodeproj/project.pbxproj
           grep -c "DEVELOPMENT_TEAM" ios/App/App.xcodeproj/project.pbxproj || true
+      - name: Inject the iMessage extension target (native)
+        script: |
+          # The iOS project is regenerated each build, so re-add the native Messages
+          # extension target here (after the team-id patch, before pod install so the
+          # workspace integrates it). Idempotent — no-ops if already present.
+          gem install xcodeproj --no-document 2>/dev/null || sudo gem install xcodeproj --no-document || true
+          ruby ios-native/inject_imessage.rb
+          grep -c "MessagesExtension" ios/App/App.xcodeproj/project.pbxproj || true
       - name: Resolve dependencies (CocoaPods or SPM, whichever the project uses)
         script: |
           if [ -f ios/App/Podfile ]; then
@@ -83,6 +91,8 @@ workflows:
           openssl genrsa -out /tmp/cert_key.pem 2048
           app-store-connect certificates create --type IOS_DISTRIBUTION --certificate-key=@file:/tmp/cert_key.pem --save
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --certificate-key=@file:/tmp/cert_key.pem --create
+          # the iMessage extension is a separate bundle id → needs its own App Store profile
+          app-store-connect fetch-signing-files "$BUNDLE_ID.MessagesExtension" --type IOS_APP_STORE --certificate-key=@file:/tmp/cert_key.pem --create
           keychain add-certificates
           xcode-project use-profiles
       - name: Set marketing version + build number
@@ -91,13 +101,18 @@ workflows:
           # or upload fails with 90062/90186. Date-based = always increases, never
           # conflicts across days, and is set-and-forget for every future build.
           MV="1.0.$(date +%y%m%d)"
+          BN="$(date +%s)"   # capture ONCE so app + extension get the identical build number
           cd ios/App
           agvtool new-marketing-version "$MV" || true
           # also force it in the Info.plist in case it's a literal value
           plutil -replace CFBundleShortVersionString -string "$MV" App/Info.plist 2>/dev/null || true
-          echo "Marketing version -> $MV"
           # Full unix timestamp for the build number = always increases.
-          agvtool new-version -all $(date +%s) || true
+          agvtool new-version -all "$BN" || true
+          # The iMessage extension bundle MUST carry the exact same version + build as the
+          # container app, or App Store validation fails (90xxx). Force both explicitly.
+          plutil -replace CFBundleShortVersionString -string "$MV" MessagesExtension/Info.plist 2>/dev/null || true
+          plutil -replace CFBundleVersion -string "$BN" MessagesExtension/Info.plist 2>/dev/null || true
+          echo "Marketing version -> $MV / build -> $BN"
       - name: Build IPA (workspace if CocoaPods, else project)
         script: |
           if [ -d ios/App/App.xcworkspace ]; then
