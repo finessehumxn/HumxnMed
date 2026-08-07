@@ -161,8 +161,26 @@
     mo.observe(document.body, { childList: true, subtree: true });
   }
 
+  // Modest RTL fixes for Arabic/Farsi (scoped to [dir="rtl"], so LTR is never touched). Not a full
+  // RTL redesign, but corrects text alignment, list bullets, inputs and the language switcher.
+  function injectRTL() {
+    if (document.getElementById('mcRTLcss')) return;
+    var s = document.createElement('style'); s.id = 'mcRTLcss';
+    s.textContent =
+      '[dir="rtl"] body,[dir="rtl"] .wrap,[dir="rtl"] p,[dir="rtl"] li,[dir="rtl"] h1,[dir="rtl"] h2,[dir="rtl"] h3{text-align:right}' +
+      '[dir="rtl"] input,[dir="rtl"] textarea,[dir="rtl"] select{text-align:right;direction:rtl}' +
+      '[dir="rtl"] ul,[dir="rtl"] ol{padding-right:1.2em;padding-left:0}' +
+      '[dir="rtl"] .price li,[dir="rtl"] .step{padding-right:22px;padding-left:0}' +
+      '[dir="rtl"] .price li::before{right:2px;left:auto}' +
+      '[dir="rtl"] #mcLangBar{left:auto !important;right:14px}';
+    (document.head || document.documentElement).appendChild(s);
+  }
   function start() {
-    if (LANG !== 'en') { document.documentElement.lang = LANG; document.documentElement.dir = RTL[LANG] ? 'rtl' : 'ltr'; }
+    if (LANG !== 'en') {
+      document.documentElement.lang = LANG;
+      if (RTL[LANG]) { document.documentElement.dir = 'rtl'; injectRTL(); }
+      else { document.documentElement.dir = 'ltr'; }
+    }
     run(document.body);
     switcher();
     notice();
