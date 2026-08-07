@@ -23,6 +23,7 @@ from .graph import build_graph
 
 try:
     from .supabase_client import (get_supabase, supabase_configured, get_entitlement, set_entitlement,
+                                  add_to_waitlist,
                                   save_session, get_user_history, log_symptom,
                                   get_symptom_history, request_review, get_review,
                                   get_pending_reviews, sign_review, export_user_data, delete_user_data, clear_user_data)
@@ -32,6 +33,7 @@ except ImportError:
     def supabase_configured(): return False
     async def get_entitlement(*a, **k): return None
     async def set_entitlement(*a, **k): return False
+    async def add_to_waitlist(*a, **k): return False
     async def save_session(*a, **k): return None
     async def get_user_history(u, limit=20): return []
     async def log_symptom(*a, **k): return False
@@ -231,6 +233,29 @@ async def serve_redeem():
 async def serve_guide():
     """Step-by-step 'how to use HumxnMed' — for clinicians and for patients."""
     return FileResponse(os.path.join(frontend_dir, "guide.html"))
+
+@app.get("/back")
+async def serve_back():
+    """Crowdfunding / 'Back HumxnMed' pre-launch landing page."""
+    return FileResponse(os.path.join(frontend_dir, "back.html"))
+
+class NotifyRequest(BaseModel):
+    email: str
+    source: Optional[str] = "back"
+
+@app.post("/notify")
+async def notify(req: NotifyRequest):
+    """Pre-launch 'notify me when we crowdfund' capture. Graceful — always returns ok so the
+    page UX is smooth; stores in the waitlist table if Supabase is set up."""
+    email = (req.email or "").strip().lower()
+    if "@" not in email or "." not in email.split("@")[-1]:
+        raise HTTPException(400, "Please enter a valid email address.")
+    try:
+        await add_to_waitlist(email, (req.source or "back")[:40])
+    except Exception as e:
+        logger.error(f"notify error: {e}")
+    logger.info(f"waitlist signup: {email}")  # marketing contact (consented), not health data
+    return {"ok": True}
 
 @app.get("/how")
 async def serve_how():

@@ -122,6 +122,28 @@ def _norm_email(email: str) -> str:
     return (email or "").strip().lower()
 
 
+async def add_to_waitlist(email: str, source: str = "") -> bool:
+    """Store a crowdfunding/pre-launch 'notify me' email. Graceful: no-op if Supabase or the
+    waitlist table isn't set up. SQL:
+      create table if not exists public.waitlist (
+        email text primary key, source text, created_at timestamptz default now());
+      alter table public.waitlist enable row level security;"""
+    sb = get_supabase()
+    e = _norm_email(email)
+    if not sb or not e:
+        return False
+    try:
+        from datetime import datetime, timezone
+        sb.table("waitlist").upsert(
+            {"email": e, "source": source, "created_at": datetime.now(timezone.utc).isoformat()},
+            on_conflict="email",
+        ).execute()
+        return True
+    except Exception as ex:
+        logger.error(f"waitlist error: {ex}")
+        return False
+
+
 async def get_entitlement(email: str) -> Optional[str]:
     """Return the tier an email owns (e.g. 'clinical'), or None."""
     sb = get_supabase()

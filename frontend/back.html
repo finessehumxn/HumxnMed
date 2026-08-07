@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="/static/mc-i18n.js"></script>
+<script src="/static/mc-a11y.js"></script>
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Back HumxnMed — your health, finally explained, for everyone</title>
+<meta name="description" content="Help keep HumxnMed free and get plain-language health to everyone. Already live. Back our crowdfunding launch.">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --em:#0B3D2E; --em2:#0A2318; --ink:#07201a; --gold:#C9A24B; --gold2:#E7C877; --cream:#F5EFE0;
+    --tx:#EAF3EE; --t2:#9FBFB4; --card:#103b31; --card2:#0e3229; --bd:#1f5a4c; --sans:Inter,system-ui,Segoe UI,Arial,sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{ font-family:var(--sans); background:var(--ink); color:var(--tx); line-height:1.65; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1060px; margin:0 auto; padding:0 22px; }
+  h1,h2,h3,.serif{ font-family:Fraunces,Georgia,serif; font-weight:600; line-height:1.1; }
+  a{ color:var(--gold2); text-decoration:none; }
+  .btn{ display:inline-block; background:var(--gold); color:#231a06; font-weight:800; font-size:16px; padding:15px 28px; border-radius:999px; border:none; cursor:pointer; font-family:inherit; transition:.15s; }
+  .btn:hover{ transform:translateY(-1px); background:var(--gold2); }
+  .btn.ghost{ background:transparent; color:var(--gold2); border:1.5px solid rgba(201,162,75,.5); }
+  .eyebrow{ text-transform:uppercase; letter-spacing:.22em; font-size:12px; font-weight:800; color:var(--gold); }
+
+  /* nav */
+  nav{ position:sticky; top:0; z-index:20; background:rgba(7,32,26,.82); backdrop-filter:blur(10px); border-bottom:1px solid rgba(255,255,255,.06); }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:14px 22px; }
+  .logo{ font-family:Fraunces,serif; font-weight:700; font-size:20px; color:var(--cream); }
+  .logo b{ color:var(--gold2); }
+
+  /* hero */
+  .hero{ background:radial-gradient(1000px 560px at 78% -12%,rgba(201,162,75,.20),transparent 60%),linear-gradient(168deg,var(--em),var(--em2) 72%,var(--ink)); padding:72px 0 56px; border-bottom:1px solid rgba(201,162,75,.16); text-align:center; }
+  .hero h1{ font-size:clamp(2.6rem,7vw,4.2rem); color:var(--cream); letter-spacing:-.02em; margin:14px auto 14px; max-width:16ch; }
+  .hero h1 em{ color:var(--gold); font-style:italic; }
+  .lead{ font-size:clamp(17px,2.4vw,20px); color:var(--t2); max-width:60ch; margin:0 auto; }
+  .cta-row{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:28px; }
+  .live-note{ margin-top:26px; font-size:13.5px; color:var(--t2); }
+  .stores{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+  .store{ display:inline-flex; align-items:center; gap:8px; background:#0b0b0b; color:#fff; text-decoration:none; padding:9px 14px; border-radius:11px; }
+  .store small{ display:block; font-size:9px; opacity:.85; } .store b{ font-size:14px; }
+
+  section{ padding:64px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .kick{ text-align:center; }
+  .kick h2{ font-size:clamp(1.7rem,4vw,2.5rem); color:var(--cream); letter-spacing:-.02em; margin:10px auto 12px; max-width:20ch; }
+  .kick p.sub{ color:var(--t2); max-width:60ch; margin:0 auto; font-size:16.5px; }
+
+  .stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:36px; }
+  @media(max-width:720px){ .stat-row{ grid-template-columns:1fr; } }
+  .stat{ background:var(--card); border:1px solid var(--bd); border-radius:18px; padding:26px 22px; text-align:center; }
+  .stat .n{ font-family:Fraunces,serif; font-size:34px; font-weight:700; color:var(--gold2); }
+  .stat .l{ color:var(--t2); font-size:14.5px; margin-top:4px; }
+
+  .worlds{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:36px; }
+  @media(max-width:760px){ .worlds{ grid-template-columns:1fr; } }
+  .world{ background:var(--card); border:1px solid var(--bd); border-radius:22px; padding:30px 28px; }
+  .world .ic{ font-size:30px; }
+  .world h3{ font-size:23px; color:var(--cream); margin:12px 0 8px; }
+  .world p{ color:var(--t2); font-size:15px; }
+  .world ul{ list-style:none; margin:14px 0 0; }
+  .world li{ position:relative; padding-left:26px; margin:8px 0; font-size:14.5px; color:var(--tx); }
+  .world li::before{ content:"✓"; position:absolute; left:0; color:var(--gold2); font-weight:800; }
+
+  .proof{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:34px; }
+  @media(max-width:860px){ .proof{ grid-template-columns:1fr 1fr; } }
+  @media(max-width:480px){ .proof{ grid-template-columns:1fr; } }
+  .pf{ background:var(--card2); border:1px solid var(--bd); border-radius:16px; padding:20px; }
+  .pf .ic{ font-size:22px; } .pf h4{ font-size:15.5px; color:var(--cream); margin:8px 0 5px; font-weight:800; font-family:var(--sans); }
+  .pf p{ font-size:13.5px; color:var(--t2); }
+
+  .funds{ max-width:760px; margin:30px auto 0; }
+  .funds li{ list-style:none; background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:16px 20px; margin:10px 0; font-size:15.5px; color:var(--tx); }
+  .funds li b{ color:var(--gold2); }
+
+  .tiers{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:34px; }
+  @media(max-width:760px){ .tiers{ grid-template-columns:1fr; } }
+  .tier{ background:var(--card); border:1px solid var(--bd); border-radius:16px; padding:20px 22px; display:flex; gap:16px; align-items:baseline; }
+  .tier .amt{ font-family:Fraunces,serif; font-weight:700; font-size:24px; color:var(--gold2); white-space:nowrap; min-width:74px; }
+  .tier .d{ font-size:14.5px; color:var(--t2); }
+  .tier .d b{ color:var(--cream); font-weight:700; }
+  .tier.feat{ border-color:rgba(201,162,75,.55); box-shadow:0 0 0 1px rgba(201,162,75,.25); }
+
+  /* email capture */
+  .capture{ background:radial-gradient(800px 400px at 50% -20%,rgba(201,162,75,.18),transparent 60%),linear-gradient(165deg,var(--em),var(--ink)); text-align:center; }
+  .capture h2{ font-size:clamp(1.8rem,4.5vw,2.6rem); color:var(--cream); margin-bottom:10px; }
+  .form{ display:flex; gap:10px; max-width:480px; margin:24px auto 0; flex-wrap:wrap; justify-content:center; }
+  .form input{ flex:1; min-width:220px; padding:15px 16px; font-size:16px; border-radius:12px; border:1px solid var(--bd); background:rgba(255,255,255,.04); color:var(--tx); font-family:inherit; }
+  .form input::placeholder{ color:#7fa394; }
+  .msg{ margin-top:14px; font-size:14.5px; min-height:20px; }
+  .msg.ok{ color:var(--gold2); } .msg.err{ color:#ff9b8f; }
+  .cap-fine{ font-size:12.5px; color:var(--t2); margin-top:16px; }
+
+  footer{ background:var(--ink); padding:40px 0; text-align:center; }
+  footer .fb{ font-family:Fraunces,serif; color:var(--cream); font-size:18px; margin-bottom:6px; }
+  footer .fl{ color:var(--t2); font-size:13px; }
+  footer a{ color:var(--t2); } footer a:hover{ color:var(--gold2); }
+  .disc{ max-width:760px; margin:18px auto 0; font-size:12px; color:#6f9a86; line-height:1.6; }
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <div class="logo">Humxn<b>Med</b></div>
+  <a class="btn ghost" href="#back" style="padding:10px 20px;font-size:14px">Notify me</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">Crowdfunding · Launching soon</div>
+  <h1>Back <em>HumxnMed.</em></h1>
+  <p class="lead">Your health, finally explained — in plain language, in your language, for everyone. It's already live. Help us keep the core <b style="color:var(--cream)">free</b> and get it to the people who need it most.</p>
+  <div class="cta-row">
+    <a class="btn" href="#back">Be first to back us →</a>
+    <a class="btn ghost" href="/app">See the app</a>
+  </div>
+  <div class="live-note">Already live in the App Store &amp; on the web:</div>
+  <div class="stores" data-i18n-keep>
+    <a class="store" href="https://apps.apple.com/us/app/medcompanion-ai/id6785335934" aria-label="Download on the App Store">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff" aria-hidden="true"><path d="M17.05 12.5c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.83-.81-3.01-.79-1.55.02-2.98.9-3.78 2.29-1.61 2.8-.41 6.95 1.15 9.22.76 1.11 1.67 2.36 2.86 2.31 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.77.74 2.98.72 1.23-.02 2.01-1.13 2.76-2.25.87-1.29 1.23-2.54 1.25-2.6-.03-.01-2.39-.92-2.41-3.65zM14.77 5.5c.64-.77 1.07-1.85.95-2.92-.92.04-2.03.61-2.69 1.38-.59.68-1.11 1.77-.97 2.82 1.02.08 2.07-.52 2.71-1.28z"/></svg>
+      <span><small>Download on the</small><b>App Store</b></span>
+    </a>
+    <a class="store" href="https://play.google.com/store/apps/details?id=com.medcompanionai.app" aria-label="Get it on Google Play">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M3.6 2.3c-.2.2-.3.5-.3.9v17.6c0 .4.1.7.3.9l.1.1L13.5 12v-.2L3.7 2.2z" fill="#00d0ff"/><path d="M17 15.3l-3.5-3.5v-.2L17 8.1l4.2 2.4c1.2.7 1.2 1.8 0 2.5L17 15.3z" fill="#ffce00"/><path d="M17 15.3L13.5 11.8 3.6 21.7c.4.4 1 .5 1.8.1L17 15.3z" fill="#ff3d47"/><path d="M17 8.1L5.4 1.6C4.6 1.2 4 1.3 3.6 1.7l9.9 10.1L17 8.1z" fill="#00f076"/></svg>
+      <span><small>Get it on</small><b>Google Play</b></span>
+    </a>
+  </div>
+</div></header>
+
+<!-- PROBLEM -->
+<section><div class="wrap kick">
+  <div class="eyebrow">You've felt this</div>
+  <h2>You left the doctor still confused.</h2>
+  <p class="sub">You nodded along to words you didn't understand — then went home, typed your symptoms into a search bar, and ended up more scared than before. If English isn't your first language, or you can't just "go get it checked," it's even harder.</p>
+  <div class="stat-row">
+    <div class="stat"><div class="n">1 in 3</div><div class="l">skip the doctor over cost, fear, or not knowing where to start</div></div>
+    <div class="stat"><div class="n">80%</div><div class="l">search their symptoms online — and often feel worse after</div></div>
+    <div class="stat"><div class="n">7 in 10</div><div class="l">leave appointments still unsure what their doctor meant</div></div>
+  </div>
+</div></section>
+
+<!-- SOLUTION / TWO WORLDS -->
+<section><div class="wrap kick">
+  <div class="eyebrow">One app · two worlds</div>
+  <h2>Health, translated into human.</h2>
+  <p class="sub">HumxnMed takes what's confusing — a result, a diagnosis, a medication, a bill — and explains it plainly. It's information to help you understand and prepare. <b style="color:var(--cream)">Not a diagnosis, never a replacement for your doctor.</b></p>
+  <div class="worlds">
+    <div class="world">
+      <div class="ic">🙋‍</div>
+      <h3>For you &amp; your family</h3>
+      <p>Understand your health, in your words and your language.</p>
+      <ul>
+        <li>Plain-language explanations of symptoms, labs, meds &amp; bills</li>
+        <li>15+ languages · read-aloud · works offline</li>
+        <li>A private "Health Passport" for any doctor or ER</li>
+        <li>Track how you feel &amp; get ready for your visits</li>
+      </ul>
+    </div>
+    <div class="world">
+      <div class="ic">🩺</div>
+      <h3>For clinicians</h3>
+      <p>A companion at the point of care — supports your judgment.</p>
+      <ul>
+        <li>Rapid, sourced reference at the bedside</li>
+        <li>Dictation → a clean draft note you review &amp; sign</li>
+        <li>Explain the plan to patients in any language</li>
+        <li>Evidence you independently review — not a medical device</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<!-- WHY BACK -->
+<section><div class="wrap kick">
+  <div class="eyebrow">Why back it</div>
+  <h2>Built to be trusted — and to be for everyone.</h2>
+  <div class="proof">
+    <div class="pf"><div class="ic">🔒</div><h4>Private by design</h4><p>Your records stay on your device. Never sold, never used for ads.</p></div>
+    <div class="pf"><div class="ic">🎁</div><h4>Free core</h4><p>Understanding your health shouldn't depend on income or language.</p></div>
+    <div class="pf"><div class="ic">🔎</div><h4>Real sources</h4><p>Meds &amp; codes come from official NIH databases — not made up by AI.</p></div>
+    <div class="pf"><div class="ic">✅</div><h4>Already real</h4><p>Live in the App Store and on the web, used by real people today.</p></div>
+  </div>
+</div></section>
+
+<!-- WHAT IT FUNDS -->
+<section><div class="wrap kick">
+  <div class="eyebrow">Where your backing goes</div>
+  <h2>Keep it free. Reach more people.</h2>
+  <ul class="funds">
+    <li>🌍 <b>More languages &amp; accessibility</b> — reach the communities that get left out.</li>
+    <li>🎁 <b>Keep the core free</b> — sustain access for people who can't pay.</li>
+    <li>🩺 <b>The clinical path</b> — the compliance work to safely bring it to clinics.</li>
+    <li>🔧 <b>Reliability &amp; scale</b> — so it stays fast and free as more people join.</li>
+  </ul>
+</div></section>
+
+<!-- REWARDS -->
+<section><div class="wrap kick">
+  <div class="eyebrow">Founding rewards</div>
+  <h2>Back us, and it's yours — for life.</h2>
+  <p class="sub">Founding backers lock in lifetime access at founding prices. Every reward is digital — delivered right after the campaign with a code.</p>
+  <div class="tiers">
+    <div class="tier"><div class="amt">$10</div><div class="d"><b>Supporter</b> — our thanks + your name on the Founders wall.</div></div>
+    <div class="tier"><div class="amt">$25</div><div class="d"><b>Early Access</b> — HumxnMed Plus for a full year.</div></div>
+    <div class="tier feat"><div class="amt">$130</div><div class="d"><b>Plus Founding Member</b> — Plus, <b>lifetime</b>, at the founding price.</div></div>
+    <div class="tier"><div class="amt">$199</div><div class="d"><b>Give + Get</b> — Plus lifetime for you + <b>gift a year</b> to someone who can't afford it.</div></div>
+    <div class="tier"><div class="amt">$300</div><div class="d"><b>Pro Founding Member</b> — everything, unlimited, <b>lifetime</b>.</div></div>
+    <div class="tier"><div class="amt">$799</div><div class="d"><b>Founding Clinician</b> — HumxnMed Clinical, <b>lifetime</b>.</div></div>
+    <div class="tier"><div class="amt">$2.5k</div><div class="d"><b>Community Sponsor</b> — fund plain-language health for a whole clinic or community.</div></div>
+  </div>
+</div></section>
+
+<!-- CAPTURE -->
+<section class="capture" id="back"><div class="wrap">
+  <div class="eyebrow" style="text-align:center">Be first</div>
+  <h2>Get notified the moment we launch.</h2>
+  <p class="sub" style="margin:0 auto">The best rewards go fast. Drop your email and you'll be first to back us — and lock in the founding price.</p>
+  <form class="form" id="notifyForm" novalidate>
+    <label for="notifyEmail" style="position:absolute;left:-9999px">Email address</label>
+    <input id="notifyEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" aria-label="Email address">
+    <button class="btn" id="notifyBtn" type="submit">Notify me →</button>
+  </form>
+  <div class="msg" id="notifyMsg" role="status" aria-live="polite"></div>
+  <div class="cap-fine">No spam, ever. Just one email when the campaign goes live. HumxnMed is a product of Millennials Creatives LLC.</div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="fb">Humxn<span style="color:var(--gold2)">Med</span></div>
+  <div class="fl">Your health, finally explained.</div>
+  <div class="fl" style="margin-top:12px">
+    <a href="/app">The app</a> · <a href="/guide">How it works</a> · <a href="/privacy">Privacy</a> · <a href="mailto:team@medcompanionai.com">team@medcompanionai.com</a>
+  </div>
+  <p class="disc">HumxnMed provides information and education to help you understand your health and prepare for your clinician — it is <b>not a diagnosis, not a substitute for professional medical advice, and not a medical device</b>. In an emergency, call your local emergency number. © 2026 Millennials Creatives LLC.</p>
+</div></footer>
+
+<script>
+  (function(){
+    var f=document.getElementById('notifyForm'), inp=document.getElementById('notifyEmail'), btn=document.getElementById('notifyBtn'), msg=document.getElementById('notifyMsg');
+    function show(t,ok){ msg.textContent=t; msg.className='msg '+(ok?'ok':'err'); }
+    f.addEventListener('submit', function(e){
+      e.preventDefault();
+      var email=(inp.value||'').trim();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ show('Please enter a valid email address.',false); return; }
+      btn.disabled=true; var old=btn.textContent; btn.textContent='Sending…';
+      fetch('/notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,source:'back'})})
+        .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+        .then(function(res){
+          if(!res.ok) throw new Error((res.d&&res.d.detail)||'Something went wrong');
+          f.style.display='none';
+          show('🎉 You’re on the list! We’ll email you the moment we launch.',true);
+        })
+        .catch(function(err){ btn.disabled=false; btn.textContent=old; show(err.message||'Something went wrong — please try again.',false); });
+    });
+  })();
+</script>
+</body>
+</html>
