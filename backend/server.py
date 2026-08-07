@@ -2323,6 +2323,9 @@ async def session_confirm(thread_id: str, req: ConfirmRequest):
         graph.update_state(config, {"final_condition": final_condition}, as_node="confirmation")
 
         raw_input = state_snapshot.values.get("raw_input", "")
+        if len(_briefing_jobs) > 500:  # cap the in-memory job store; drop oldest (FIFO) to prevent leak
+            for _k in list(_briefing_jobs.keys())[:250]:
+                _briefing_jobs.pop(_k, None)
         _briefing_jobs[thread_id] = {"status": "processing"}
         asyncio.create_task(_briefing_task(thread_id, config, req.confirmed, override, req.user_id, raw_input, final_condition))
         return {"status": "processing"}
@@ -2341,8 +2344,10 @@ async def session_result(thread_id: str):
     if not job:
         return {"status": "unknown"}
     if job["status"] == "complete":
+        _briefing_jobs.pop(thread_id, None)  # one-time fetch — free the memory
         return {"status": "complete", "briefing": job["briefing"]}
     if job["status"] == "error":
+        _briefing_jobs.pop(thread_id, None)
         return {"status": "error", "error": job.get("error", "Briefing failed. Please try again.")}
     return {"status": "processing"}
 
