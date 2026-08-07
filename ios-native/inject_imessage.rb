@@ -58,6 +58,9 @@ ext.build_configurations.each do |c|
   bs['ASSETCATALOG_COMPILER_APPICON_NAME'] = 'iMessage App Icon'
   bs['ENABLE_BITCODE']                   = 'NO'
   bs['SKIP_INSTALL']                     = 'YES'
+  # Explicitly link the frameworks the extension uses. Swift autolinking normally adds
+  # these, but naming them is harmless and rules out a missing-symbol link failure.
+  bs['OTHER_LDFLAGS']                    = ['$(inherited)', '-framework', 'Foundation', '-framework', 'UIKit', '-framework', 'Messages']
   bs['LD_RUNPATH_SEARCH_PATHS']          = ['$(inherited)', '@executable_path/Frameworks', '@executable_path/../../Frameworks']
   bs['CLANG_ENABLE_MODULES']             = 'YES'
   bs['SWIFT_EMIT_LOC_STRINGS']           = 'YES'

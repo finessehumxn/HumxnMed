@@ -116,9 +116,16 @@ workflows:
       - name: Build IPA (workspace if CocoaPods, else project)
         script: |
           if [ -d ios/App/App.xcworkspace ]; then
-            xcode-project build-ipa --workspace ios/App/App.xcworkspace --scheme "$XCODE_SCHEME"
+            xcode-project build-ipa --workspace ios/App/App.xcworkspace --scheme "$XCODE_SCHEME" || BUILD_FAILED=1
           else
-            xcode-project build-ipa --project ios/App/App.xcodeproj --scheme "$XCODE_SCHEME"
+            xcode-project build-ipa --project ios/App/App.xcodeproj --scheme "$XCODE_SCHEME" || BUILD_FAILED=1
+          fi
+          if [ "$BUILD_FAILED" = "1" ]; then
+            echo "==================== REAL BUILD ERRORS ===================="
+            # xcpretty hides actool/clang diagnostics; surface them from the raw logs.
+            grep -rhiE "error:|❌|is missing|unassigned|Undefined symbol|required (icon|content)" /tmp/xcodebuild_logs/ 2>/dev/null | sort -u | head -100
+            echo "=========================================================="
+            exit 1
           fi
     artifacts:
       - build/ios/ipa/*.ipa

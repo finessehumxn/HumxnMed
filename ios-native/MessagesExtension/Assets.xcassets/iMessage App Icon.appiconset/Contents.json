@@ -1,6 +1,34 @@
 {
   "images" : [
     {
+      "filename" : "icon_54x40.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "scale" : "2x",
+      "size" : "27x20"
+    },
+    {
+      "filename" : "icon_81x60.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "scale" : "3x",
+      "size" : "27x20"
+    },
+    {
+      "filename" : "icon_64x48.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "scale" : "2x",
+      "size" : "32x24"
+    },
+    {
+      "filename" : "icon_96x72.png",
+      "idiom" : "universal",
+      "platform" : "ios",
+      "scale" : "3x",
+      "size" : "32x24"
+    },
+    {
       "filename" : "icon_58x58.png",
       "idiom" : "iphone",
       "scale" : "2x",
@@ -43,46 +71,11 @@
       "size" : "74x55"
     },
     {
-      "filename" : "icon_54x40.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "2x",
-      "size" : "27x20"
-    },
-    {
-      "filename" : "icon_81x60.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "3x",
-      "size" : "27x20"
-    },
-    {
-      "filename" : "icon_64x48.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "2x",
-      "size" : "32x24"
-    },
-    {
-      "filename" : "icon_96x72.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "3x",
-      "size" : "32x24"
-    },
-    {
       "filename" : "icon_1024x768.png",
-      "idiom" : "universal",
-      "platform" : "ios",
-      "scale" : "1x",
-      "size" : "1024x768"
-    },
-    {
-      "filename" : "icon_1024x1024.png",
       "idiom" : "ios-marketing",
       "platform" : "ios",
       "scale" : "1x",
-      "size" : "1024x1024"
+      "size" : "1024x768"
     }
   ],
   "info" : {
