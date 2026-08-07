@@ -136,6 +136,15 @@ async def _rate_limit_and_security_headers(request, call_next):
     resp.headers["X-Frame-Options"] = "SAMEORIGIN"
     resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     resp.headers.setdefault("Content-Security-Policy", "frame-ancestors 'self'")
+    # Edge-cacheable so a CDN (e.g. Cloudflare) absorbs a launch traffic spike. Static assets cache
+    # 5 min; page HTML caches 60s so deploys still propagate quickly. GET only; never cache the API.
+    if request.method == "GET":
+        p = path.lower()
+        if p.startswith("/static/") or p.rsplit(".", 1)[-1] in ("js", "css", "png", "jpg", "jpeg", "svg", "webp", "ico", "woff", "woff2"):
+            resp.headers.setdefault("Cache-Control", "public, max-age=300, stale-while-revalidate=86400")
+        elif p in ("/", "/app", "/clinical", "/console", "/guide", "/humxnmed", "/founding", "/family",
+                   "/welcome", "/redeem", "/privacy", "/terms", "/workspace", "/handout", "/pro", "/about"):
+            resp.headers.setdefault("Cache-Control", "public, max-age=60, stale-while-revalidate=600")
     return resp
 
 memory = MemorySaver()
