@@ -1045,7 +1045,7 @@ h1, h2, h3 { font-family: 'Lora', Georgia, serif; color: var(--text-dark); line-
   margin-top: 1px;
 }
 .src-name { font-size: 14px; color: var(--text-dark); font-weight: 600; margin-bottom: 2px; }
-.src-url { font-size: 12.5px; color: var(--sage); cursor: pointer; word-break: break-all; }
+.src-url { font-size: 12.5px; color: var(--sage); cursor: pointer; word-break: break-all; text-decoration: none; display: block; }
 .src-url:hover { text-decoration: underline; }
 
 .closing-card {
@@ -3210,7 +3210,11 @@ function clean(s) {
   if (!s) return '';
   return String(s)
     .replace(/<cite[^>]*>/g, '').replace(/<\/cite>/g, '').replace(/\[\d+\]/g, '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    // Single quotes are escaped too: without it, cleaned text placed inside a
+    // single-quoted HTML attribute could break out of the attribute. (Note this does
+    // NOT make cleaned data safe inside an inline event handler — entities are decoded
+    // before JS parses it. Don't interpolate data into onclick; use href/addEventListener.)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function out(h) { document.getElementById('output').insertAdjacentHTML('beforeend', h); }
@@ -4942,7 +4946,19 @@ function renderBriefing(b) {
   }
 
   var srcRows = (b.sources||[]).map(function(s,i){
-    return '<div class="src-item"><div class="src-num">'+(i+1)+'</div><div><div class="src-name">'+clean(s.title)+'</div><div class="src-url" onclick="window.open(\''+clean(s.url)+'\',\'_blank\')">'+clean(s.url)+'</div></div></div>';
+    // Render the source as a real link, never an inline onclick. clean() escapes
+    // & < > " but NOT the single quote, and a browser decodes HTML entities before
+    // JS parses an inline handler — so escaping wouldn't help either. A URL holding
+    // a ' would break out of window.open('...') and run arbitrary script. These URLs
+    // are model output grounded in fetched web pages, so the string is
+    // attacker-influenceable. An href with an http(s) allowlist has no JS context at
+    // all, and the allowlist also blocks javascript:/data: schemes.
+    var _u = String(s.url || '').trim();
+    var _safe = /^https?:\/\//i.test(_u) ? _u : '';
+    var _link = _safe
+      ? '<a class="src-url" href="'+clean(_safe)+'" target="_blank" rel="noopener noreferrer">'+clean(_safe)+'</a>'
+      : '<div class="src-url">'+clean(_u)+'</div>';
+    return '<div class="src-item"><div class="src-num">'+(i+1)+'</div><div><div class="src-name">'+clean(s.title)+'</div>'+_link+'</div></div>';
   }).join('');
 
   var fbk = '<div style="margin-top:1rem;padding:1rem 1.25rem;background:var(--lteal);border-radius:14px;border:1.5px solid var(--border);display:flex;align-items:center;gap:1rem;flex-wrap:wrap"><div style="flex:1;font-size:14px;color:var(--text-body);line-height:1.5;min-width:180px"><strong style="color:var(--text-dark)">Was this helpful?</strong> Your feedback shapes what we build next.</div><a href="https://docs.google.com/forms/d/e/1FAIpQLSdDaTyD5q2OnlDxIiPzAtgU_jFvm8mbsCPtr6MwLh-0B3_FjQ/viewform?usp=header" target="_blank" rel="noopener" style="background:var(--teal);color:#fff;text-decoration:none;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-message-circle"></i> Give Feedback</a></div>';
