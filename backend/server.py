@@ -582,7 +582,7 @@ async def translate(req: TranslateRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=1500,
             system=("You are a medical translator. Translate the user's text into the target "
@@ -633,7 +633,7 @@ async def i18n_batch(req: I18nRequest):
             for i in range(0, len(todo), 40):
                 chunk = todo[i:i+40]
                 numbered = "\n".join(f"{j+1}. {s}" for j, s in enumerate(chunk))
-                resp = client.messages.create(
+                resp = await asyncio.to_thread(client.messages.create,
                     model="claude-sonnet-4-6",
                     max_tokens=4000,
                     system=(
@@ -697,7 +697,7 @@ async def insights(req: InsightsRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=1400,
             system=(
@@ -762,7 +762,7 @@ async def explain_records(req: RecordsRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=2400,
             system=(
@@ -839,7 +839,7 @@ async def chronology(req: ChronologyRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=3000,
             system=(
@@ -927,7 +927,7 @@ async def previsit_intake(req: PreVisitRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=3200,
             system=(
@@ -990,7 +990,7 @@ async def explain_note(req: ExplainNoteRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=2600,
             system=(
@@ -1049,7 +1049,7 @@ async def clinical_reference(req: ClinicalRefRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=1600,
             system=(
@@ -1099,7 +1099,7 @@ async def clinical_scribe(req: ClinicalScribeRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=2200,
             system=(
@@ -1148,7 +1148,7 @@ async def clinical_weigh(req: ClinicalWeighRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=2600,
             system=(
@@ -1238,7 +1238,7 @@ async def handout(req: HandoutRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=2600,
             system=(
@@ -1413,7 +1413,7 @@ async def med_guide(req: MedGuideRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=2400,
             system=(
@@ -1495,7 +1495,7 @@ async def visit_summary(req: VisitSummaryRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=1600,
             system=(
@@ -1695,7 +1695,7 @@ async def visit_prep(req: VisitPrepRequest):
     try:
         import anthropic, json as _json
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6", max_tokens=1400, system=system,
             messages=[{"role": "user", "content": f"Logged history (oldest first):\n{log_text}"}],
         )
@@ -1766,7 +1766,7 @@ async def billhelp(req: BillRequest):
     try:
         import anthropic, json as _json
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6", max_tokens=2500, system=system,
             messages=[{"role": "user", "content": content}],
         )
@@ -1841,7 +1841,7 @@ async def advocate(req: AdvocateRequest):
     try:
         import anthropic, json as _json
         client = anthropic.Anthropic()
-        resp = client.messages.create(model="claude-sonnet-4-6", max_tokens=2500, system=system,
+        resp = await asyncio.to_thread(client.messages.create,model="claude-sonnet-4-6", max_tokens=2500, system=system,
                                       messages=[{"role": "user", "content": content}])
         raw = "".join(getattr(b, "text", "") for b in resp.content).replace("```json", "").replace("```", "").strip()
         s, e = raw.find("{"), raw.rfind("}")
@@ -1866,7 +1866,7 @@ async def quick_take(req: QuickTakeRequest):
         return {"status": "error"}
     try:
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=400,
             system=("You are a warm, plain-language health companion giving a quick first take while a "
@@ -1922,7 +1922,7 @@ async def companion(req: CompanionRequest):
     try:
         import anthropic
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6", max_tokens=400, system=system,
             messages=[{"role": "user", "content": msg}],
         )
@@ -1962,7 +1962,7 @@ async def triage(req: TriageRequest):
     try:
         import anthropic, json as _json
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6", max_tokens=600, system=system,
             messages=[{"role": "user", "content": text}],
         )
@@ -2015,7 +2015,7 @@ async def visit_assist(req: VisitAssistRequest):
     try:
         import anthropic, json as _json, re as _re
         client = anthropic.Anthropic()
-        resp = client.messages.create(
+        resp = await asyncio.to_thread(client.messages.create,
             model="claude-sonnet-4-6",
             max_tokens=900,
             system=system,
@@ -2204,7 +2204,8 @@ async def session_start(req: StartRequest):
         "intent": req.intent,
     }
     try:
-        result = graph.invoke(initial_state, config, interrupt_before=["confirmation"])
+        # blocking LangGraph run — keep it off the event loop so one request can't freeze others
+        result = await asyncio.to_thread(graph.invoke, initial_state, config, interrupt_before=["confirmation"])
         guardrail = result.get("guardrail_status", "pass")
         if guardrail in ("emergency", "crisis", "off_topic", "invalid"):
             return {"status": guardrail, "guardrail_message": result.get("guardrail_message", "")}
