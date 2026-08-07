@@ -171,7 +171,11 @@ async def serve_trust():
     return FileResponse(os.path.join(frontend_dir, "trust.html"))
 
 @app.get("/pro")
+@app.get("/chronology")
+@app.get("/legal")
 async def serve_pro():
+    # The attorney/clinician medical-chronology tool. Also served at /chronology and /legal so the
+    # URL isn't confused with the consumer "Pro" price tier (which lives on /founding).
     return FileResponse(os.path.join(frontend_dir, "pro.html"))
 
 @app.get("/clinical")
