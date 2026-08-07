@@ -113,6 +113,33 @@ workflows:
           plutil -replace CFBundleShortVersionString -string "$MV" MessagesExtension/Info.plist 2>/dev/null || true
           plutil -replace CFBundleVersion -string "$BN" MessagesExtension/Info.plist 2>/dev/null || true
           echo "Marketing version -> $MV / build -> $BN"
+      - name: Verify + re-assert MessagesExtension product type (post-pod)
+        script: |
+          # The icon set is proven-correct (matches shipping extensions), so an actool
+          # "no applicable content" error means actool is judging the icons as a PLAIN app
+          # icon — i.e. the target's messages product type was lost (pod install re-saves the
+          # project). Print it, then re-assert the messages product type + appicon name so
+          # actool compiles a Messages icon.
+          cd ios/App
+          ruby -e '
+          require "xcodeproj"
+          proj = Xcodeproj::Project.open("App.xcodeproj")
+          t = proj.targets.find { |x| x.name == "MessagesExtension" }
+          abort "MessagesExtension target NOT FOUND" unless t
+          puts "BEFORE: productType = #{t.product_type}"
+          c = t.build_configurations.find { |b| b.name == "Release" } || t.build_configurations.first
+          %w[ASSETCATALOG_COMPILER_APPICON_NAME TARGETED_DEVICE_FAMILY SDKROOT].each { |k| puts "  #{k} = #{c.build_settings[k].inspect}" }
+          puts "  frameworks = #{t.frameworks_build_phase.files.map(&:display_name).join(%q{, })}"
+          # re-assert
+          t.product_type = "com.apple.product-type.app-extension.messages"
+          t.build_configurations.each do |bc|
+            bc.build_settings["ASSETCATALOG_COMPILER_APPICON_NAME"] = "iMessage App Icon"
+            bc.build_settings["TARGETED_DEVICE_FAMILY"] = "1,2"
+          end
+          proj.save
+          again = Xcodeproj::Project.open("App.xcodeproj").targets.find { |x| x.name == "MessagesExtension" }
+          puts "AFTER:  productType = #{again.product_type}"
+          ' || echo "(re-assert failed)"
       - name: Build IPA (workspace if CocoaPods, else project)
         script: |
           if [ -d ios/App/App.xcworkspace ]; then
