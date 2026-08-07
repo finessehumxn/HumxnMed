@@ -142,38 +142,12 @@
     dictate:function(){
       var input=document.getElementById(activeInputId()); if(!input) return;
       try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(e){}
-      if(this.active){ this.stopDictation(); return; }              // tap again = stop
-      var SRnat=this.srNative(); if(SRnat){ this.native(input, SRnat); return; }
-      var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      var isIOS=/iP(hone|ad|od)/.test(navigator.userAgent||'') || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
-      // iOS Safari has no working Web Speech API — record audio and transcribe on our server
-      // (also the better fit: records until you tap stop, so pauses never cut you off).
-      if(isIOS || !SR){ this.recorder(input); return; }
-      var self=this;
-      var base=(input.value||'').replace(/\s+$/,''); if(base) base+=' ';   // keep & append to existing text
-      var finalTxt='';
-      var r=new SR(); r.lang=navigator.language||'en-US'; r.interimResults=true; r.continuous=true;
-      r.onresult=function(e){
-        var interim='';
-        for(var i=e.resultIndex;i<e.results.length;i++){
-          if(e.results[i].isFinal){ finalTxt+=e.results[i][0].transcript+' '; }
-          else { interim+=e.results[i][0].transcript; }
-        }
-        input.value=(base+finalTxt+interim).replace(/\s{2,}/g,' ');
-        try{ input.scrollTop=input.scrollHeight; }catch(_){}
-      };
-      r.onerror=function(ev){
-        if(ev&&(ev.error==='not-allowed'||ev.error==='service-not-allowed')){ self.manualStop=true; self.active=false; self.setBtn(false); }
-        // 'no-speech'/'aborted' during a pause: let onend auto-resume.
-      };
-      r.onend=function(){
-        if(self.manualStop){ self.active=false; self.setBtn(false); return; }
-        // Browser auto-stops on silence/timeout — resume so thinking pauses never cut them off.
-        base=(base+finalTxt).replace(/\s{2,}/g,' '); if(base&&!/\s$/.test(base)) base+=' '; finalTxt='';
-        try{ r.start(); }catch(e){ setTimeout(function(){ try{ if(!self.manualStop) r.start(); }catch(_){} }, 300); }
-      };
-      this.rec=r; this.active=true; this.manualStop=false; this.setBtn(true);
-      try{ r.start(); }catch(e){ this.active=false; this.setBtn(false); }
+      if(this.active){ this.stopDictation(); return; }   // tap again = stop
+      // ONE reliable path on every device: record until the clinician taps stop, then transcribe
+      // on our server. The old live Web-Speech path kept auto-restarting to survive pauses, which
+      // caused a repeating start-beep and double/duplicated words. MediaRecorder is silent, never
+      // cuts off on a pause, and transcribes ONCE at the end — no beep, no doubles, no rush.
+      this.recorder(input);
     },
     native:function(input, SR){
       var self=this;
