@@ -65,7 +65,12 @@
         if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',show); else show();
       })();
     </script>
-    <div class="sub">For a licensed clinician — you are the decision-maker. Reference, documentation &amp; evidence you independently review. <a class="home" href="/app">Patient app →</a> &middot; <a class="home" href="#" onclick="window.mcPromptFounderCode&&window.mcPromptFounderCode();return false;">Founder code</a></div>
+    <div class="sub">For a licensed clinician — you are the decision-maker. Reference, documentation &amp; evidence you independently review. <a class="home" href="/guide">📖 How to use</a> &middot; <a class="home" href="/app">Patient app →</a> &middot; <a class="home" href="/redeem">Founder code</a></div>
+    <div id="firstHint" style="display:none;background:var(--accent-soft,#e7f4ee);border:1px solid var(--line,#e3ebe6);border-radius:12px;padding:11px 14px;margin:12px 0 2px;font-size:13.5px;color:var(--ink)">
+      👋 <b>New here?</b> Pick a tab, type or tap 🎤 Dictate (pauses are fine — it won’t rush you), then hit the button. <a href="/guide" style="color:var(--accent,#0f7a5a);font-weight:700">See the 30-second guide →</a>
+      <button onclick="try{localStorage.setItem('mc_console_seen','1')}catch(e){};this.parentNode.style.display='none'" aria-label="Dismiss" style="float:right;background:none;border:none;color:var(--sub,#5c6670);font-size:16px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <script>try{ if(!localStorage.getItem('mc_console_seen')){ var fh=document.getElementById('firstHint'); if(fh) fh.style.display='block'; } }catch(e){}</script>
     <div class="modes" id="modes">
       <button data-m="lookup" class="on">🔎 Look up</button>
       <button data-m="document">📝 Document</button>

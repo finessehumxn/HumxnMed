@@ -164,6 +164,15 @@ async def serve_redeem():
     No account needed; works on any device by re-entering the same code."""
     return FileResponse(os.path.join(frontend_dir, "redeem.html"))
 
+@app.get("/guide")
+async def serve_guide():
+    """Step-by-step 'how to use HumxnMed' — for clinicians and for patients."""
+    return FileResponse(os.path.join(frontend_dir, "guide.html"))
+
+@app.get("/how")
+async def serve_how():
+    return FileResponse(os.path.join(frontend_dir, "guide.html"))
+
 @app.get("/billing-config")
 async def billing_config():
     """Whether freemium gating is enforced, and which features belong to which tier.
