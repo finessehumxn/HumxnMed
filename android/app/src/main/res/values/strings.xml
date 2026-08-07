@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">HumxnMedAI</string>
-    <string name="title_activity_main">HumxnMedAI</string>
+    <string name="app_name">HumxnMed</string>
+    <string name="title_activity_main">HumxnMed</string>
     <string name="package_name">com.medcompanionai.app</string>
     <string name="custom_url_scheme">com.medcompanionai.app</string>
 </resources>
