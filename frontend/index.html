@@ -4593,18 +4593,24 @@ async function startPipeline() {
     });
     var data = await res.json();
 
-    if (['emergency','crisis','off_topic','invalid'].includes(data.status)) {
+    // 'unavailable' = the safety classifier failed and the backend deliberately failed
+    // closed. It MUST be handled here: dropping it would strand the user on a blank
+    // screen at exactly the moment we couldn't verify their message was safe.
+    if (['emergency','crisis','off_topic','invalid','unavailable'].includes(data.status)) {
       step(0,'done');
       var isEmg = data.status === 'emergency';
       var isCrisis = data.status === 'crisis';
+      var isUnavail = data.status === 'unavailable';
       out('<div class="guardrail-card ' + (isEmg ? 'guard-emergency' : isCrisis ? 'guard-crisis' : '') + '">' +
         '<div class="card-header">' +
           '<div class="card-icon ' + (isEmg ? 'ci-red' : 'ci-teal') + '"><i class="ti ' + (isEmg ? 'ti-urgent' : 'ti-heart-handshake') + '"></i></div>' +
-          '<div class="card-title">' + (isEmg ? 'Please get help right away' : isCrisis ? 'You matter — help is here' : 'A quick note') + '</div>' +
+          '<div class="card-title">' + (isEmg ? 'Please get help right away' : isCrisis ? 'You matter — help is here' : isUnavail ? 'I couldn’t review that safely' : 'A quick note') + '</div>' +
         '</div>' +
         '<p class="guard-text">' + clean(data.guardrail_message) + '</p>' +
         (isEmg ? '<div class="guard-resource res-emergency"><i class="ti ti-phone"></i> Call 911 now or go to your nearest Emergency Room</div>' : '') +
-        (isCrisis ? '<div class="guard-resource res-crisis"><i class="ti ti-phone"></i> Call or text <strong>988</strong> — Suicide & Crisis Lifeline, 24/7</div>' : '') +
+        (isCrisis ? '<div class="guard-resource res-crisis"><i class="ti ti-phone"></i> Call or text <strong>988</strong> — Suicide &amp; Crisis Lifeline, 24/7</div>' : '') +
+        (isUnavail ? '<div class="guard-resource res-emergency"><i class="ti ti-phone"></i> Emergency? Call <strong>911</strong></div>' +
+                     '<div class="guard-resource res-crisis"><i class="ti ti-phone"></i> In distress? Call or text <strong>988</strong> — 24/7</div>' : '') +
       '</div>' +
       '<div class="reset-row"><button class="reset-btn" onclick="reset()"><i class="ti ti-refresh"></i> Search something different</button></div>');
       showCustomizing(false);
