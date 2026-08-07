@@ -15,7 +15,7 @@ else:
 
 from fastapi import FastAPI, HTTPException, Header, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
@@ -367,6 +367,65 @@ def _rate_limited(bucket: str, key: str, limit: int, window_s: int) -> bool:
             _attempts.pop(k, None)
     return False
 
+def _client_ip(request: Request) -> str:
+    """Railway terminates TLS upstream, so request.client.host is the proxy. Trust the
+    first X-Forwarded-For hop for metering (spoofable, but the cost here is a wrongly
+    throttled request, not a security bypass)."""
+    xff = request.headers.get("x-forwarded-for", "")
+    if xff:
+        return xff.split(",")[0].strip()[:45]
+    return request.client.host if request.client else "unknown"
+
+# Every POST below spends Anthropic/OpenAI tokens. Unmetered, they are an uncapped
+# billing liability reachable by anyone with curl. GETs (e.g. /session/{id}/result,
+# which the app polls every few seconds) are deliberately NOT metered.
+_METERED_PATHS = {
+    "/previsit-intake", "/visit-summary", "/speak", "/transcribe", "/visit-prep",
+    "/billhelp", "/advocate", "/quick-take", "/companion", "/triage",
+    "/visit-assist", "/review/request", "/analyze/image",
+}
+_METERED_PREFIXES = ("/session/",)   # /session/start and /session/{id}/confirm
+MC_RATE_LIMIT = int(os.getenv("MC_RATE_LIMIT", "20"))       # requests per window, per IP
+MC_RATE_WINDOW = int(os.getenv("MC_RATE_WINDOW", "60"))     # seconds
+
+@app.middleware("http")
+async def _meter_expensive_endpoints(request: Request, call_next):
+    path = request.url.path
+    if request.method == "POST" and (path in _METERED_PATHS or path.startswith(_METERED_PREFIXES)):
+        ip = _client_ip(request)
+        if _rate_limited("llm", ip, limit=MC_RATE_LIMIT, window_s=MC_RATE_WINDOW):
+            logger.warning(f"rate limit hit: {ip} on {path}")
+            return JSONResponse(
+                status_code=429,
+                content={"status": "error",
+                         "error": "You're going a bit fast — please wait a moment and try again."},
+                headers={"Retry-After": str(MC_RATE_WINDOW)},
+            )
+    return await call_next(request)
+
+
+def _purge_thread(thread_id: str) -> None:
+    """Drop a finished session's LangGraph checkpoint.
+
+    Two reasons. MemorySaver keeps every thread's state in RAM until the process
+    restarts (an unbounded leak), and that state is PatientState — the patient's own
+    words and symptoms. Retaining PHI in memory indefinitely contradicts the
+    store-nothing-by-default promise. Best-effort across langgraph versions; the
+    result is read from _briefing_jobs, not the checkpointer, so this is safe."""
+    try:
+        cp = getattr(graph, "checkpointer", None)
+        if cp is None:
+            return
+        if hasattr(cp, "delete_thread"):
+            cp.delete_thread(thread_id)
+            return
+        storage = getattr(cp, "storage", None)
+        if isinstance(storage, dict):
+            storage.pop(thread_id, None)
+    except Exception as e:
+        logger.warning(f"checkpoint purge failed for {thread_id}: {e}")
+
+
 @app.get("/redeem-code")
 async def redeem_code(request: Request, code: str = ""):
     """Redeem a founding-clinician comp code -> free Clinical access for MC_FOUNDER_DAYS.
@@ -374,7 +433,7 @@ async def redeem_code(request: Request, code: str = ""):
 
     Rate limited and compared in constant time: a valid code grants a $799-tier
     entitlement, so an unmetered endpoint here is a free-Clinical vending machine."""
-    ip = (request.client.host if request.client else "unknown")
+    ip = _client_ip(request)
     if _rate_limited("redeem", ip, limit=5, window_s=300):
         raise HTTPException(429, "Too many attempts — please wait a few minutes and try again.")
     c = (code or "").strip().upper()
@@ -2344,6 +2403,10 @@ async def _briefing_task(thread_id, config, confirmed, override, user_id, raw_in
     except Exception as e:
         logger.error(f"briefing task error: {e}", exc_info=True)
         _briefing_jobs[thread_id] = {"status": "error", "error": "Something went wrong generating your briefing. Please try again."}
+    finally:
+        # The graph is done with this thread either way. Drop its checkpoint so the
+        # patient's words don't sit in RAM until the next restart.
+        _purge_thread(thread_id)
 
 @app.post("/session/{thread_id}/confirm")
 async def session_confirm(thread_id: str, req: ConfirmRequest):

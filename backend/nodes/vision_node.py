@@ -73,7 +73,16 @@ def vision_node(state: PatientState) -> dict:
                 ]
             }]
         )
-        text = resp.content[0].text.strip().replace("```json", "").replace("```", "")
+        # Never index content[0] blindly: a refusal returns an empty content list and
+        # thinking-enabled models put a thinking block first. Find the text block.
+        text = ""
+        for _blk in (getattr(resp, "content", None) or []):
+            if getattr(_blk, "type", None) == "text":
+                text = _blk.text or ""
+                break
+        text = text.strip().replace("```json", "").replace("```", "")
+        if "{" not in text or "}" not in text:
+            raise ValueError("vision model returned no JSON object")
         analysis = json.loads(text[text.find("{"):text.rfind("}")+1])
         logger.info(f"vision_node completed: type={analysis.get('image_type')}")
         return {"image_analysis": analysis, "current_node": "vision", "error": None}
