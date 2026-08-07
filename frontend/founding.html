@@ -145,14 +145,14 @@
 <script>
   // Capture a referring partner code (?ref=CODE) so a later checkout can be attributed to them.
   try{ var _ref=new URLSearchParams(location.search).get('ref'); if(_ref){ localStorage.setItem('mc_ref', _ref.slice(0,60)); } }catch(e){}
-  // ── Founding-offer Stripe Payment Links — paste your 6 URLs here (then it's live) ──
+  // ── Founding-offer Stripe Payment Links — all 9 plans live ──
+  // Every button on this page maps to a key below. A key that is missing or empty degrades
+  // to the graceful fallback in go() rather than doing nothing, so a blanked link is visible
+  // instead of silently costing a sale.
   var STRIPE = {
     plusMonthly:  'https://buy.stripe.com/4gM7sM7XUb4Z8Q69a9cwg06',
     plusYearly:   'https://buy.stripe.com/5kQ14oa625KFc2iaedcwg05',
     plusLifetime: 'https://buy.stripe.com/6oUdRa6TQ4GB3vM4TTcwg04',
-    // ── Pro — NOT YET CREATED IN STRIPE. Create the 3 Payment Links ($24.99/mo,
-    // $149.99/yr, $299.99 lifetime), paste them here, and Pro checkout is live
-    // instantly. Until then these three buttons fall back to PENDING handling below.
     proMonthly:   'https://buy.stripe.com/bJeeVe0vsc933vM721cwg0j',
     proYearly:    'https://buy.stripe.com/4gM14o91Y0qlc2i5XXcwg0k',
     proLifetime:  'https://buy.stripe.com/6oU28s2DA7SNc2i2LLcwg0l',
@@ -160,15 +160,8 @@
     clinicalYearly:    'https://buy.stripe.com/6oU4gAa623Cx6HYcmlcwg01',
     clinicalLifetime:  'https://buy.stripe.com/cNieVefqm8WRaYedqpcwg00'
   };
-  // Human labels for plans with no payment link yet.
-  var PENDING = {
-    proMonthly:  'Pro — $24.99/mo',
-    proYearly:   'Pro — $149.99/yr',
-    proLifetime: 'Pro Founding Lifetime — $299.99'
-  };
-  // Demand signal: a click on an unbuyable plan is the highest-intent event on this page.
-  // Record it locally so the attempt isn't lost, and so /console can surface real proof of
-  // which Pro tier people actually reach for before the Stripe links exist.
+  // Safety net: if a payment link is ever blanked or a new plan ships without one, record the
+  // click so a broken checkout shows up as data instead of a silently lost sale.
   function recordIntent(key){
     try{
       var log = JSON.parse(localStorage.getItem('mc_intent') || '[]');
@@ -230,8 +223,7 @@
       // No payment link for this plan yet (Pro). Stay honest — the app really is free during
       // beta — but name the plan back to the buyer and record the attempt rather than losing it.
       recordIntent(key);
-      var plan = PENDING[key];
-      alert((plan ? plan + " checkout is opening shortly — we've noted your interest.\n\n" : "Checkout for this plan is opening shortly.\n\n")
+      alert("Checkout for this plan is opening shortly — we've noted your interest.\n\n"
         + "In the meantime HumxnMed is completely free to use during our beta — tap “Get started” and dive right in.");
     }
   }
