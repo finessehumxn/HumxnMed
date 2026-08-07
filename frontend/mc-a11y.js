@@ -16,6 +16,9 @@
     try {
       var nodes = (root && root.querySelectorAll) ? root.querySelectorAll('[onclick]:not(a):not(button):not(input):not(select):not(textarea):not([tabindex])') : [];
       Array.prototype.forEach.call(nodes, function (el) {
+        // skip container elements that already hold their own interactive controls — labeling a
+        // whole card as a "button" mis-announces it to screen readers and adds redundant tab stops
+        if (el.querySelector && el.querySelector('a[href],button,input,select,textarea,[role="button"],[onclick]')) return;
         el.setAttribute('tabindex', '0');
         if (!el.getAttribute('role')) el.setAttribute('role', 'button');
       });
@@ -47,6 +50,7 @@
     );
   }
   document.addEventListener('keydown', function (e) {
+    if (e.defaultPrevented) return;   // a dialog with its own trap already handled it — don't double-move focus
     var dlgs = openDialogs();
     if (!dlgs.length) return;
     var d = dlgs[dlgs.length - 1]; // topmost
@@ -80,7 +84,10 @@
         try { if (lastTrigger && lastTrigger.focus) lastTrigger.focus(); } catch (e) {}
       }
     });
-    try { mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] }); } catch (e) {}
+    // childList only — watching every class/style change on the whole page (to catch modals toggled
+    // via a .show class) fires constantly on this busy app and drags performance. Trade-off: a modal
+    // that's pre-rendered and merely shown won't auto-focus-in, but the Tab-trap still contains it.
+    try { mo.observe(document.body, { childList: true, subtree: true }); } catch (e) {}
   }
 
   function boot() { makeFocusable(document); }

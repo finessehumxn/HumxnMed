@@ -46,7 +46,9 @@
   function returningClinicianBanner() {
     if (document.getElementById('mcWorldBanner')) return;
     var b = document.createElement('div'); b.id = 'mcWorldBanner'; b.setAttribute('data-i18n-keep', '');
-    b.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99997;background:#0B3D2E;color:#eafaf1;font:13px/1.4 system-ui,-apple-system,sans-serif;padding:9px 14px;text-align:center;box-shadow:0 -2px 12px rgba(0,0,0,.3)';
+    // sit ABOVE the machine-translation notice bar if it's present, so they don't overlap
+    var bottom = document.getElementById('mcI18nNote') ? '38px' : '0';
+    b.style.cssText = 'position:fixed;bottom:' + bottom + ';left:0;right:0;z-index:99997;background:#0B3D2E;color:#eafaf1;font:13px/1.4 system-ui,-apple-system,sans-serif;padding:9px 14px;text-align:center;box-shadow:0 -2px 12px rgba(0,0,0,.3)';
     b.innerHTML = 'You’re in the patient world. <a href="/console" style="color:#7fe6b4;font-weight:700;text-decoration:none">Go to the Clinician console →</a> ' +
       '<button type="button" onclick="this.parentNode.remove()" aria-label="Dismiss" style="background:none;border:none;color:#a9d6c2;margin-left:8px;cursor:pointer;font-size:15px">×</button>';
     document.body.appendChild(b);
