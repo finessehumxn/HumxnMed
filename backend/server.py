@@ -619,7 +619,12 @@ async def i18n_batch(req: I18nRequest):
     if target not in _I18N_LANGS or not strings:
         return {"translations": {}}
     cache = _i18n_cache.setdefault(target, {})
-    todo = [s for s in dict.fromkeys(strings) if s not in cache]   # unique, uncached, ordered
+    # SAFETY (defense in depth): never machine-translate safety-critical copy, no matter who calls
+    # this endpoint. Such strings are excluded from translation; the return maps them to themselves
+    # (authoritative English) via cache.get(s, s).
+    import re as _re
+    _safety = _re.compile(r"988|911|suicide|crisis lifeline|not a (diagnosis|doctor|medical device|substitute|replacement)|not an emergency|call your local emergency|seek emergency|emergency room|go to the er|get help right away|call emergency", _re.I)
+    todo = [s for s in dict.fromkeys(strings) if s not in cache and not _safety.search(s)]  # unique, uncached, non-safety
     if todo:
         try:
             import anthropic, json as _json
