@@ -98,7 +98,7 @@
       <div class="plans">
         <button class="plan" onclick="go('proMonthly')"><span><span class="pl-l">Monthly</span></span><span class="pl-price">$24.99/mo</span></button>
         <button class="plan best" onclick="go('proYearly')"><span><span class="pl-l">Yearly <span class="tag">Best value</span></span><span class="pl-sub">~$12.50/mo, billed yearly</span></span><span class="pl-price">$149.99/yr</span></button>
-        <button class="plan life" onclick="go('proLifetime')"><span><span class="pl-l">Founding Lifetime <span class="tag">🔒 locked</span></span><span class="pl-sub">pay once, yours forever</span></span><span class="pl-price">$299.99</span></button>
+        <button class="plan life" onclick="go('proLifetime')"><span><span class="pl-l">Founding Lifetime <span class="tag">🔒 locked</span></span><span class="pl-sub">pay once, yours forever</span></span><span class="pl-price">$299</span></button>
       </div>
     </div>
 
@@ -153,9 +153,9 @@
     // ── Pro — NOT YET CREATED IN STRIPE. Create the 3 Payment Links ($24.99/mo,
     // $149.99/yr, $299.99 lifetime), paste them here, and Pro checkout is live
     // instantly. Until then these three buttons fall back to PENDING handling below.
-    proMonthly:   '',
-    proYearly:    '',
-    proLifetime:  '',
+    proMonthly:   'https://buy.stripe.com/bJeeVe0vsc933vM721cwg0j',
+    proYearly:    'https://buy.stripe.com/4gM14o91Y0qlc2i5XXcwg0k',
+    proLifetime:  'https://buy.stripe.com/6oU28s2DA7SNc2i2LLcwg0l',
     clinicalMonthly:   'https://buy.stripe.com/aFadRaba6a0V6HY721cwg02',
     clinicalYearly:    'https://buy.stripe.com/6oU4gAa623Cx6HYcmlcwg01',
     clinicalLifetime:  'https://buy.stripe.com/cNieVefqm8WRaYedqpcwg00'
