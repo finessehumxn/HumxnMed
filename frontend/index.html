@@ -5376,6 +5376,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function addM(){ var n=document.getElementById('mcMedName'), d=document.getElementById('mcMedDose'); if(!n||!n.value.trim()) return; var m=meds(); m.push({name:n.value.trim(), dose:(d&&d.value.trim())||''}); saveMeds(m); var idx=m.length-1; n.value=''; if(d) d.value=''; n.focus(); render(); normalizeMed(idx); }
   function checkM(){ var m=meds(); if(!m.length){ alert('Add at least one medication first.'); return; }
+    // Patient-facing AI interaction-checking is decision support (regulatory line). Off by default
+    // until a clinical/regulatory sign-off; until then, route people to a pharmacist who has their
+    // full history and can check accurately. Re-enable with window.MC_CONSUMER_SAFETY_ALERTS = true.
+    if(!window.MC_CONSUMER_SAFETY_ALERTS){
+      alert('Your pharmacist checks medication interactions for free and has your full history — the safest way to check. Bring or show them your medication list, or ask by phone. (We keep this one with the professionals on purpose.)');
+      return;
+    }
     var listTxt = m.map(function(x){ return x.name + (x.dose?(' ('+x.dose+')'):''); }).join(', ');
     var prompt = 'I take these medications: ' + listTxt + '. In plain language, are there any interactions between them, and any foods, drinks, or over-the-counter medicines I should avoid? What warning signs should I watch for?';
     closeM();
