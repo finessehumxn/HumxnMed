@@ -145,7 +145,10 @@
       if(this.active){ this.stopDictation(); return; }              // tap again = stop
       var SRnat=this.srNative(); if(SRnat){ this.native(input, SRnat); return; }
       var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(!SR){ input.focus(); var h=document.querySelector('.vhint'); if(h) h.textContent='Tap the mic on your keyboard and speak.'; return; }
+      var isIOS=/iP(hone|ad|od)/.test(navigator.userAgent||'') || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+      // iOS Safari has no working Web Speech API — record audio and transcribe on our server
+      // (also the better fit: records until you tap stop, so pauses never cut you off).
+      if(isIOS || !SR){ this.recorder(input); return; }
       var self=this;
       var base=(input.value||'').replace(/\s+$/,''); if(base) base+=' ';   // keep & append to existing text
       var finalTxt='';
@@ -191,6 +194,37 @@
           });
           SR.start({ language:navigator.language||'en-US', maxResults:1, partialResults:true, popup:false });
         }).catch(function(){ self.active=false; self.setBtn(false); input.focus(); });
+    },
+    // Mobile/iOS path: record in the browser until the clinician taps stop (no silence cutoff),
+    // then transcribe on our server and append. Fits the "don't rush me" ask perfectly.
+    recorder:function(input){
+      var self=this, hint=document.querySelector('.vhint');
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){ input.focus(); if(hint) hint.textContent='Voice isn’t available on this device — please type your notes.'; return; }
+      if(hint) hint.textContent='🎤 Allow the microphone when asked…';
+      navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+        var mime=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac'].find(function(m){ try{ return MediaRecorder.isTypeSupported(m); }catch(e){ return false; } })||'';
+        var rec=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+        var chunks=[]; var base=(input.value||'').replace(/\s+$/,''); if(base) base+=' ';
+        self.rec=rec; self.active=true; self.manualStop=false; self.setBtn(true);
+        rec.ondataavailable=function(e){ if(e.data&&e.data.size) chunks.push(e.data); };
+        rec.onstop=function(){
+          try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
+          self.active=false; self.setBtn(false);
+          var h=document.querySelector('.vhint'); if(h) h.textContent='⏳ Transcribing…';
+          var type=rec.mimeType||mime||'audio/webm'; var blob=new Blob(chunks,{type:type});
+          if(!blob.size){ if(h) h.textContent='🎤 Didn’t catch that — tap Dictate and try again.'; return; }
+          var fr=new FileReader();
+          fr.onloadend=function(){
+            var b64=String(fr.result).split(',')[1];
+            fetch('/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:b64,mime:type})})
+              .then(function(r){ if(!r.ok){ var er=new Error('http'); er.code=r.status; throw er; } return r.json(); })
+              .then(function(d){ var t=(d&&d.text?d.text:'').trim(); if(t) input.value=(base+t).replace(/\s{2,}/g,' '); var hh=document.querySelector('.vhint'); if(hh) hh.textContent=t?'Added — review and run when you’re ready.':'🎤 Didn’t catch that — try again.'; })
+              .catch(function(err){ var hh=document.querySelector('.vhint'); if(hh) hh.textContent=(err&&err.code===503)?'Voice transcription isn’t set up on the server yet.':'Couldn’t transcribe — try again.'; });
+          };
+          fr.readAsDataURL(blob);
+        };
+        rec.start();
+      }).catch(function(){ self.active=false; self.setBtn(false); var h=document.querySelector('.vhint'); if(h) h.textContent='🎤 Microphone access is needed — allow it in your browser settings, or type your notes.'; });
     }
   };
   window.mcV=mcV;
