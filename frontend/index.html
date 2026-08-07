@@ -2068,7 +2068,7 @@ h1, h2, h3 { font-family: 'Lora', Georgia, serif; color: var(--text-dark); line-
 <!-- Analytics intentionally removed: we promise "never tied to a profile / you're not the product,"
      and a session-replay tracker contradicts that. Do not re-add third-party analytics without
      disclosing it in /privacy and honoring the privacy claims. -->
-
+<script>
 /* ── Approach preference ── */
 var selectedApproaches = [];
 var pendingUseAI = true;
@@ -3881,7 +3881,7 @@ async function wkCompanion(message) {
 }
 function wkSimpler() { var w = window._wk; if (!w) return; wkCompanion("Please explain this more simply, like you are talking to someone who feels a little overwhelmed: " + w.chunks[w.i]); }
 function wkAsk() {
-  wkControls('<div style="display:flex;gap:.5rem"><input id="wkInput" placeholder="Ask me anything about this..." style="flex:1;background:#16323a;border:1px solid #1f5a5c;border-radius:11px;padding:.7rem .9rem;color:#eafaf8;font-size:14px;font-family:inherit"/><button onclick="wkAskSend()" aria-label="Send" style="background:#1f9d96;border:none;color:#fff;width:46px;border-radius:11px;font-size:18px;cursor:pointer">›</button></div>');
+  wkControls('<div style="display:flex;gap:.5rem"><input id="wkInput" aria-label="Ask a follow-up about this result" placeholder="Ask me anything about this..." style="flex:1;background:#16323a;border:1px solid #1f5a5c;border-radius:11px;padding:.7rem .9rem;color:#eafaf8;font-size:14px;font-family:inherit"/><button onclick="wkAskSend()" aria-label="Send" style="background:#1f9d96;border:none;color:#fff;width:46px;border-radius:11px;font-size:18px;cursor:pointer">›</button></div>');
   var inp = document.getElementById('wkInput'); if (inp) { inp.focus(); inp.addEventListener('keydown', function(e){ if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229){ e.preventDefault(); wkAskSend(); } }); }
 }
 function wkAskSend() { var inp = document.getElementById('wkInput'); if (!inp) return; var q = inp.value.trim(); if (!q) return; wkBubble(clean(q), 'you'); wkCompanion(q); }
@@ -4265,7 +4265,7 @@ function hubLogForm() {
     + '<div style="font-size:12px;font-weight:800;color:#D4B26A;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.6rem">Log how you are feeling</div>'
     + '<input id="logWhat" placeholder="What is going on? (e.g. headaches, stomach pain)" style="' + HH_IS + '"/>'
     + '<input id="logHowLong" placeholder="How long? (e.g. 2 weeks, on and off)" style="' + HH_IS + '"/>'
-    + '<div style="font-size:13px;color:#9fbfbb;margin:.2rem 0 .5rem">How bad right now: <input id="logSev" type="range" min="1" max="10" value="5" oninput="var v=document.getElementById(\'logSevV\');if(v)v.textContent=this.value" style="vertical-align:middle;width:55%"/> <strong id="logSevV" style="color:#eafaf8">5</strong>/10</div>'
+    + '<div style="font-size:13px;color:#9fbfbb;margin:.2rem 0 .5rem">How bad right now: <input id="logSev" type="range" min="1" max="10" value="5" aria-label="Symptom severity from 1 to 10" oninput="var v=document.getElementById(\'logSevV\');if(v)v.textContent=this.value" style="vertical-align:middle;width:55%"/> <strong id="logSevV" style="color:#eafaf8">5</strong>/10</div>'
     + '<textarea id="logNotes" rows="2" placeholder="How does it feel and affect you? Anything else..." style="' + HH_IS + '"></textarea>'
     + '<button onclick="addLogEntry()" style="background:#1f9d96;border:none;color:#fff;border-radius:10px;padding:.6rem 1rem;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit"><i class="ti ti-plus"></i> Add to my log</button>'
     + ' <span id="logMsg" class="ok" style="font-size:12.5px;margin-left:.4rem"></span></div>';
