@@ -15,7 +15,7 @@ else:
 
 from fastapi import FastAPI, HTTPException, Header, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command
@@ -407,6 +407,32 @@ async def _meter_expensive_endpoints(request: Request, call_next):
                          "error": "You're going a bit fast — please wait a moment and try again."},
                 headers={"Retry-After": str(MC_RATE_WINDOW)},
             )
+    return await call_next(request)
+
+
+# Canonical host. Four domains currently serve this app, and the purchase unlock is
+# same-origin localStorage — so a buyer who lands on one domain and gets redirected to
+# another by Stripe pays and still sees the free tier. Setting MC_CANONICAL_HOST makes
+# every page load land on one origin. Unset = off (no redirects), which is the current
+# behaviour, so this is inert until you opt in.
+MC_CANONICAL_HOST = os.getenv("MC_CANONICAL_HOST", "").strip().lower().replace("https://", "").rstrip("/")
+
+# Added last => runs first, so a redirect costs nothing against the rate limiter.
+@app.middleware("http")
+async def _canonical_host(request: Request, call_next):
+    if MC_CANONICAL_HOST and request.method in ("GET", "HEAD"):
+        host = (request.headers.get("host") or "").split(":")[0].lower()
+        # Never touch native shells (capacitor://localhost), local dev, health checks,
+        # or a request that is already on the canonical host.
+        if (host and host != MC_CANONICAL_HOST
+                and "." in host                      # skip 'localhost' and bare hostnames
+                and not host.endswith(".local")
+                and not host.startswith("127.")
+                and request.url.path != "/health"):   # keep Railway's probe on any host
+            target = f"https://{MC_CANONICAL_HOST}{request.url.path}"
+            if request.url.query:
+                target += f"?{request.url.query}"
+            return RedirectResponse(target, status_code=301)
     return await call_next(request)
 
 
