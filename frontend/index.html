@@ -3134,13 +3134,23 @@ document.addEventListener('DOMContentLoaded', function() {
    HUMXNMED AI — MAIN SCRIPT
 ══════════════════════════════════════ */
 
-// Point at the fully-configured Railway service (adequate-presence). The custom
-// domain medcompanionai.com resolves to a SEPARATE service that is missing the
-// GROQ/OPENAI keys, so /transcribe + /speak fail there. This service has every
-// key (Anthropic, Groq, OpenAI, Supabase) and serves the same app.
-// Same-origin: works on Railway AND its custom domain (humxnmed.millennialscreatives.com) with
-// no CORS, and still hits this fully-keyed backend. (If the frontend is ever served from a
-// separate keyless host, re-pin this to the Railway URL or configure CORS.)
+// Same-origin by design: works on Railway and on the custom domain with no CORS.
+//
+// ⚠️ DEPLOYMENT NOTE — the previous comment here was backwards. Verified via /health:
+//
+//   humxnmed.millennialscreatives.com  -> web service   stt: groq=false openai=false
+//   medcompanionai.com                 -> web service   stt: groq=false openai=false
+//   web-production-82e2d.up.railway.app-> web service   stt: groq=false openai=false
+//   medcompanion-ai.up.railway.app     -> OTHER service stt: groq=true  openai=true
+//
+// The speech keys live on the service almost nobody is routed to. Every customer-facing
+// domain hits the `web` service, which has ANTHROPIC/LANGCHAIN/SUPABASE/STRIPE but NO
+// GROQ_API_KEY or OPENAI_API_KEY — so /transcribe and /speak fail there. Since dictation
+// now records audio and transcribes server-side on every device, that is the whole
+// dictation and read-aloud feature down in production.
+//
+// FIX: set GROQ_API_KEY (and OPENAI_API_KEY, required when MC_BAA_ONLY=1) on the `web`
+// service, not on medcompanion-ai. Re-check with: curl https://<domain>/health
 const API = location.origin;
 /* Resilient fetch for the AI calls: a real timeout + one automatic retry,
    so a dropped phone connection or a slow briefing recovers instead of
