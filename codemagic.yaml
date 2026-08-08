@@ -66,6 +66,13 @@ workflows:
           # The iOS project is regenerated each build, so re-add the native Messages
           # extension target here (after the team-id patch, before pod install so the
           # workspace integrates it). Idempotent — no-ops if already present.
+          # GATED: set MC_IMESSAGE=1 in the Codemagic env to include the extension.
+          # Default OFF so the main app ships cleanly while the extension's actool icon
+          # issue is solved offline (all extension code stays in the repo, ready to flip on).
+          if [ "${MC_IMESSAGE:-0}" != "1" ]; then
+            echo "iMessage extension DISABLED (MC_IMESSAGE!=1) — shipping the app without it."
+            exit 0
+          fi
           gem install xcodeproj --no-document 2>/dev/null || sudo gem install xcodeproj --no-document || true
           ruby ios-native/inject_imessage.rb
           grep -c "MessagesExtension" ios/App/App.xcodeproj/project.pbxproj || true
@@ -92,7 +99,9 @@ workflows:
           app-store-connect certificates create --type IOS_DISTRIBUTION --certificate-key=@file:/tmp/cert_key.pem --save
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --certificate-key=@file:/tmp/cert_key.pem --create
           # the iMessage extension is a separate bundle id → needs its own App Store profile
-          app-store-connect fetch-signing-files "$BUNDLE_ID.MessagesExtension" --type IOS_APP_STORE --certificate-key=@file:/tmp/cert_key.pem --create
+          if [ "${MC_IMESSAGE:-0}" = "1" ]; then
+            app-store-connect fetch-signing-files "$BUNDLE_ID.MessagesExtension" --type IOS_APP_STORE --certificate-key=@file:/tmp/cert_key.pem --create
+          fi
           keychain add-certificates
           xcode-project use-profiles
       - name: Set marketing version + build number
@@ -115,6 +124,7 @@ workflows:
           echo "Marketing version -> $MV / build -> $BN"
       - name: Verify + re-assert MessagesExtension product type (post-pod)
         script: |
+          if [ "${MC_IMESSAGE:-0}" != "1" ]; then echo "iMessage disabled — skipping."; exit 0; fi
           # The icon set is proven-correct (matches shipping extensions), so an actool
           # "no applicable content" error means actool is judging the icons as a PLAIN app
           # icon — i.e. the target's messages product type was lost (pod install re-saves the
