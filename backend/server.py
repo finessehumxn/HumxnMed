@@ -177,6 +177,12 @@ async def serve_privacy():
 async def serve_trust():
     return FileResponse(os.path.join(frontend_dir, "trust.html"))
 
+@app.get("/support")
+@app.get("/help")
+async def serve_support():
+    """Support / help page — the App Store & Play Support URL points here."""
+    return FileResponse(os.path.join(frontend_dir, "support.html"))
+
 @app.get("/pro")
 @app.get("/chronology")
 @app.get("/legal")
